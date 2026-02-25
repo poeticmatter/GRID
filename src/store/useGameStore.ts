@@ -3,6 +3,7 @@ import type { Grid, Card, ServerNode, PlayerStats, Coordinate, Cell } from '../e
 import { createGrid, checkPatternFit, getAffectedCells, refillGrid, rotatePattern } from '../engine/grid-logic';
 import { generateServerNode, calculateServerProgress, createStartingDeck } from '../engine/game-logic';
 import { playSfx } from '../engine/audio';
+import { SERVER_GRAPH, STARTING_NODES } from '../engine/graph-logic';
 
 interface GameState {
     grid: Grid;
@@ -30,6 +31,46 @@ interface GameState {
     endTurn: () => void;
 }
 
+function computeEndTurn(state: GameState, tracePenalty: number, handOverride?: Card[], discardOverride?: Card[]): Partial<GameState> {
+    const newGrid = refillGrid(state.grid, state.refillRate);
+    let currentDeck = [...state.deck];
+    let currentDiscard = discardOverride ? [...discardOverride] : [...state.discardPile];
+    let finalHand = handOverride ? [...handOverride] : [...state.hand];
+
+    while (finalHand.length < state.maxHandSize) {
+        if (currentDeck.length === 0) {
+            if (currentDiscard.length === 0) break;
+            currentDeck = [...currentDiscard];
+            for (let j = currentDeck.length - 1; j > 0; j--) {
+                const k = Math.floor(Math.random() * (j + 1));
+                [currentDeck[j], currentDeck[k]] = [currentDeck[k], currentDeck[j]];
+            }
+            currentDiscard = [];
+        }
+        const card = currentDeck.pop();
+        if (card) finalHand.push(card);
+    }
+
+    const newTrace = Math.min(100, state.playerStats.trace + tracePenalty);
+
+    let newGameState = state.gameState;
+    if (newTrace >= 100 || (finalHand.length === 0 && currentDeck.length === 0)) {
+        newGameState = 'GAME_OVER';
+    }
+
+    return {
+        grid: newGrid,
+        hand: finalHand,
+        deck: currentDeck,
+        discardPile: currentDiscard,
+        playerStats: { ...state.playerStats, trace: newTrace },
+        gameState: newGameState,
+        turn: state.turn + 1,
+        selectedCardId: null,
+        rotation: 0
+    };
+}
+
 export const useGameStore = create<GameState>((set, get) => ({
     grid: [],
     activeServers: [],
@@ -41,8 +82,6 @@ export const useGameStore = create<GameState>((set, get) => ({
     playerStats: {
         hardwareHealth: 3,
         maxHardwareHealth: 3,
-        softwareHealth: 10,
-        maxSoftwareHealth: 10,
         trace: 0,
         credits: 0,
     },
@@ -69,15 +108,8 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
 
         // Generate Servers
-        const activeServers: ServerNode[] = [];
-        for (let i = 0; i < 3; i++) {
-            activeServers.push(generateServerNode(1, i));
-        }
-
+        const activeServers: ServerNode[] = STARTING_NODES.map(id => ({ ...SERVER_GRAPH[id] }));
         const deepMap: ServerNode[] = [];
-        for (let i = 3; i < 13; i++) {
-            deepMap.push(generateServerNode(Math.floor(i / 2) + 1, i));
-        }
 
         set({
             grid,
@@ -90,8 +122,6 @@ export const useGameStore = create<GameState>((set, get) => ({
             playerStats: {
                 hardwareHealth: 3,
                 maxHardwareHealth: 3,
-                softwareHealth: 10,
-                maxSoftwareHealth: 10,
                 trace: 0,
                 credits: 0,
             },
@@ -112,33 +142,21 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
 
     playCard: (cardId, x, y) => {
-        const { grid, hand, discardPile, activeServers, playerStats, deepMap, rotation } = get();
+        const state = get();
+        const { grid, hand, discardPile, trashPile, activeServers, playerStats, deepMap, rotation, deck } = state;
         const card = hand.find(c => c.id === cardId);
         if (!card) return;
 
         if (card.action === 'RESET') {
-            const { endTurn } = get();
             playSfx('select'); // different sfx in the future
 
             const newHand = [...hand.filter(c => c.id !== cardId), ...discardPile];
-            const newPlayerStats = { ...playerStats, trace: Math.min(100, playerStats.trace + 10) };
-            const newDiscard = [card]; // Wait, actually standard to put played reset card in discard or let it vanish. Let's trace back to discard limit.
+            const newDiscard = [card];
 
-            let newGameState = get().gameState;
-            if (newPlayerStats.trace >= 100) {
-                newGameState = 'GAME_OVER';
-            }
+            // Apply turn advancement logic within a single, predictable state update cycle
+            const updates = computeEndTurn(state, 10, newHand, newDiscard);
 
-            set({
-                hand: newHand,
-                discardPile: newDiscard,
-                playerStats: newPlayerStats,
-                gameState: newGameState,
-                selectedCardId: null,
-                rotation: 0
-            });
-
-            setTimeout(() => get().endTurn(), 0); // Need to call correctly
+            set({ ...updates });
             return;
         }
 
@@ -165,6 +183,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         const newPlayerStats = { ...playerStats };
         const newActiveServers: ServerNode[] = [];
 
+        let newHand = hand.filter(c => c.id !== cardId);
+        let newDeck = [...deck];
+        let newTrashPile = [...trashPile];
+        let newDiscard = [...discardPile, card];
+
         activeServers.forEach(server => {
             const result = calculateServerProgress(server, affected);
 
@@ -175,7 +198,15 @@ export const useGameStore = create<GameState>((set, get) => ({
                 } else if (server.penaltyType === 'HARDWARE_DAMAGE') {
                     newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - 1);
                 } else if (server.penaltyType === 'NET_DAMAGE') {
-                    newPlayerStats.softwareHealth = Math.max(0, newPlayerStats.softwareHealth - 1);
+                    // Physically remove a card from Hand or Deck and move it to trashPile array
+                    if (newHand.length > 0) {
+                        const idx = Math.floor(Math.random() * newHand.length);
+                        const trashed = newHand.splice(idx, 1)[0];
+                        newTrashPile.push(trashed);
+                    } else if (newDeck.length > 0) {
+                        const trashed = newDeck.pop()!;
+                        newTrashPile.push(trashed);
+                    }
                 }
             }
 
@@ -200,13 +231,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             remainingServers.push(newDeepMap.shift()!);
         }
 
-        // 4. Update Hand/Discard
-        const newHand = hand.filter(c => c.id !== cardId);
-        const newDiscard = [...discardPile, card];
-
         // Check Win/Loss
-        let newGameState = get().gameState;
-        if (newPlayerStats.hardwareHealth <= 0 || newPlayerStats.trace >= 100 || newPlayerStats.softwareHealth <= 0) {
+        let newGameState = state.gameState;
+        if (newPlayerStats.hardwareHealth <= 0 || newPlayerStats.trace >= 100 || (newHand.length === 0 && newDeck.length === 0)) {
             newGameState = 'GAME_OVER';
         } else if (remainingServers.length === 0 && newDeepMap.length === 0) {
             newGameState = 'VICTORY';
@@ -217,7 +244,9 @@ export const useGameStore = create<GameState>((set, get) => ({
             activeServers: remainingServers,
             deepMap: newDeepMap,
             hand: newHand,
+            deck: newDeck,
             discardPile: newDiscard,
+            trashPile: newTrashPile,
             playerStats: newPlayerStats,
             gameState: newGameState,
             selectedCardId: null,
@@ -226,48 +255,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     },
 
     endTurn: () => {
-        const { grid, refillRate, deck, discardPile, hand, maxHandSize, playerStats } = get();
-
-        // 1. Refill Grid
-        const newGrid = refillGrid(grid, refillRate);
-
-        // 2. Draw Cards
-        let currentDeck = [...deck];
-        let currentDiscard = [...discardPile];
-        const newHand = [...hand];
-
-        while (newHand.length < maxHandSize) {
-            if (currentDeck.length === 0) {
-                if (currentDiscard.length === 0) break; // No cards left
-                // Shuffle discard into deck
-                currentDeck = [...currentDiscard];
-                // Shuffle logic
-                for (let j = currentDeck.length - 1; j > 0; j--) {
-                    const k = Math.floor(Math.random() * (j + 1));
-                    [currentDeck[j], currentDeck[k]] = [currentDeck[k], currentDeck[j]];
-                }
-                currentDiscard = [];
-            }
-            const card = currentDeck.pop();
-            if (card) newHand.push(card);
-        }
-
-        // 3. Passive Trace Increase
-        const newTrace = Math.min(100, playerStats.trace + 2);
-
-        let newGameState = get().gameState;
-        if (newTrace >= 100) {
-            newGameState = 'GAME_OVER';
-        }
-
-        set({
-            grid: newGrid,
-            hand: newHand,
-            deck: currentDeck,
-            discardPile: currentDiscard,
-            playerStats: { ...playerStats, trace: newTrace },
-            gameState: newGameState,
-            turn: get().turn + 1
-        });
+        const state = get();
+        const updates = computeEndTurn(state, 2);
+        set(updates);
     }
 }));

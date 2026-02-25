@@ -48,9 +48,7 @@ export interface ServerNode {
 
 export interface PlayerStats {
   hardwareHealth: number; // Meat health
-  softwareHealth: number; // Net health (sanity)
   trace: number; // 0-100
   credits: number;
   maxHardwareHealth: number;
-  maxSoftwareHealth: number;
 }
