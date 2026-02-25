@@ -6,6 +6,7 @@ interface CardProps {
   card: CardType;
   isSelected: boolean;
   onClick: () => void;
+  rotation?: number;
 }
 
 const COLOR_MAP: Record<CellColor, string> = {
@@ -21,7 +22,7 @@ const isPatternCell = (x: number, y: number, pattern: Coordinate[]) => {
   return pattern.some(p => p.x === x && p.y === y);
 };
 
-export const Card = ({ card, isSelected, onClick }: CardProps) => {
+export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => {
   const { name, visualColor, pattern } = card;
 
   return (
@@ -35,8 +36,8 @@ export const Card = ({ card, isSelected, onClick }: CardProps) => {
       onClick={onClick}
       whileHover={{ y: -5 }}
       animate={{
-          y: isSelected ? -20 : 0,
-          scale: isSelected ? 1.1 : 1
+        y: isSelected ? -20 : 0,
+        scale: isSelected ? 1.1 : 1
       }}
     >
       <div className="text-xs font-bold uppercase tracking-wider text-center mb-2 border-b border-white/20 pb-1 truncate">
@@ -44,29 +45,43 @@ export const Card = ({ card, isSelected, onClick }: CardProps) => {
       </div>
 
       <div className="flex-1 flex items-center justify-center">
-        {/* Mini Grid Visualization (5x5) */}
-        <div className="grid grid-cols-5 gap-0.5 p-1 bg-black/30 rounded">
-          {Array.from({ length: 25 }).map((_, i) => {
-            const x = (i % 5) - 2; // -2 to 2
-            const y = Math.floor(i / 5) - 2; // -2 to 2
-            const active = isPatternCell(x, y, pattern);
+        {card.action === 'RESET' ? (
+          <div className="text-rose-500 flex flex-col items-center">
+            <div className="w-10 h-10 border-2 border-rose-500 rounded-full flex items-center justify-center mb-2 animate-pulse">
+              !
+            </div>
+            <div className="text-xs font-bold">SYSTEM RESET</div>
+          </div>
+        ) : (
+          {/* Mini Grid Visualization (5x5) */ }
+          < motion.div 
+          className="grid grid-cols-5 gap-0.5 p-1 bg-black/30 rounded"
+        animate={{ rotate: rotation }}
+        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+        >
+        {Array.from({ length: 25 }).map((_, i) => {
+          const x = (i % 5) - 2; // -2 to 2
+          const y = Math.floor(i / 5) - 2; // -2 to 2
+          const active = isPatternCell(x, y, pattern);
 
-            return (
-              <div
-                key={i}
-                className={clsx(
-                  'w-2.5 h-2.5 rounded-[1px]',
-                  active ? 'bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]' : 'bg-white/5'
-                )}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      <div className="mt-2 text-[10px] text-white/50 text-center font-mono">
-        EXECUTE
-      </div>
+          return (
+            <div
+              key={i}
+              className={clsx(
+                'w-2.5 h-2.5 rounded-[1px]',
+                active ? 'bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]' : 'bg-white/5'
+              )}
+            />
+          );
+        })}
     </motion.div>
+  )
+}
+      </div >
+
+  <div className="mt-2 text-[10px] text-white/50 text-center font-mono">
+    EXECUTE
+  </div>
+    </motion.div >
   );
 };

@@ -21,9 +21,9 @@ export const generateServerNode = (difficulty: number, idOffset: number): Server
   // Random countermeasure (symbol requirement)
   const symbolReqs: Partial<Record<CellSymbol, number>> = {};
   if (difficulty > 2 && Math.random() < 0.4) {
-     const symbols: CellSymbol[] = ['SHIELD', 'EYE', 'SKULL'];
-     const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-     symbolReqs[symbol] = 1; // Require 1 symbol to avoid penalty
+    const symbols: CellSymbol[] = ['SHIELD', 'EYE', 'SKULL'];
+    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
+    symbolReqs[symbol] = 1; // Require 1 symbol to avoid penalty
   }
 
   const penaltyType = Math.random() < 0.33 ? 'TRACE' : (Math.random() < 0.5 ? 'HARDWARE_DAMAGE' : 'NET_DAMAGE');
@@ -69,22 +69,22 @@ export const calculateServerProgress = (server: ServerNode, cutCells: Cell[]): {
   const reqColors = server.requirements.colors;
   if (reqColors) {
     (Object.entries(reqColors) as [CellColor, number][]).forEach(([color, reqAmount]) => {
-        if (!reqAmount) return;
-        const current = newProgress.colors[color] || 0;
-        const added = cutColors[color] || 0;
+      if (!reqAmount) return;
+      const current = newProgress.colors[color] || 0;
+      const added = cutColors[color] || 0;
 
-        // Update progress
-        const total = current + added;
-        newProgress.colors[color] = Math.min(reqAmount, total);
+      // Update progress
+      const total = current + added;
+      newProgress.colors[color] = Math.min(reqAmount, total);
 
-        // Check if this specific requirement is met
-        if (total < reqAmount) {
-            hacked = false;
-        }
+      // Check if this specific requirement is met
+      if (total < reqAmount) {
+        hacked = false;
+      }
     });
   } else {
-      // Should not happen, but if no requirements, assume hacked?
-      hacked = true;
+    // Should not happen, but if no requirements, assume hacked?
+    hacked = true;
   }
 
   // Check Countermeasures (Symbols)
@@ -92,13 +92,13 @@ export const calculateServerProgress = (server: ServerNode, cutCells: Cell[]): {
   const reqSymbols = server.requirements.symbols;
 
   if (reqSymbols) {
-      (Object.entries(reqSymbols) as [CellSymbol, number][]).forEach(([symbol, reqAmount]) => {
-          if (!reqAmount) return;
-          // Check if this cut provides the symbol
-          if ((cutSymbols[symbol] || 0) < reqAmount) {
-              penaltyTriggered = true;
-          }
-      });
+    (Object.entries(reqSymbols) as [CellSymbol, number][]).forEach(([symbol, reqAmount]) => {
+      if (!reqAmount) return;
+      // Check if this cut provides the symbol
+      if ((cutSymbols[symbol] || 0) < reqAmount) {
+        penaltyTriggered = true;
+      }
+    });
   }
 
   return {
@@ -132,10 +132,27 @@ export const createStartingDeck = (): Card[] => {
         id: `card-${id++}`,
         name: p.name,
         pattern: p.pattern,
-        visualColor: p.color
+        visualColor: p.color,
+        action: 'CUT'
       });
     });
   }
+
+  // Add 2 Reset Cards
+  deck.push({
+    id: `card-${id++}`,
+    name: 'SYS/RESET',
+    pattern: [],
+    visualColor: 'RED',
+    action: 'RESET'
+  });
+  deck.push({
+    id: `card-${id++}`,
+    name: 'SYS/RESET',
+    pattern: [],
+    visualColor: 'RED',
+    action: 'RESET'
+  });
 
   // Shuffle
   for (let i = deck.length - 1; i > 0; i--) {

@@ -20,11 +20,14 @@ export interface Cell {
 
 export type Grid = Cell[][];
 
+export type CardAction = 'CUT' | 'RESET';
+
 export interface Card {
   id: string;
   name: string;
   pattern: Coordinate[]; // Relative coordinates centered on anchor
   visualColor: CellColor; // For visual flavor
+  action?: CardAction;
 }
 
 export interface ServerRequirements {

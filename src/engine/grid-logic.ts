@@ -55,6 +55,23 @@ export const checkPatternFit = (grid: Grid, pattern: Coordinate[], centerX: numb
   });
 };
 
+export const rotatePattern = (pattern: Coordinate[], rotation: number): Coordinate[] => {
+  if (rotation === 0) return pattern;
+
+  return pattern.map(({ x, y }) => {
+    switch (rotation) {
+      case 90:
+        return { x: -y, y: x };
+      case 180:
+        return { x: -x, y: -y };
+      case 270:
+        return { x: y, y: -x };
+      default:
+        return { x, y };
+    }
+  });
+};
+
 export const getAffectedCells = (grid: Grid, pattern: Coordinate[], centerX: number, centerY: number): Cell[] => {
   const affected: Cell[] = [];
 
