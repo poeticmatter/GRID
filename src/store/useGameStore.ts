@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Grid, Card, ServerNode, PlayerStats, Coordinate, Cell } from '../engine/types';
+import type { Grid, Card, ServerNode, PlayerStats } from '../engine/types';
 import { createGrid, checkPatternFit, getAffectedCells, refillGrid, rotatePattern } from '../engine/grid-logic';
 import { calculateServerProgress, createStartingDeck } from '../engine/game-logic';
 import { playSfx } from '../engine/audio';

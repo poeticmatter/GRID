@@ -53,35 +53,34 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
             <div className="text-xs font-bold">SYSTEM RESET</div>
           </div>
         ) : (
-          {/* Mini Grid Visualization (5x5) */ }
-          < motion.div 
-          className="grid grid-cols-5 gap-0.5 p-1 bg-black/30 rounded"
-        animate={{ rotate: rotation }}
-        transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-        >
-        {Array.from({ length: 25 }).map((_, i) => {
-          const x = (i % 5) - 2; // -2 to 2
-          const y = Math.floor(i / 5) - 2; // -2 to 2
-          const active = isPatternCell(x, y, pattern);
+          <motion.div
+            className="grid grid-cols-5 gap-0.5 p-1 bg-black/30 rounded"
+            animate={{ rotate: rotation }}
+            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
+          >
+            {Array.from({ length: 25 }).map((_, i) => {
+              const x = (i % 5) - 2; // -2 to 2
+              const y = Math.floor(i / 5) - 2; // -2 to 2
+              const active = isPatternCell(x, y, pattern);
 
-          return (
-            <div
-              key={i}
-              className={clsx(
-                'w-2.5 h-2.5 rounded-[1px]',
-                active ? 'bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]' : 'bg-white/5'
-              )}
-            />
-          );
-        })}
-    </motion.div>
-  )
-}
+              return (
+                <div
+                  key={i}
+                  className={clsx(
+                    'w-2.5 h-2.5 rounded-[1px]',
+                    active ? 'bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]' : 'bg-white/5'
+                  )}
+                />
+              );
+            })}
+          </motion.div>
+        )
+        }
       </div >
 
-  <div className="mt-2 text-[10px] text-white/50 text-center font-mono">
-    EXECUTE
-  </div>
+      <div className="mt-2 text-[10px] text-white/50 text-center font-mono">
+        EXECUTE
+      </div>
     </motion.div >
   );
 };

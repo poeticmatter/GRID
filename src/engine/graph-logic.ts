@@ -1,4 +1,4 @@
-import { ServerNode } from './types';
+import type { ServerNode } from './types';
 
 export interface GraphNode extends ServerNode {
     edges: string[];

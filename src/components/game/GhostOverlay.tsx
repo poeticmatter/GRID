@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { checkPatternFit, getAffectedCells, rotatePattern } from '../../engine/grid-logic';
-import { Coordinate } from '../../engine/types';
+import type { Coordinate } from '../../engine/types';
 import { playSfx } from '../../engine/audio';
 
 export const GhostOverlay = () => {
@@ -37,7 +37,7 @@ export const GhostOverlay = () => {
             onMouseLeave={() => setHoveredCell(null)}
         >
             {grid.map((row, y) => (
-                row.map((cell, x) => {
+                row.map((_, x) => {
                     const isAffected = affected.some(c => c.x === x && c.y === y);
                     return (
                         <div

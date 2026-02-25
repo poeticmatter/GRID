@@ -1,23 +1,17 @@
 import { useGameStore } from '../../store/useGameStore';
 import { Cell } from './Cell';
-import { playSfx } from '../../engine/audio';
 import { GhostOverlay } from './GhostOverlay';
 
 export const Board = () => {
-  const { grid, playCard, selectedCardId } = useGameStore();
-
-  const handleCellClick = (x: number, y: number) => {
-    // Basic fallback or generic click logic
-    // Actual play card execution with validation is handled by GhostOverlay
-  };
+  const { grid } = useGameStore();
 
   return (
     <div
       className="bg-slate-900 border border-slate-700 p-2 rounded-lg shadow-xl relative backdrop-blur-sm"
     >
       <div className="grid grid-cols-6 gap-1 relative z-10 pointer-events-none">
-        {grid.map((row, y) => (
-          row.map((cell, x) => {
+        {grid.map((row) => (
+          row.map((cell) => {
             return (
               <Cell
                 key={cell.id}
