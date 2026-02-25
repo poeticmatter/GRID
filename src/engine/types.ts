@@ -32,7 +32,7 @@ export interface Card {
 
 export interface ServerRequirements {
   colors: Partial<Record<CellColor, number>>;
-  symbols: Partial<Record<CellSymbol, number>>; // e.g. Requires 2 Shields to avoid penalty
+  symbols?: Partial<Record<CellSymbol, number>>; // e.g. Requires 2 Shields to avoid penalty
 }
 
 export interface ServerNode {

@@ -58,9 +58,9 @@ const ServerCard = ({ server }: { server: ServerNode }) => {
         })}
 
         {/* Countermeasures */}
-        {Object.entries(server.requirements.symbols).map(([symbol, req]) => {
+        {Object.entries(server.requirements.symbols || {}).map(([symbol, req]) => {
           if (!req) return null;
-           return (
+          return (
             <div key={symbol} className="text-[10px] text-red-400 flex items-center gap-1 mt-1 border-t border-white/5 pt-1">
               <span>TRAP:</span>
               {SYMBOL_ICON_MAP[symbol as CellSymbol]}

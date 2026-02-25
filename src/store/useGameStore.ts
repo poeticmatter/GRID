@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import type { Grid, Card, ServerNode, PlayerStats, Coordinate, Cell } from '../engine/types';
 import { createGrid, checkPatternFit, getAffectedCells, refillGrid, rotatePattern } from '../engine/grid-logic';
-import { generateServerNode, calculateServerProgress, createStartingDeck } from '../engine/game-logic';
+import { calculateServerProgress, createStartingDeck } from '../engine/game-logic';
 import { playSfx } from '../engine/audio';
 import { SERVER_GRAPH, STARTING_NODES } from '../engine/graph-logic';
 
@@ -108,7 +108,20 @@ export const useGameStore = create<GameState>((set, get) => ({
         }
 
         // Generate Servers
-        const activeServers: ServerNode[] = STARTING_NODES.map(id => ({ ...SERVER_GRAPH[id] }));
+        const activeServers: ServerNode[] = STARTING_NODES.map(id => {
+            const node = SERVER_GRAPH[id];
+            return {
+                ...node,
+                requirements: {
+                    colors: { ...node.requirements.colors },
+                    symbols: { ...(node.requirements.symbols || {}) }
+                },
+                progress: {
+                    colors: { ...node.progress.colors },
+                    symbols: { ...(node.progress.symbols || {}) }
+                }
+            };
+        });
         const deepMap: ServerNode[] = [];
 
         set({
@@ -196,16 +209,18 @@ export const useGameStore = create<GameState>((set, get) => ({
                 if (server.penaltyType === 'TRACE') {
                     newPlayerStats.trace = Math.min(100, newPlayerStats.trace + server.penaltyValue);
                 } else if (server.penaltyType === 'HARDWARE_DAMAGE') {
-                    newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - 1);
+                    newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - server.penaltyValue);
                 } else if (server.penaltyType === 'NET_DAMAGE') {
                     // Physically remove a card from Hand or Deck and move it to trashPile array
-                    if (newHand.length > 0) {
-                        const idx = Math.floor(Math.random() * newHand.length);
-                        const trashed = newHand.splice(idx, 1)[0];
-                        newTrashPile.push(trashed);
-                    } else if (newDeck.length > 0) {
-                        const trashed = newDeck.pop()!;
-                        newTrashPile.push(trashed);
+                    for (let p = 0; p < server.penaltyValue; p++) {
+                        if (newHand.length > 0) {
+                            const idx = Math.floor(Math.random() * newHand.length);
+                            const trashed = newHand.splice(idx, 1)[0];
+                            newTrashPile.push(trashed);
+                        } else if (newDeck.length > 0) {
+                            const trashed = newDeck.pop()!;
+                            newTrashPile.push(trashed);
+                        }
                     }
                 }
             }
@@ -216,6 +231,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         // 3. Handle Hacked Servers (Progression)
         const remainingServers: ServerNode[] = [];
         const newDeepMap = [...deepMap];
+        let hasTargetHacked = false;
 
         newActiveServers.forEach(s => {
             if (s.status !== 'HACKED') {
@@ -223,6 +239,37 @@ export const useGameStore = create<GameState>((set, get) => ({
             } else {
                 newPlayerStats.credits += s.difficulty * 10;
                 playSfx('hack');
+
+                const graphNode = SERVER_GRAPH[s.id];
+                if (graphNode) {
+                    if (graphNode.isTarget) {
+                        hasTargetHacked = true;
+                    }
+
+                    graphNode.edges.forEach(childId => {
+                        const existsActive = activeServers.some(activeS => activeS.id === childId);
+                        const existsDeep = newDeepMap.some(deepS => deepS.id === childId);
+
+                        if (!existsActive && !existsDeep) {
+                            const childNodeTemplate = SERVER_GRAPH[childId];
+                            if (childNodeTemplate) {
+                                // Deep copy node
+                                const newChild: ServerNode = {
+                                    ...childNodeTemplate,
+                                    requirements: {
+                                        colors: { ...childNodeTemplate.requirements.colors },
+                                        symbols: { ...(childNodeTemplate.requirements.symbols || {}) }
+                                    },
+                                    progress: {
+                                        colors: { ...childNodeTemplate.progress.colors },
+                                        symbols: { ...(childNodeTemplate.progress.symbols || {}) }
+                                    }
+                                };
+                                newDeepMap.push(newChild);
+                            }
+                        }
+                    });
+                }
             }
         });
 
@@ -235,7 +282,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         let newGameState = state.gameState;
         if (newPlayerStats.hardwareHealth <= 0 || newPlayerStats.trace >= 100 || (newHand.length === 0 && newDeck.length === 0)) {
             newGameState = 'GAME_OVER';
-        } else if (remainingServers.length === 0 && newDeepMap.length === 0) {
+        } else if (hasTargetHacked) {
             newGameState = 'VICTORY';
         }
 

@@ -48,7 +48,7 @@ export const calculateServerProgress = (server: ServerNode, cutCells: Cell[]): {
   // Deep copy server progress
   const newProgress: ServerRequirements = {
     colors: { ...server.progress.colors },
-    symbols: { ...server.progress.symbols }
+    symbols: { ...(server.progress.symbols || {}) }
   };
 
   // Tally cut cells
@@ -89,7 +89,7 @@ export const calculateServerProgress = (server: ServerNode, cutCells: Cell[]): {
 
   // Check Countermeasures (Symbols)
   let penaltyTriggered = false;
-  const reqSymbols = server.requirements.symbols;
+  const reqSymbols = server.requirements.symbols || {};
 
   if (reqSymbols) {
     (Object.entries(reqSymbols) as [CellSymbol, number][]).forEach(([symbol, reqAmount]) => {
