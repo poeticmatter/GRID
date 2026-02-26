@@ -1,37 +1,20 @@
-import { useEffect, useRef } from 'react';
-import { useGameStore } from '../../store/useGameStore';
+import { useEffect } from 'react';
 import { initAudio, playSfx } from '../../engine/audio';
+import { gameEventBus } from '../../engine/eventBus';
 
 export const AudioController = () => {
-  const { gameState, turn } = useGameStore();
-  const prevGameState = useRef(gameState);
-  const prevTurn = useRef(turn);
-
   useEffect(() => {
-    // Game State Changes
-    if (gameState === 'PLAYING' && (prevGameState.current === 'MENU' || prevGameState.current === 'GAME_OVER' || prevGameState.current === 'VICTORY')) {
-      // Start Game
-      initAudio();
-    } else if (gameState === 'GAME_OVER') {
-      playSfx('game_over');
-      // stopAudio is called inside playSfx for game_over, but explicit call is safer if needed
-    } else if (gameState === 'VICTORY') {
-      playSfx('victory');
-    }
+    const handleSfx = (sfx: string) => playSfx(sfx as any);
+    const handleInit = () => initAudio();
 
-    prevGameState.current = gameState;
-  }, [gameState]);
+    gameEventBus.on('AUDIO_PLAY_SFX', handleSfx);
+    gameEventBus.on('AUDIO_INIT', handleInit);
 
-  useEffect(() => {
-    // Turn Change SFX
-    if (turn > prevTurn.current) {
-       // New Turn
-       // playSfx('turn_start'); // Not implemented yet
-    }
-    prevTurn.current = turn;
-  }, [turn]);
+    return () => {
+      gameEventBus.off('AUDIO_PLAY_SFX', handleSfx);
+      gameEventBus.off('AUDIO_INIT', handleInit);
+    };
+  }, []);
 
-  // We can add more specific listeners here if needed
-
-  return null; // Invisible component
+  return null; // Invisible side-effect component
 };

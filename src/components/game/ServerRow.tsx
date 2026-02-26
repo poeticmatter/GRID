@@ -1,4 +1,4 @@
-import { useGameStore } from '../../store/useGameStore';
+import { useServerStore } from '../../store/useServerStore';
 import type { ServerNode, CellColor, CellSymbol } from '../../engine/types';
 import { Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -78,7 +78,7 @@ const ServerCard = ({ server }: { server: ServerNode }) => {
 };
 
 export const ServerRow = () => {
-  const { activeServers } = useGameStore();
+  const { activeServers } = useServerStore();
 
   return (
     <div className="flex gap-4 p-4 items-start justify-center overflow-visible min-h-[140px]">

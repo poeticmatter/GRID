@@ -1,11 +1,15 @@
 import { useState } from 'react';
-import { useGameStore } from '../../store/useGameStore';
+import { useGridStore } from '../../store/useGridStore';
+import { useDeckStore } from '../../store/useDeckStore';
+import { useUIStore } from '../../store/useUIStore';
+import { Dispatch } from '../../engine/orchestrator';
 import { checkPatternFit, getAffectedCells, rotatePattern } from '../../engine/grid-logic';
 import type { Coordinate } from '../../engine/types';
-import { playSfx } from '../../engine/audio';
 
 export const GhostOverlay = () => {
-    const { grid, hand, selectedCardId, rotation, playCard } = useGameStore();
+    const { grid } = useGridStore();
+    const { hand } = useDeckStore();
+    const { selectedCardId, rotation } = useUIStore();
     const [hoveredCell, setHoveredCell] = useState<Coordinate | null>(null);
 
     if (!selectedCardId) return null;
@@ -23,12 +27,8 @@ export const GhostOverlay = () => {
     }
 
     const handleClick = (x: number, y: number) => {
-        if (valid) {
-            playCard(selectedCardId, x, y);
-            setHoveredCell(null); // Optional: clear hover state on play
-        } else {
-            playSfx('error');
-        }
+        Dispatch({ type: 'PLAY_CARD', payload: { cardId: selectedCardId, x, y } });
+        setHoveredCell(null);
     };
 
     return (

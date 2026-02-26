@@ -1,9 +1,9 @@
-import { useGameStore } from '../../store/useGameStore';
+import { useGridStore } from '../../store/useGridStore';
 import { Cell } from './Cell';
 import { GhostOverlay } from './GhostOverlay';
 
 export const Board = () => {
-  const { grid } = useGameStore();
+  const { grid } = useGridStore();
 
   return (
     <div

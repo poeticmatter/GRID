@@ -1,19 +1,24 @@
 import { useEffect } from 'react';
 import { useGameStore } from '../../store/useGameStore';
+import { usePlayerStore } from '../../store/usePlayerStore';
+import { useDeckStore } from '../../store/useDeckStore';
+import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
 import { Hand } from '../game/Hand';
 import { ServerRow } from '../game/ServerRow';
 import { EndTurnButton } from '../ui/EndTurnButton';
 import { AudioController } from '../audio/AudioController';
-import { initAudio } from '../../engine/audio';
+import { gameEventBus } from '../../engine/eventBus';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export const GameLayout = () => {
-    const { initializeGame, playerStats, turn, gameState, hand, deck } = useGameStore();
+    const { gameState, turn } = useGameStore();
+    const { playerStats } = usePlayerStore();
+    const { hand, deck } = useDeckStore();
 
-    const handleStart = async () => {
-        await initAudio();
-        initializeGame();
+    const handleStart = () => {
+        gameEventBus.emit('AUDIO_INIT');
+        Dispatch({ type: 'INITIALIZE_GAME' });
     };
 
     useEffect(() => {

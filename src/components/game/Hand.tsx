@@ -1,20 +1,23 @@
-import { useGameStore } from '../../store/useGameStore';
+import { useDeckStore } from '../../store/useDeckStore';
+import { useUIStore } from '../../store/useUIStore';
+import { Dispatch } from '../../engine/orchestrator';
 import { Card } from './Card';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RotateCw, Power } from 'lucide-react';
 
 export const Hand = () => {
-  const { hand, selectedCardId, selectCard, rotateCard, playCard, rotation } = useGameStore();
+  const { hand } = useDeckStore();
+  const { selectedCardId, rotation } = useUIStore();
 
   const handleRotate = (e: React.MouseEvent) => {
     e.stopPropagation();
-    rotateCard();
+    Dispatch({ type: 'ROTATE_CARD' });
   };
 
   const handleExecuteReset = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (selectedCardId) {
-      playCard(selectedCardId, 0, 0); // x, y are ignored for RESET
+      Dispatch({ type: 'PLAY_CARD', payload: { cardId: selectedCardId, x: 0, y: 0 } });
     }
   };
 
@@ -66,7 +69,7 @@ export const Hand = () => {
               <Card
                 card={card}
                 isSelected={selectedCardId === card.id}
-                onClick={() => selectCard(selectedCardId === card.id ? null : card.id)}
+                onClick={() => Dispatch({ type: 'SELECT_CARD', payload: { cardId: selectedCardId === card.id ? null : card.id } })}
                 rotation={selectedCardId === card.id ? rotation : 0}
               />
             </motion.div>
