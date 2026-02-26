@@ -23,7 +23,10 @@ const isPatternCell = (x: number, y: number, pattern: Coordinate[]) => {
 };
 
 export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => {
-  const { name, visualColor, pattern } = card;
+  const { name, visualColor, effects } = card;
+  const cutEffect = effects.find(e => e.type === 'CUT');
+  const pattern = cutEffect && cutEffect.type === 'CUT' ? cutEffect.pattern : [];
+  const isReset = effects.some(e => e.type === 'SYSTEM_RESET');
 
   return (
     <motion.div
@@ -45,7 +48,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
       </div>
 
       <div className="flex-1 flex items-center justify-center">
-        {card.action === 'RESET' ? (
+        {isReset ? (
           <div className="text-rose-500 flex flex-col items-center">
             <div className="w-10 h-10 border-2 border-rose-500 rounded-full flex items-center justify-center mb-2 animate-pulse">
               !
@@ -74,13 +77,12 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
               );
             })}
           </motion.div>
-        )
-        }
-      </div >
+        )}
+      </div>
 
       <div className="mt-2 text-[10px] text-white/50 text-center font-mono">
         EXECUTE
       </div>
-    </motion.div >
+    </motion.div>
   );
 };

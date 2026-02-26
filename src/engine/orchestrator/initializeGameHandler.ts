@@ -8,15 +8,8 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
     const grid = createGrid(6, 6);
     const deck = createStartingDeck();
 
-    // Draw initial hand
-    const hand: Card[] = [];
-    const currentDeck = [...deck];
-    for (let i = 0; i < 4; i++) {
-        if (currentDeck.length > 0) {
-            const card = currentDeck.pop();
-            if (card) hand.push(card);
-        }
-    }
+    const hand: Card[] = [...deck];
+    const currentDeck: Card[] = [];
 
     // Generate Servers
     const activeServers: ServerNode[] = STARTING_NODES.map(id => {

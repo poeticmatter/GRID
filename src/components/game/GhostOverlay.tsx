@@ -1,23 +1,22 @@
 import { useState } from 'react';
 import { useGridStore } from '../../store/useGridStore';
-import { useDeckStore } from '../../store/useDeckStore';
+import { useGameStore } from '../../store/useGameStore';
 import { useUIStore } from '../../store/useUIStore';
-import { Dispatch } from '../../engine/orchestrator';
 import { checkPatternFit, getAffectedCells, rotatePattern } from '../../engine/grid-logic';
-import type { Coordinate } from '../../engine/types';
+import type { Coordinate, EffectCut } from '../../engine/types';
 
 export const GhostOverlay = () => {
     const { grid } = useGridStore();
-    const { hand } = useDeckStore();
-    const { selectedCardId, rotation } = useUIStore();
+    const { gameState, effectQueue, executeCut } = useGameStore();
+    const { rotation } = useUIStore();
     const [hoveredCell, setHoveredCell] = useState<Coordinate | null>(null);
 
-    if (!selectedCardId) return null;
+    const activeEffect = effectQueue[0]?.effect;
 
-    const card = hand.find(c => c.id === selectedCardId);
-    if (!card || card.action === 'RESET') return null;
+    if (gameState !== 'EFFECT_RESOLUTION' || !activeEffect || activeEffect.type !== 'CUT') return null;
 
-    const rotatedPattern = rotatePattern(card.pattern, rotation);
+    const cutEffect = activeEffect as EffectCut;
+    const rotatedPattern = rotatePattern(cutEffect.pattern, rotation);
     let affected: { x: number, y: number }[] = [];
     let valid = false;
 
@@ -27,7 +26,7 @@ export const GhostOverlay = () => {
     }
 
     const handleClick = (x: number, y: number) => {
-        Dispatch({ type: 'PLAY_CARD', payload: { cardId: selectedCardId, x, y } });
+        executeCut(x, y);
         setHoveredCell(null);
     };
 

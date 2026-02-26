@@ -10,7 +10,7 @@ import type { GameAction, GameSnapshot, StateDeltas } from './orchestrator/types
 import { handleInitializeGame } from './orchestrator/initializeGameHandler';
 import { handleSelectCard } from './orchestrator/selectCardHandler';
 import { handleRotateCard } from './orchestrator/rotateCardHandler';
-import { handlePlayCard } from './orchestrator/playCardHandler';
+import { cutMechanic } from './orchestrator/mechanics/cutMechanic';
 import { handleEndTurn } from './orchestrator/endTurnHandler';
 import { initializeMechanics } from './orchestrator/mechanicsInit';
 
@@ -94,8 +94,8 @@ export const Dispatch = (action: GameAction) => {
         case 'ROTATE_CARD':
             deltas = handleRotateCard(snapshot);
             break;
-        case 'PLAY_CARD':
-            deltas = handlePlayCard(snapshot, action.payload.cardId, action.payload.x, action.payload.y);
+        case 'RESOLVE_CUT':
+            deltas = cutMechanic(snapshot, action.payload);
             break;
         case 'END_TURN':
             deltas = handleEndTurn(snapshot, 2);

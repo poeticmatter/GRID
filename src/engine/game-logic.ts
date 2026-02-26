@@ -122,36 +122,32 @@ export const createStartingDeck = (): Card[] => {
     { name: 'L-Shape', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }], color: 'PURPLE' },
   ];
 
-  // Create 15 cards (3 of each)
+  // Create exactly 4 cut cards
   const deck: Card[] = [];
   let id = 0;
 
-  for (let i = 0; i < 3; i++) {
-    basicPatterns.forEach(p => {
-      deck.push({
-        id: `card-${id++}`,
-        name: p.name,
-        pattern: p.pattern,
-        visualColor: p.color,
-        action: 'CUT'
-      });
+  for (let i = 0; i < 4; i++) {
+    const p = basicPatterns[i];
+    deck.push({
+      id: `card-${id++}`,
+      name: p.name,
+      visualColor: p.color,
+      effects: [
+        { type: 'CUT', pattern: p.pattern },
+        { type: 'REPROGRAM', amount: 2 }
+      ]
     });
   }
 
-  // Add 2 Reset Cards
+  // Add 1 Reset Card
   deck.push({
     id: `card-${id++}`,
     name: 'SYS/RESET',
-    pattern: [],
     visualColor: 'RED',
-    action: 'RESET'
-  });
-  deck.push({
-    id: `card-${id++}`,
-    name: 'SYS/RESET',
-    pattern: [],
-    visualColor: 'RED',
-    action: 'RESET'
+    effects: [
+      { type: 'SYSTEM_RESET' },
+      { type: 'REPROGRAM', amount: 2 }
+    ]
   });
 
   // Shuffle

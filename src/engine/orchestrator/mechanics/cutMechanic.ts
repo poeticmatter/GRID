@@ -2,17 +2,14 @@ import { checkPatternFit, getAffectedCells, rotatePattern } from '../../grid-log
 import { calculateServerProgress } from '../../game-logic';
 import { SERVER_GRAPH } from '../../graph-logic';
 import type { ServerNode, Card, Grid } from '../../types';
-import type { CardMechanicFn } from '../mechanicRegistry';
+import type { ReadonlyDeep, GameSnapshot, StateDeltas } from '../types';
 
-export const cutMechanic: CardMechanicFn = (snapshot, payload) => {
-    const { cardId, x, y } = payload;
-    const card = snapshot.hand.find((c: any) => c.id === cardId);
-    if (!card) return {};
+export const cutMechanic = (snapshot: ReadonlyDeep<GameSnapshot>, payload: { x: number; y: number; pattern: any[] }): StateDeltas => {
+    const { x, y, pattern: rawPattern } = payload;
 
     const events: Array<{ type: string; payload?: any }> = [];
 
-    // Clone the readonly array from deeply frozen state for rotatePattern
-    const pattern = [...card.pattern].map(p => ({ ...p }));
+    const pattern = [...rawPattern].map((p: any) => ({ ...p }));
     const rotatedPattern = rotatePattern(pattern, snapshot.rotation);
 
     // checkPatternFit expects Grid, but snapshot.grid is ReadonlyDeep<Grid>.
@@ -38,10 +35,10 @@ export const cutMechanic: CardMechanicFn = (snapshot, payload) => {
     const newPlayerStats = { ...snapshot.playerStats };
     const newActiveServers: ServerNode[] = [];
 
-    let newHand = snapshot.hand.filter((c: any) => c.id !== cardId) as Card[];
+    let newHand = [...snapshot.hand] as Card[];
     let newDeck = [...snapshot.deck] as Card[];
     let newTrashPile = [...snapshot.trashPile] as Card[];
-    let newDiscard = [...snapshot.discardPile, card as Card] as Card[];
+    let newDiscard = [...snapshot.discardPile] as Card[];
 
     snapshot.activeServers.forEach((readonlyServer: any) => {
         const server = readonlyServer as unknown as ServerNode;

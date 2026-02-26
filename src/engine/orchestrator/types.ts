@@ -1,6 +1,6 @@
 import type { Grid, Card, ServerNode, PlayerStats } from '../types';
 
-export type GamePhase = 'MENU' | 'PLAYING' | 'GAME_OVER' | 'VICTORY';
+export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'GAME_OVER' | 'VICTORY';
 
 type Builtin = Function | Date | Error | RegExp | string | number | boolean | null | undefined;
 
@@ -53,5 +53,5 @@ export type GameAction =
     | { type: 'INITIALIZE_GAME' }
     | { type: 'SELECT_CARD'; payload: { cardId: string | null } }
     | { type: 'ROTATE_CARD' }
-    | { type: 'PLAY_CARD'; payload: { cardId: string; x: number; y: number } }
+    | { type: 'RESOLVE_CUT'; payload: { x: number; y: number; pattern: any[] } }
     | { type: 'END_TURN' };

@@ -20,14 +20,27 @@ export interface Cell {
 
 export type Grid = Cell[][];
 
-export type CardAction = 'CUT' | 'RESET';
+export interface EffectCut {
+  type: 'CUT';
+  pattern: Coordinate[];
+}
+
+export interface EffectReprogram {
+  type: 'REPROGRAM';
+  amount: number;
+}
+
+export interface EffectSystemReset {
+  type: 'SYSTEM_RESET';
+}
+
+export type Effect = EffectCut | EffectReprogram | EffectSystemReset;
 
 export interface Card {
   id: string;
   name: string;
-  pattern: Coordinate[]; // Relative coordinates centered on anchor
-  visualColor: CellColor; // For visual flavor
-  action?: CardAction;
+  visualColor: CellColor;
+  effects: Effect[];
 }
 
 export interface ServerRequirements {

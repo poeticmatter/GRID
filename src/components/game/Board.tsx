@@ -1,6 +1,7 @@
 import { useGridStore } from '../../store/useGridStore';
 import { Cell } from './Cell';
 import { GhostOverlay } from './GhostOverlay';
+import { ReprogramOverlay } from './ReprogramOverlay';
 
 export const Board = () => {
   const { grid } = useGridStore();
@@ -27,6 +28,7 @@ export const Board = () => {
       </div>
 
       <GhostOverlay />
+      <ReprogramOverlay />
 
       {/* Background Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />

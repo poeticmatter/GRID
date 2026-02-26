@@ -6,7 +6,7 @@ import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
 import { Hand } from '../game/Hand';
 import { ServerRow } from '../game/ServerRow';
-import { EndTurnButton } from '../ui/EndTurnButton';
+import { EffectOrderingUI } from '../game/EffectOrderingUI';
 import { AudioController } from '../audio/AudioController';
 import { gameEventBus } from '../../engine/eventBus';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -87,13 +87,11 @@ export const GameLayout = () => {
                 </div>
             </div>
 
-            {/* Controls Layer */}
-            <div className="absolute bottom-40 right-8 z-50 pointer-events-auto">
-                <EndTurnButton />
-            </div>
 
-            {/* Hand Layer */}
+
             <Hand />
+
+            <EffectOrderingUI />
 
             {/* Overlays */}
             <AnimatePresence>
