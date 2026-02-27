@@ -1,4 +1,4 @@
-import type { Grid, Card, ServerNode, PlayerStats } from '../types';
+import type { Grid, Card, ServerNode, PlayerStats, Effect, Coordinate, ActiveEffect } from '../types';
 
 export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'GAME_OVER' | 'VICTORY';
 
@@ -29,6 +29,10 @@ export interface GameSnapshot {
     rotation: number;
     gameState: GamePhase;
     turn: number;
+    pendingEffects: Effect[];
+    effectQueue: ActiveEffect[];
+    activeCardId: string | null;
+    reprogramTargetSource: Coordinate | null;
 }
 
 export interface StateDeltas {
@@ -47,6 +51,10 @@ export interface StateDeltas {
     gameState?: GamePhase;
     turn?: number;
     events?: Array<{ type: string; payload?: any }>;
+    pendingEffects?: Effect[];
+    effectQueue?: ActiveEffect[];
+    activeCardId?: string | null;
+    reprogramTargetSource?: Coordinate | null;
 }
 
 export type GameAction =
@@ -54,4 +62,11 @@ export type GameAction =
     | { type: 'SELECT_CARD'; payload: { cardId: string | null } }
     | { type: 'ROTATE_CARD' }
     | { type: 'RESOLVE_CUT'; payload: { x: number; y: number; pattern: any[] } }
-    | { type: 'END_TURN' };
+    | { type: 'END_TURN' }
+    | { type: 'PLAY_CARD'; payload: { cardId: string; effects: Effect[] } }
+    | { type: 'QUEUE_EFFECT'; payload: { effect: Effect } }
+    | { type: 'CONFIRM_EFFECT_ORDER' }
+    | { type: 'SET_REPROGRAM_SOURCE'; payload: { source: Coordinate | null } }
+    | { type: 'RESOLVE_SYSTEM_RESET' }
+    | { type: 'RESOLVE_REPROGRAM'; payload: { source: Coordinate; dest: Coordinate } }
+    | { type: 'FINISH_CARD_RESOLUTION' };

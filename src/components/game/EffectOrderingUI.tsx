@@ -1,8 +1,9 @@
 import { useGameStore } from '../../store/useGameStore';
 import { motion } from 'framer-motion';
+import { Dispatch } from '../../engine/orchestrator';
 
 export const EffectOrderingUI = () => {
-    const { gameState, pendingEffects, queueEffect, confirmEffectOrder, effectQueue } = useGameStore();
+    const { gameState, pendingEffects, effectQueue } = useGameStore();
 
     if (gameState !== 'EFFECT_ORDERING') return null;
 
@@ -24,7 +25,7 @@ export const EffectOrderingUI = () => {
                         {pendingEffects.map((eff, i) => (
                             <button
                                 key={i}
-                                onClick={() => queueEffect(eff)}
+                                onClick={() => Dispatch({ type: 'QUEUE_EFFECT', payload: { effect: eff } })}
                                 className="p-3 bg-cyan-950/40 hover:bg-cyan-900/60 border border-cyan-500/30 hover:border-cyan-400 rounded text-left transition-all text-cyan-100 uppercase tracking-widest font-mono text-sm"
                             >
                                 + {eff.type} {eff.type === 'REPROGRAM' && `(${eff.amount})`}
@@ -47,7 +48,7 @@ export const EffectOrderingUI = () => {
 
                     {pendingEffects.length === 0 && (
                         <button
-                            onClick={confirmEffectOrder}
+                            onClick={() => Dispatch({ type: 'CONFIRM_EFFECT_ORDER' })}
                             className="mt-6 w-full py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold tracking-widest rounded shadow-[0_0_15px_rgba(16,185,129,0.5)] transition-all hover:scale-[1.02]"
                         >
                             EXECUTE QUEUE

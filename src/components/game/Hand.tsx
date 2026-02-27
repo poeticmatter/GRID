@@ -9,7 +9,7 @@ import { RotateCw, Play } from 'lucide-react';
 export const Hand = () => {
     const { hand } = useDeckStore();
     const { selectedCardId, rotation } = useUIStore();
-    const { playCard, gameState } = useGameStore();
+    const { gameState } = useGameStore();
 
     const handleRotate = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -21,7 +21,7 @@ export const Hand = () => {
         if (selectedCardId && gameState === 'PLAYING') {
             const card = hand.find(c => c.id === selectedCardId);
             if (card) {
-                playCard(selectedCardId, card.effects);
+                Dispatch({ type: 'PLAY_CARD', payload: { cardId: selectedCardId, effects: card.effects } });
             }
         }
     };

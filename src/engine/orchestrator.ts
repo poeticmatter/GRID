@@ -40,7 +40,11 @@ function buildSnapshot(): GameSnapshot {
         selectedCardId: uiStore.selectedCardId,
         rotation: uiStore.rotation,
         gameState: gameStore.gameState,
-        turn: gameStore.turn
+        turn: gameStore.turn,
+        pendingEffects: gameStore.pendingEffects,
+        effectQueue: gameStore.effectQueue,
+        activeCardId: gameStore.activeCardId,
+        reprogramTargetSource: gameStore.reprogramTargetSource
     };
 }
 
@@ -73,12 +77,23 @@ function applyDeltas(deltas: StateDeltas) {
     if (deltas.gameState !== undefined) gameStore.setGameState(deltas.gameState);
     if (deltas.turn !== undefined) gameStore.setTurn(deltas.turn);
 
+    if (deltas.pendingEffects !== undefined) gameStore.setPendingEffects(deltas.pendingEffects);
+    if (deltas.effectQueue !== undefined) gameStore.setEffectQueue(deltas.effectQueue);
+    if (deltas.activeCardId !== undefined) gameStore.setActiveCardId(deltas.activeCardId);
+    if (deltas.reprogramTargetSource !== undefined) gameStore.setReprogramSource(deltas.reprogramTargetSource);
+
     if (deltas.events) {
         deltas.events.forEach(event => {
             gameEventBus.emit(event.type, event.payload);
         });
     }
 }
+
+import { mergeDeltas, patchSnapshot } from './orchestrator/deltaHelpers';
+import { evaluateQueue } from './orchestrator/fsm';
+import { systemResetMechanic } from './orchestrator/mechanics/systemResetMechanic';
+import { finishCardResolution } from './orchestrator/mechanics/finishCardResolution';
+import { reprogramMechanic } from './orchestrator/mechanics/reprogramMechanic';
 
 export const Dispatch = (action: GameAction) => {
     const snapshot = buildSnapshot();
@@ -94,14 +109,80 @@ export const Dispatch = (action: GameAction) => {
         case 'ROTATE_CARD':
             deltas = handleRotateCard(snapshot);
             break;
-        case 'RESOLVE_CUT':
-            deltas = cutMechanic(snapshot, action.payload);
-            break;
         case 'END_TURN':
             deltas = handleEndTurn(snapshot, 2);
             break;
+
+        case 'PLAY_CARD': {
+            const { cardId, effects } = action.payload;
+            if (effects.length > 1) {
+                deltas = {
+                    gameState: 'EFFECT_ORDERING',
+                    activeCardId: cardId,
+                    pendingEffects: [...effects],
+                    effectQueue: [],
+                    reprogramTargetSource: null,
+                };
+            } else if (effects.length === 1) {
+                const initDeltas: StateDeltas = {
+                    gameState: 'EFFECT_RESOLUTION',
+                    activeCardId: cardId,
+                    pendingEffects: [],
+                    effectQueue: [{ cardId, effect: effects[0] }],
+                    reprogramTargetSource: null,
+                };
+                deltas = mergeDeltas(initDeltas, evaluateQueue(patchSnapshot(snapshot, initDeltas)));
+            }
+            break;
+        }
+
+        case 'QUEUE_EFFECT': {
+            const pendingEffects = snapshot.pendingEffects.filter(e => e !== action.payload.effect);
+            const effectQueue = [...snapshot.effectQueue, { cardId: snapshot.activeCardId!, effect: action.payload.effect }];
+            deltas = { pendingEffects, effectQueue };
+            break;
+        }
+
+        case 'CONFIRM_EFFECT_ORDER': {
+            const initDeltas: StateDeltas = { gameState: 'EFFECT_RESOLUTION' };
+            deltas = mergeDeltas(initDeltas, evaluateQueue(patchSnapshot(snapshot, initDeltas)));
+            break;
+        }
+
+        case 'SET_REPROGRAM_SOURCE': {
+            deltas = { reprogramTargetSource: action.payload.source };
+            break;
+        }
+
+        case 'RESOLVE_CUT': {
+            const cutDeltas = cutMechanic(snapshot, action.payload);
+            const queue = [...(cutDeltas.effectQueue || snapshot.effectQueue)];
+            queue.shift();
+            cutDeltas.effectQueue = queue;
+            deltas = mergeDeltas(cutDeltas, evaluateQueue(patchSnapshot(snapshot, cutDeltas)));
+            break;
+        }
+
+        case 'RESOLVE_REPROGRAM': {
+            const repDeltas = reprogramMechanic(snapshot, action.payload);
+            deltas = mergeDeltas(repDeltas, evaluateQueue(patchSnapshot(snapshot, repDeltas)));
+            break;
+        }
+
+        case 'RESOLVE_SYSTEM_RESET': {
+            const sysDeltas = systemResetMechanic(snapshot);
+            const queue = [...(sysDeltas.effectQueue || snapshot.effectQueue)];
+            queue.shift();
+            sysDeltas.effectQueue = queue;
+            deltas = mergeDeltas(sysDeltas, evaluateQueue(patchSnapshot(snapshot, sysDeltas)));
+            break;
+        }
+
+        case 'FINISH_CARD_RESOLUTION': {
+            deltas = finishCardResolution(snapshot);
+            break;
+        }
     }
 
     applyDeltas(deltas);
 };
-

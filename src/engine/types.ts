@@ -65,3 +65,8 @@ export interface PlayerStats {
   credits: number;
   maxHardwareHealth: number;
 }
+
+export interface ActiveEffect {
+  cardId: string;
+  effect: Effect;
+}

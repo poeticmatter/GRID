@@ -1,10 +1,11 @@
 import { useGridStore } from '../../store/useGridStore';
 import { useGameStore } from '../../store/useGameStore';
 import type { EffectReprogram } from '../../engine/types';
+import { Dispatch } from '../../engine/orchestrator';
 
 export const ReprogramOverlay = () => {
     const { grid } = useGridStore();
-    const { gameState, effectQueue, reprogramTargetSource, setReprogramSource, executeReprogram } = useGameStore();
+    const { gameState, effectQueue, reprogramTargetSource } = useGameStore();
 
     const activeEffect = effectQueue[0]?.effect;
 
@@ -16,10 +17,10 @@ export const ReprogramOverlay = () => {
         if (!reprogramTargetSource) {
             const cell = grid[y][x];
             if (cell.state !== 'BROKEN') {
-                setReprogramSource({ x, y });
+                Dispatch({ type: 'SET_REPROGRAM_SOURCE', payload: { source: { x, y } } });
             }
         } else {
-            executeReprogram({ x, y });
+            Dispatch({ type: 'RESOLVE_REPROGRAM', payload: { source: reprogramTargetSource, dest: { x, y } } });
         }
     };
 

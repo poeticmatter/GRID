@@ -4,10 +4,11 @@ import { useGameStore } from '../../store/useGameStore';
 import { useUIStore } from '../../store/useUIStore';
 import { checkPatternFit, getAffectedCells, rotatePattern } from '../../engine/grid-logic';
 import type { Coordinate, EffectCut } from '../../engine/types';
+import { Dispatch } from '../../engine/orchestrator';
 
 export const GhostOverlay = () => {
     const { grid } = useGridStore();
-    const { gameState, effectQueue, executeCut } = useGameStore();
+    const { gameState, effectQueue } = useGameStore();
     const { rotation } = useUIStore();
     const [hoveredCell, setHoveredCell] = useState<Coordinate | null>(null);
 
@@ -26,7 +27,7 @@ export const GhostOverlay = () => {
     }
 
     const handleClick = (x: number, y: number) => {
-        executeCut(x, y);
+        Dispatch({ type: 'RESOLVE_CUT', payload: { x, y, pattern: rotatedPattern } });
         setHoveredCell(null);
     };
 
