@@ -10,7 +10,6 @@ import type { GameAction, GameSnapshot, StateDeltas } from './orchestrator/types
 import { handleInitializeGame } from './orchestrator/initializeGameHandler';
 import { handleSelectCard } from './orchestrator/selectCardHandler';
 import { handleRotateCard } from './orchestrator/rotateCardHandler';
-import { cutMechanic } from './orchestrator/mechanics/cutMechanic';
 import { handleEndTurn } from './orchestrator/endTurnHandler';
 import { initializeMechanics } from './orchestrator/mechanicsInit';
 
@@ -91,9 +90,6 @@ function applyDeltas(deltas: StateDeltas) {
 
 import { mergeDeltas, patchSnapshot } from './orchestrator/deltaHelpers';
 import { evaluateQueue } from './orchestrator/fsm';
-import { systemResetMechanic } from './orchestrator/mechanics/systemResetMechanic';
-import { finishCardResolution } from './orchestrator/mechanics/finishCardResolution';
-import { reprogramMechanic } from './orchestrator/mechanics/reprogramMechanic';
 
 export const Dispatch = (action: GameAction) => {
     const snapshot = buildSnapshot();
@@ -155,31 +151,22 @@ export const Dispatch = (action: GameAction) => {
         }
 
         case 'RESOLVE_CUT': {
-            const cutDeltas = cutMechanic(snapshot, action.payload);
-            const queue = [...(cutDeltas.effectQueue || snapshot.effectQueue)];
-            queue.shift();
-            cutDeltas.effectQueue = queue;
-            deltas = mergeDeltas(cutDeltas, evaluateQueue(patchSnapshot(snapshot, cutDeltas)));
+            deltas = evaluateQueue(snapshot, action.payload);
             break;
         }
 
         case 'RESOLVE_REPROGRAM': {
-            const repDeltas = reprogramMechanic(snapshot, action.payload);
-            deltas = mergeDeltas(repDeltas, evaluateQueue(patchSnapshot(snapshot, repDeltas)));
+            deltas = evaluateQueue(snapshot, action.payload);
             break;
         }
 
         case 'RESOLVE_SYSTEM_RESET': {
-            const sysDeltas = systemResetMechanic(snapshot);
-            const queue = [...(sysDeltas.effectQueue || snapshot.effectQueue)];
-            queue.shift();
-            sysDeltas.effectQueue = queue;
-            deltas = mergeDeltas(sysDeltas, evaluateQueue(patchSnapshot(snapshot, sysDeltas)));
+            deltas = evaluateQueue(snapshot);
             break;
         }
 
         case 'FINISH_CARD_RESOLUTION': {
-            deltas = finishCardResolution(snapshot);
+            deltas = evaluateQueue(snapshot);
             break;
         }
     }

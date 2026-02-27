@@ -22,6 +22,9 @@ interface GameState {
 
     setGameState: (state: GamePhase) => void;
     setTurn: (turn: number) => void;
+    setPendingEffects: (pendingEffects: Effect[]) => void;
+    setEffectQueue: (effectQueue: ActiveEffect[]) => void;
+    setActiveCardId: (activeCardId: string | null) => void;
 
     playCard: (cardId: string, effects: Effect[]) => void;
     queueEffect: (effect: Effect) => void;
