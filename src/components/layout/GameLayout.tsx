@@ -8,6 +8,7 @@ import { Hand } from '../game/Hand';
 import { ServerRow } from '../game/ServerRow';
 import { EffectOrderingUI } from '../game/EffectOrderingUI';
 import { AudioController } from '../audio/AudioController';
+import { PlaybackController } from '../game/PlaybackController';
 import { gameEventBus } from '../../engine/eventBus';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -30,6 +31,7 @@ export const GameLayout = () => {
 
     return (
         <div className="h-screen w-screen bg-slate-900 text-white overflow-hidden relative font-sans">
+            <PlaybackController />
             <AudioController />
             {/* Background Ambience */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80" />

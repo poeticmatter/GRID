@@ -3,9 +3,10 @@ import type { ActiveEffect } from '../types';
 import { patchSnapshot, mergeDeltas } from './deltaHelpers';
 import { getMechanic } from './mechanicRegistry';
 
-export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: any): StateDeltas {
+export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: any): StateDeltas[] {
     let currentSnapshot = snapshot;
     let accumulatedDeltas: StateDeltas = {};
+    const history: StateDeltas[] = [];
     let currentPayload = payload;
 
     while (true) {
@@ -16,7 +17,8 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
         if (queue.length === 0) {
             const finalMechanic = getMechanic('FINISH_CARD_RESOLUTION');
             const finalDeltas = finalMechanic ? finalMechanic.execute(currentSnapshot) : {};
-            return mergeDeltas(accumulatedDeltas, finalDeltas);
+            history.push(finalDeltas);
+            return history;
         }
 
         const activeEffect = queue[0];
@@ -30,6 +32,7 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
             const stepDeltas = { effectQueue: poppedQueue };
             accumulatedDeltas = mergeDeltas(accumulatedDeltas, stepDeltas);
             currentSnapshot = patchSnapshot(currentSnapshot, stepDeltas);
+            history.push(stepDeltas);
             continue;
         }
 
@@ -48,13 +51,14 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
                 currentSnapshot = patchSnapshot(currentSnapshot, stepDeltas);
 
                 currentPayload = undefined;
+                history.push(stepDeltas);
 
                 // If the mechanic deliberately kept the same effect queue by value
                 if (nextQueue === queue || (nextQueue.length > 0 && nextQueue[0] === queue[0])) {
-                    return accumulatedDeltas;
+                    return history;
                 }
             } else {
-                return accumulatedDeltas;
+                return history;
             }
         } else {
             const resultDeltas = mechanic.execute(currentSnapshot);
@@ -67,6 +71,7 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
             const stepDeltas = mergeDeltas(resultDeltas, { effectQueue: nextQueue });
             accumulatedDeltas = mergeDeltas(accumulatedDeltas, stepDeltas);
             currentSnapshot = patchSnapshot(currentSnapshot, stepDeltas);
+            history.push(stepDeltas);
         }
     }
 }

@@ -5,6 +5,7 @@ import { usePlayerStore } from '../store/usePlayerStore';
 import { useUIStore } from '../store/useUIStore';
 import { useGameStore } from '../store/useGameStore';
 import { gameEventBus } from './eventBus';
+import { useVisualQueueStore } from '../store/useVisualQueueStore';
 
 import type { GameAction, GameSnapshot, StateDeltas } from './orchestrator/types';
 import { handleInitializeGame } from './orchestrator/initializeGameHandler';
@@ -47,7 +48,7 @@ function buildSnapshot(): GameSnapshot {
     };
 }
 
-function applyDeltas(deltas: StateDeltas) {
+export function applyDeltas(deltas: StateDeltas) {
     const gridStore = useGridStore.getState();
     const serverStore = useServerStore.getState();
     const deckStore = useDeckStore.getState();
@@ -88,12 +89,12 @@ function applyDeltas(deltas: StateDeltas) {
     }
 }
 
-import { mergeDeltas, patchSnapshot } from './orchestrator/deltaHelpers';
+import { patchSnapshot } from './orchestrator/deltaHelpers';
 import { evaluateQueue } from './orchestrator/fsm';
 
 export const Dispatch = (action: GameAction) => {
     const snapshot = buildSnapshot();
-    let deltas: StateDeltas = {};
+    let deltas: StateDeltas | StateDeltas[] = {};
 
     switch (action.type) {
         case 'INITIALIZE_GAME':
@@ -127,7 +128,7 @@ export const Dispatch = (action: GameAction) => {
                     effectQueue: [{ cardId, effect: effects[0] }],
                     reprogramTargetSource: null,
                 };
-                deltas = mergeDeltas(initDeltas, evaluateQueue(patchSnapshot(snapshot, initDeltas)));
+                deltas = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
             }
             break;
         }
@@ -141,7 +142,7 @@ export const Dispatch = (action: GameAction) => {
 
         case 'CONFIRM_EFFECT_ORDER': {
             const initDeltas: StateDeltas = { gameState: 'EFFECT_RESOLUTION' };
-            deltas = mergeDeltas(initDeltas, evaluateQueue(patchSnapshot(snapshot, initDeltas)));
+            deltas = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
             break;
         }
 
@@ -171,5 +172,9 @@ export const Dispatch = (action: GameAction) => {
         }
     }
 
-    applyDeltas(deltas);
+    if (Array.isArray(deltas)) {
+        useVisualQueueStore.getState().enqueue(deltas);
+    } else {
+        applyDeltas(deltas);
+    }
 };
