@@ -1,4 +1,4 @@
-import type { Grid, Card, ServerNode, PlayerStats, Effect, Coordinate, ActiveEffect } from '../types';
+import type { Grid, Card, ServerNode, PlayerStats, Effect, Coordinate, ActiveEffect, Cell } from '../types';
 
 export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'GAME_OVER' | 'VICTORY';
 
@@ -56,6 +56,8 @@ export interface StateDeltas {
     activeCardId?: string | null;
     reprogramTargetSource?: Coordinate | null;
     durationMs?: number;
+    harvestedCells?: Cell[];
+    targetHacked?: boolean;
 }
 
 export type GameAction =

@@ -2,6 +2,7 @@ import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
 import type { ActiveEffect } from '../types';
 import { patchSnapshot, mergeDeltas } from './deltaHelpers';
 import { getMechanic } from './mechanicRegistry';
+import { applySystemsPipeline } from './systemsPipeline';
 
 export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: any): StateDeltas[] {
     let currentSnapshot = snapshot;
@@ -38,7 +39,8 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
 
         if (mechanic.type === 'DEFERRED') {
             if (currentPayload !== undefined) {
-                const resultDeltas = mechanic.execute(currentSnapshot, currentPayload);
+                const resultDeltasRaw = mechanic.execute(currentSnapshot, currentPayload);
+                const resultDeltas = applySystemsPipeline(currentSnapshot, resultDeltasRaw);
 
                 let nextQueue = resultDeltas.effectQueue;
 
@@ -61,7 +63,8 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
                 return history;
             }
         } else {
-            const resultDeltas = mechanic.execute(currentSnapshot);
+            const resultDeltasRaw = mechanic.execute(currentSnapshot);
+            const resultDeltas = applySystemsPipeline(currentSnapshot, resultDeltasRaw);
 
             let nextQueue = resultDeltas.effectQueue;
             if (!nextQueue) {
