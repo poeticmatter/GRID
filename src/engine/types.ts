@@ -34,7 +34,12 @@ export interface EffectSystemReset {
   type: 'SYSTEM_RESET';
 }
 
-export type Effect = EffectCut | EffectReprogram | EffectSystemReset;
+export interface EffectEndTurn {
+  type: 'END_TURN';
+  tracePenalty?: number;
+}
+
+export type Effect = EffectCut | EffectReprogram | EffectSystemReset | EffectEndTurn;
 
 export interface Card {
   id: string;

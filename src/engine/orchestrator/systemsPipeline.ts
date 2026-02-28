@@ -1,6 +1,6 @@
-import { calculateServerProgress } from '../../game-logic';
-import { SERVER_GRAPH } from '../../graph-logic';
-import type { ServerNode, Card, Cell } from '../../types';
+import { calculateServerProgress } from '../game-logic';
+import { SERVER_GRAPH } from '../graph-logic';
+import type { ServerNode, Card, Cell } from '../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
 import { mergeDeltas } from './deltaHelpers';
 

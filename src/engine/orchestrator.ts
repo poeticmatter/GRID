@@ -11,7 +11,7 @@ import type { GameAction, GameSnapshot, StateDeltas } from './orchestrator/types
 import { handleInitializeGame } from './orchestrator/initializeGameHandler';
 import { handleSelectCard } from './orchestrator/selectCardHandler';
 import { handleRotateCard } from './orchestrator/rotateCardHandler';
-import { handleEndTurn } from './orchestrator/endTurnHandler';
+// EndTurnHandler removed in favor of FSM
 import { initializeMechanics } from './orchestrator/mechanicsInit';
 
 initializeMechanics();
@@ -106,9 +106,13 @@ export const Dispatch = (action: GameAction) => {
         case 'ROTATE_CARD':
             deltas = [handleRotateCard(snapshot)];
             break;
-        case 'END_TURN':
-            deltas = [handleEndTurn(snapshot, 2)];
+        case 'END_TURN': {
+            const initDeltas: StateDeltas = {
+                effectQueue: [{ cardId: 'SYSTEM', effect: { type: 'END_TURN', tracePenalty: 2 } }] as any
+            };
+            deltas = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
             break;
+        }
 
         case 'PLAY_CARD': {
             const { cardId, effects } = action.payload;
