@@ -50,7 +50,7 @@ export interface StateDeltas {
     rotation?: number;
     gameState?: GamePhase;
     turn?: number;
-    events?: Array<{ type: string; payload?: any }>;
+    events?: Array<{ type: string; payload?: any; durationMs?: number }>;
     pendingEffects?: Effect[];
     effectQueue?: ActiveEffect[];
     activeCardId?: string | null;

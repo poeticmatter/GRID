@@ -10,7 +10,7 @@ export const cutMechanic: IEffectMechanic = {
     execute: (snapshot: ReadonlyDeep<GameSnapshot>, payload: { x: number; y: number; pattern: any[] }): StateDeltas => {
         const { x, y, pattern: rawPattern } = payload;
 
-        const events: Array<{ type: string; payload?: any }> = [];
+        const events: Array<{ type: string; payload?: any; durationMs?: number }> = [];
 
         const pattern = [...rawPattern].map((p: any) => ({ ...p }));
         const rotatedPattern = rotatePattern(pattern, snapshot.rotation);
@@ -21,12 +21,12 @@ export const cutMechanic: IEffectMechanic = {
 
         if (!checkPatternFit(activeGrid, rotatedPattern, x, y)) {
             return {
-                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error' }],
+                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 }],
                 effectQueue: snapshot.effectQueue as import('../../types').ActiveEffect[]
             };
         }
 
-        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'cut' });
+        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'cut', durationMs: 800 });
 
         // 1. Harvest Cells & Update Grid
         const affected = getAffectedCells(activeGrid, rotatedPattern, x, y);
@@ -51,7 +51,7 @@ export const cutMechanic: IEffectMechanic = {
             const result = calculateServerProgress(server, affected);
 
             if (result.penaltyTriggered) {
-                events.push({ type: 'AUDIO_PLAY_SFX', payload: 'error' });
+                events.push({ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 });
                 if (server.penaltyType === 'TRACE') {
                     newPlayerStats.trace = Math.min(100, newPlayerStats.trace + server.penaltyValue);
                 } else if (server.penaltyType === 'HARDWARE_DAMAGE') {
@@ -83,7 +83,7 @@ export const cutMechanic: IEffectMechanic = {
                 remainingServers.push(s);
             } else {
                 newPlayerStats.credits += s.difficulty * 10;
-                events.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack' });
+                events.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 500 });
 
                 const graphNode = SERVER_GRAPH[s.id];
                 if (graphNode) {
@@ -131,9 +131,9 @@ export const cutMechanic: IEffectMechanic = {
         }
 
         if (newGameState === 'GAME_OVER' && snapshot.gameState !== 'GAME_OVER') {
-            events.push({ type: 'AUDIO_PLAY_SFX', payload: 'game_over' });
+            events.push({ type: 'AUDIO_PLAY_SFX', payload: 'game_over', durationMs: 1500 });
         } else if (newGameState === 'VICTORY' && snapshot.gameState !== 'VICTORY') {
-            events.push({ type: 'AUDIO_PLAY_SFX', payload: 'victory' });
+            events.push({ type: 'AUDIO_PLAY_SFX', payload: 'victory', durationMs: 2000 });
         }
 
         return {
