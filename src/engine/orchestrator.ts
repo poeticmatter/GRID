@@ -94,32 +94,32 @@ import { evaluateQueue } from './orchestrator/fsm';
 
 export const Dispatch = (action: GameAction) => {
     const snapshot = buildSnapshot();
-    let deltas: StateDeltas | StateDeltas[] = {};
+    let deltas: StateDeltas[] = [];
 
     switch (action.type) {
         case 'INITIALIZE_GAME':
-            deltas = handleInitializeGame(snapshot);
+            deltas = [handleInitializeGame(snapshot)];
             break;
         case 'SELECT_CARD':
-            deltas = handleSelectCard(snapshot, action.payload.cardId);
+            deltas = [handleSelectCard(snapshot, action.payload.cardId)];
             break;
         case 'ROTATE_CARD':
-            deltas = handleRotateCard(snapshot);
+            deltas = [handleRotateCard(snapshot)];
             break;
         case 'END_TURN':
-            deltas = handleEndTurn(snapshot, 2);
+            deltas = [handleEndTurn(snapshot, 2)];
             break;
 
         case 'PLAY_CARD': {
             const { cardId, effects } = action.payload;
             if (effects.length > 1) {
-                deltas = {
+                deltas = [{
                     gameState: 'EFFECT_ORDERING',
                     activeCardId: cardId,
                     pendingEffects: [...effects],
                     effectQueue: [],
                     reprogramTargetSource: null,
-                };
+                }];
             } else if (effects.length === 1) {
                 const initDeltas: StateDeltas = {
                     gameState: 'EFFECT_RESOLUTION',
@@ -136,7 +136,7 @@ export const Dispatch = (action: GameAction) => {
         case 'QUEUE_EFFECT': {
             const pendingEffects = snapshot.pendingEffects.filter(e => e !== action.payload.effect);
             const effectQueue = [...snapshot.effectQueue, { cardId: snapshot.activeCardId!, effect: action.payload.effect }];
-            deltas = { pendingEffects, effectQueue };
+            deltas = [{ pendingEffects, effectQueue }];
             break;
         }
 
@@ -147,7 +147,7 @@ export const Dispatch = (action: GameAction) => {
         }
 
         case 'SET_REPROGRAM_SOURCE': {
-            deltas = { reprogramTargetSource: action.payload.source };
+            deltas = [{ reprogramTargetSource: action.payload.source }];
             break;
         }
 
@@ -172,9 +172,5 @@ export const Dispatch = (action: GameAction) => {
         }
     }
 
-    if (Array.isArray(deltas)) {
-        useVisualQueueStore.getState().enqueue(deltas);
-    } else {
-        applyDeltas(deltas);
-    }
+    useVisualQueueStore.getState().enqueue(deltas);
 };
