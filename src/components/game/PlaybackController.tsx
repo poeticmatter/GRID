@@ -27,13 +27,13 @@ export const PlaybackController = () => {
 
                 applyDeltas(action.deltas);
 
-                // Dynamic delay driven by event metadata
-                let delay = 400; // base step delay for fluid visual
+                // Dynamic delay driven by event and root metadata
+                let delay = action.deltas.durationMs || 0;
                 if (action.deltas.events && action.deltas.events.length > 0) {
                     const maxDuration = Math.max(
                         ...action.deltas.events.map(e => e.durationMs || 0)
                     );
-                    if (maxDuration > 0) {
+                    if (maxDuration > delay) {
                         delay = maxDuration;
                     }
                 }

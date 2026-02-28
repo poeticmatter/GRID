@@ -148,7 +148,8 @@ export const cutMechanic: IEffectMechanic = {
             gameState: newGameState,
             selectedCardId: null,
             rotation: 0,
-            events: events.length > 0 ? events : undefined
+            events: events.length > 0 ? events : undefined,
+            durationMs: 400
         };
     }
 };

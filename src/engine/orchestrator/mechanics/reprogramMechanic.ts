@@ -65,7 +65,8 @@ export const reprogramMechanic: IEffectMechanic = {
         const deltas: StateDeltas = {
             grid,
             reprogramTargetSource: null,
-            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'reprogram', durationMs: 500 }]
+            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'reprogram', durationMs: 500 }],
+            durationMs: 400
         };
 
         if (nextQueue !== undefined) {

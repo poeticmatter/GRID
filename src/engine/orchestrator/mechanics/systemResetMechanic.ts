@@ -17,7 +17,8 @@ export const systemResetMechanic: IEffectMechanic = {
             discardPile: newDiscard,
             grid: refilled,
             turn: snapshot.turn + 1,
-            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 600 }] // Can add sound
+            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 600 }], // Can add sound
+            durationMs: 400
         };
     }
 };

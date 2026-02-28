@@ -29,9 +29,9 @@ export const handleEndTurn = (snapshot: ReadonlyDeep<GameSnapshot>, tracePenalty
         newGameState = 'GAME_OVER';
     }
 
-    const events: Array<{ type: string; payload?: any }> = [];
+    const events: Array<{ type: string; payload?: any; durationMs?: number }> = [];
     if (newGameState === 'GAME_OVER' && snapshot.gameState !== 'GAME_OVER') {
-        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'game_over' });
+        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'game_over', durationMs: 1500 });
     }
 
     return {
@@ -44,6 +44,7 @@ export const handleEndTurn = (snapshot: ReadonlyDeep<GameSnapshot>, tracePenalty
         turn: snapshot.turn + 1,
         selectedCardId: null,
         rotation: 0,
-        events: events.length > 0 ? events : undefined
+        events: events.length > 0 ? events : undefined,
+        durationMs: 600
     };
 };

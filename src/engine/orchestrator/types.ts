@@ -55,6 +55,7 @@ export interface StateDeltas {
     effectQueue?: ActiveEffect[];
     activeCardId?: string | null;
     reprogramTargetSource?: Coordinate | null;
+    durationMs?: number;
 }
 
 export type GameAction =
