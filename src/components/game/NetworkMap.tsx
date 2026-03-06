@@ -191,112 +191,113 @@ export const NetworkMap = () => {
     };
 
     return (
-        <div className="absolute top-24 w-full z-40 flex flex-col items-center pointer-events-none">
-
-            <div className="w-full relative flex justify-center mt-2">
-                {!isOpen && (
-                    <div className="absolute top-0 flex flex-col items-center w-full">
-                        <div className="flex gap-4 p-2 relative z-50">
-                            <motion.button
-                                onClick={() => setIsOpen(true)}
-                                className="pointer-events-auto bg-slate-900 border border-slate-700/80 px-6 py-2 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-lg shadow-black/50 text-white group"
-                            >
-                                <Globe className="w-4 h-4 text-white/40 group-hover:text-cyan-400/70 transition-all duration-500" />
-                                <span className="text-xs font-mono font-bold tracking-[0.15em] text-white/80 group-hover:text-white transition-colors uppercase">
-                                    View Topology
-                                </span>
-                                <ChevronDown className="w-4 h-4 text-white/40" />
-                            </motion.button>
-                        </div>
-                        <div className="flex gap-4 p-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto min-h-[140px] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                            <AnimatePresence>
-                                {activeServers.filter(s => s.type !== 'HOME').map((server) => (
-                                    <ServerCard key={server.id} server={server} />
-                                ))}
-                            </AnimatePresence>
-                            {activeServers.filter(s => s.type !== 'HOME').length === 0 && (
-                                <div className="text-white/30 text-sm font-mono animate-pulse">
-                                    SCANNING FOR TARGETS...
-                                </div>
-                            )}
-                        </div>
-                    </div>
-                )}
-
-                <AnimatePresence>
-                    {isOpen && (
-                        <motion.div
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0, filter: 'blur(10px)' }}
-                            transition={{ duration: 0.3 }}
-                            className="fixed inset-0 w-screen h-screen z-[100] bg-slate-950 pointer-events-auto overflow-hidden flex flex-col"
-                        >
-                            {/* Close Button Pinned to Top */}
-                            <div className="absolute top-6 w-full flex justify-center z-[110]">
+        <>
+            <div className="absolute top-24 w-full z-40 flex flex-col items-center pointer-events-none">
+                <div className="w-full relative flex justify-center mt-2">
+                    {!isOpen && (
+                        <div className="absolute top-0 flex flex-col items-center w-full">
+                            <div className="flex gap-4 p-2 relative z-50">
                                 <motion.button
-                                    onClick={() => setIsOpen(false)}
-                                    className="pointer-events-auto bg-slate-900 border border-cyan-500/50 px-8 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] text-white group"
+                                    onClick={() => setIsOpen(true)}
+                                    className="pointer-events-auto bg-slate-900 border border-slate-700/80 px-6 py-2 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-lg shadow-black/50 text-white group"
                                 >
-                                    <Globe className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-500" />
-                                    <span className="text-sm font-mono font-bold tracking-[0.2em] text-white group-hover:text-cyan-200 transition-colors uppercase">
-                                        Close Topology
+                                    <Globe className="w-4 h-4 text-white/40 group-hover:text-cyan-400/70 transition-all duration-500" />
+                                    <span className="text-xs font-mono font-bold tracking-[0.15em] text-white/80 group-hover:text-white transition-colors uppercase">
+                                        View Topology
                                     </span>
-                                    <ChevronUp className="w-5 h-5 text-white/80" />
+                                    <ChevronDown className="w-4 h-4 text-white/40" />
                                 </motion.button>
                             </div>
-                            {/* Z-0: City Background Layer */}
-                            <CityBackground nodeCoords={nodeCoords} />
-
-                            {/* Z-10: SVG Edge Lines Layer */}
-                            <svg className="absolute inset-0 w-full h-full z-10 pointer-events-none">
-                                {networkGraph.map(node => {
-                                    const p1 = nodeCoords[node.id];
-                                    if (!p1) return null;
-                                    return node.children.map(childId => {
-                                        const p2 = nodeCoords[childId];
-                                        if (!p2) return null;
-
-                                        const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
-                                        const isChildActive = activeServers.some(s => s.id === childId);
-                                        const isActiveConnection = isParentCleared && isChildActive;
-
-                                        return (
-                                            <line
-                                                key={`${node.id}-${childId}`}
-                                                x1={`${p1.x}%`} y1={`${p1.y}%`}
-                                                x2={`${p2.x}%`} y2={`${p2.y}%`}
-                                                stroke={isActiveConnection ? "rgba(34, 211, 238, 0.4)" : "rgba(6, 182, 212, 0.15)"}
-                                                strokeWidth={isActiveConnection ? "3" : "1.5"}
-                                                strokeDasharray={!isActiveConnection ? "5 5" : "none"}
-                                            />
-                                        );
-                                    });
-                                })}
-                            </svg>
-
-                            {/* Z-20: Absolute Positioned Node Circles Layer */}
-                            {networkGraph.map(node => {
-                                const coord = nodeCoords[node.id];
-                                if (!coord) return null;
-                                return (
-                                    <div
-                                        key={node.id}
-                                        className="absolute z-20"
-                                        style={{
-                                            left: `${coord.x}%`,
-                                            top: `${coord.y}%`,
-                                            transform: 'translate(-50%, -50%)'
-                                        }}
-                                    >
-                                        <CircularNodeIcon server={node} state={getNodeState(node)} />
+                            <div className="flex gap-4 p-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto min-h-[140px] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                                <AnimatePresence>
+                                    {activeServers.filter(s => s.type !== 'HOME').map((server) => (
+                                        <ServerCard key={server.id} server={server} />
+                                    ))}
+                                </AnimatePresence>
+                                {activeServers.filter(s => s.type !== 'HOME').length === 0 && (
+                                    <div className="text-white/30 text-sm font-mono animate-pulse">
+                                        SCANNING FOR TARGETS...
                                     </div>
-                                );
-                            })}
-                        </motion.div>
+                                )}
+                            </div>
+                        </div>
                     )}
-                </AnimatePresence>
+                </div>
             </div>
-        </div>
+
+            <AnimatePresence>
+                {isOpen && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, filter: 'blur(10px)' }}
+                        transition={{ duration: 0.3 }}
+                        className="fixed inset-0 w-screen h-screen z-[100] bg-slate-950 pointer-events-auto overflow-hidden flex flex-col"
+                    >
+                        {/* Close Button Pinned to Top */}
+                        <div className="absolute top-6 w-full flex justify-center z-[110]">
+                            <motion.button
+                                onClick={() => setIsOpen(false)}
+                                className="pointer-events-auto bg-slate-900 border border-cyan-500/50 px-8 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] text-white group"
+                            >
+                                <Globe className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-500" />
+                                <span className="text-sm font-mono font-bold tracking-[0.2em] text-white group-hover:text-cyan-200 transition-colors uppercase">
+                                    Close Topology
+                                </span>
+                                <ChevronUp className="w-5 h-5 text-white/80" />
+                            </motion.button>
+                        </div>
+                        {/* Z-0: City Background Layer */}
+                        <CityBackground nodeCoords={nodeCoords} />
+
+                        {/* Z-10: SVG Edge Lines Layer */}
+                        <svg className="absolute inset-0 w-full h-full z-10 pointer-events-none">
+                            {networkGraph.map(node => {
+                                const p1 = nodeCoords[node.id];
+                                if (!p1) return null;
+                                return node.children.map(childId => {
+                                    const p2 = nodeCoords[childId];
+                                    if (!p2) return null;
+
+                                    const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
+                                    const isChildActive = activeServers.some(s => s.id === childId);
+                                    const isActiveConnection = isParentCleared && isChildActive;
+
+                                    return (
+                                        <line
+                                            key={`${node.id}-${childId}`}
+                                            x1={`${p1.x}%`} y1={`${p1.y}%`}
+                                            x2={`${p2.x}%`} y2={`${p2.y}%`}
+                                            stroke={isActiveConnection ? "rgba(34, 211, 238, 0.4)" : "rgba(6, 182, 212, 0.15)"}
+                                            strokeWidth={isActiveConnection ? "3" : "1.5"}
+                                            strokeDasharray={!isActiveConnection ? "5 5" : "none"}
+                                        />
+                                    );
+                                });
+                            })}
+                        </svg>
+
+                        {/* Z-20: Absolute Positioned Node Circles Layer */}
+                        {networkGraph.map(node => {
+                            const coord = nodeCoords[node.id];
+                            if (!coord) return null;
+                            return (
+                                <div
+                                    key={node.id}
+                                    className="absolute z-20"
+                                    style={{
+                                        left: `${coord.x}%`,
+                                        top: `${coord.y}%`,
+                                        transform: 'translate(-50%, -50%)'
+                                    }}
+                                >
+                                    <CircularNodeIcon server={node} state={getNodeState(node)} />
+                                </div>
+                            );
+                        })}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+        </>
     );
 };
