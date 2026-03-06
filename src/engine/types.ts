@@ -81,6 +81,8 @@ export interface NetworkNode {
   status: 'ACTIVE' | 'HACKED' | 'LOCKED';
   visibility: 'REVEALED' | 'HIDDEN';
   children: string[];
+  gridX: number;
+  gridY: number;
 }
 
 export interface PlayerStats {

@@ -1,5 +1,5 @@
 import { NodePools } from '../../data/nodes';
-import type { NodeDefinition, NetworkNode } from '../types';
+import type { NodeDefinition, NetworkNode, CellColor } from '../types';
 
 export class NodeRegistry {
     private static instance: NodeRegistry;
@@ -111,7 +111,9 @@ export class NodeRegistry {
             resetTrace: def.resetTrace,
             status: 'ACTIVE',
             visibility: 'HIDDEN',
-            children: []
+            children: [],
+            gridX: 0,
+            gridY: 0
         };
     }
 }

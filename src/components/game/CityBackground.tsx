@@ -6,7 +6,7 @@ export interface CityBackgroundProps {
 
 export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
     const buildings = useMemo(() => {
-        const b = [];
+        const b: { type: string, left: number, width: number, height: number, color: string, border?: string }[] = [];
 
         // Use a simple seeded random to avoid rendering flicker
         let seed = 1234;

@@ -1,5 +1,4 @@
 import { calculateServerProgress } from '../game-logic';
-import { nodeRegistry } from '../registry/NodeRegistry';
 import type { NetworkNode, Card } from '../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
 import { mergeDeltas } from './deltaHelpers';
@@ -71,12 +70,12 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
 
     // Sync networkGraph with any progress made in activeServers this tick
     const baseGraph = deltas.networkGraph ? deltas.networkGraph : snapshot.networkGraph;
-    const newGraph: NetworkNode[] = baseGraph.map(node => {
+    const newGraph: NetworkNode[] = baseGraph.map((node: any) => {
         const activeMatch = deltas.activeServers!.find(s => s.id === node.id);
         if (activeMatch) {
-            return { ...activeMatch }; // Copy the updated state from activeServers
+            return { ...activeMatch } as NetworkNode; // Copy the updated state from activeServers
         }
-        return { ...node, children: [...node.children] };
+        return { ...node, children: [...node.children] } as NetworkNode;
     });
 
     deltas.activeServers.forEach((s) => {

@@ -3,7 +3,6 @@ import { createStartingDeck } from '../game-logic';
 import { generateGraph } from '../graph-logic';
 import type { GameSnapshot, StateDeltas, ReadonlyDeep } from './types';
 import type { Card, NetworkNode } from '../types';
-import { nodeRegistry } from '../registry/NodeRegistry';
 
 export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): StateDeltas => {
     const grid = createGrid(6, 6);

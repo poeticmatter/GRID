@@ -167,43 +167,17 @@ export const NetworkMap = () => {
     const nodeCoords = useMemo(() => {
         if (!networkGraph || networkGraph.length === 0) return {};
 
-        // Calculate depths iteratively
-        const layoutLevels: NetworkNode[][] = [];
-        const visited = new Set<string>();
-
-        let currentLevelIds = [networkGraph.find(n => n.type === 'HOME')?.id].filter(Boolean) as string[];
-
-        while (currentLevelIds.length > 0) {
-            const levelNodes = currentLevelIds.map(id => networkGraph.find(n => n.id === id)).filter(Boolean) as NetworkNode[];
-            layoutLevels.push(levelNodes);
-
-            levelNodes.forEach(n => visited.add(n.id));
-
-            const nextLevelIds = new Set<string>();
-            levelNodes.forEach(n => {
-                n.children.forEach(childId => {
-                    if (!visited.has(childId)) {
-                        nextLevelIds.add(childId);
-                    }
-                });
-            });
-            currentLevelIds = Array.from(nextLevelIds);
-        }
-
         const coords: Record<string, { x: number, y: number }> = {};
-        const maxDepth = layoutLevels.length;
+        const maxY = Math.max(0, ...networkGraph.map(n => n.gridY || 0));
 
-        layoutLevels.forEach((level, depth) => {
-            // Home is at depth 0 (bottom). Deepest nodes are at maxDepth-1 (top).
-            // So y % goes from 90% (bottom) to 15% (top).
-            const y = maxDepth > 1 ? 85 - (depth / (maxDepth - 1)) * 65 : 85;
+        networkGraph.forEach((node) => {
+            let x = 50;
+            if (node.gridX === 0) x = 20;
+            else if (node.gridX === 1) x = 50;
+            else if (node.gridX === 2) x = 80;
 
-            level.forEach((node, i) => {
-                const count = level.length;
-                // Distribute evenly horizontally between 20% and 80%
-                const x = count > 1 ? 20 + (i / (count - 1)) * 60 : 50;
-                coords[node.id] = { x, y };
-            });
+            const y = maxY > 0 ? 85 - ((node.gridY || 0) / maxY) * 65 : 85;
+            coords[node.id] = { x, y };
         });
 
         return coords;
