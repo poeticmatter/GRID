@@ -131,11 +131,12 @@ export const generateGraph = (): NetworkNode[] => {
         }
 
         // Anti-Termination Safeguard
-        if (requestedConnections.length === 0 && currentRow.length > 0) {
-            // Force at least one straight-up connection
-            const fallbackParent = currentRow[Math.floor(Math.random() * currentRow.length)];
-            const safeTx = isLastRow ? 1 : fallbackParent.gridX;
-            requestedConnections.push({ parent: fallbackParent, targetX: safeTx });
+        for (const parent of currentRow) {
+            const hasConnection = requestedConnections.some(conn => conn.parent.id === parent.id);
+            if (!hasConnection) {
+                const safeTx = isLastRow ? 1 : parent.gridX;
+                requestedConnections.push({ parent, targetX: safeTx });
+            }
         }
 
         // Instantiate nodes in the new row
