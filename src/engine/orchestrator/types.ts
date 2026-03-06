@@ -18,7 +18,7 @@ export interface GameSnapshot {
     grid: Grid;
     refillRate: number;
     activeServers: NetworkNode[];
-    deepMap: NetworkNode[];
+    networkGraph: NetworkNode[];
     hand: Card[];
     deck: Card[];
     discardPile: Card[];
@@ -39,7 +39,7 @@ export interface StateDeltas {
     grid?: Grid;
     refillRate?: number;
     activeServers?: NetworkNode[];
-    deepMap?: NetworkNode[];
+    networkGraph?: NetworkNode[];
     hand?: Card[];
     deck?: Card[];
     discardPile?: Card[];

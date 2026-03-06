@@ -5,7 +5,7 @@ import { useDeckStore } from '../../store/useDeckStore';
 import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
 import { Hand } from '../game/Hand';
-import { ServerRow } from '../game/ServerRow';
+import { NetworkMap } from '../game/NetworkMap';
 import { EffectOrderingUI } from '../game/EffectOrderingUI';
 import { AudioController } from '../audio/AudioController';
 import { PlaybackController } from '../game/PlaybackController';
@@ -51,7 +51,7 @@ export const GameLayout = () => {
                         <span>HARDWARE:</span>
                         <span>
                             {Array.from({ length: playerStats.maxHardwareHealth }).map((_, i) => (
-                                <span key={i} className={i < playerStats.hardwareHealth ? "text-rose-500 drop-shadow-[0_0_2px_rgba(244,63,94,0.8)]" : "text-slate-700"}>▮</span>
+                                <span key={i} className={i < playerStats.hardwareHealth ? "text-rose-500 drop-shadow-[0_0_2px_rgba(244,63,94,0.8)]" : "text-slate-700"} >▮</span>
                             ))}
                         </span>
                     </div>
@@ -75,12 +75,8 @@ export const GameLayout = () => {
                 </div>
             </div>
 
-            {/* Server Row Layer */}
-            <div className="absolute top-24 w-full z-30 pointer-events-none">
-                <div className="pointer-events-auto">
-                    <ServerRow />
-                </div>
-            </div>
+            {/* Network Map Overlay (Handles both Active Targets and Topology) */}
+            <NetworkMap />
 
             {/* Main Game Area */}
             <div className="absolute inset-0 flex flex-col items-center justify-center pt-48 pb-32 pointer-events-none">
@@ -88,8 +84,6 @@ export const GameLayout = () => {
                     <Board />
                 </div>
             </div>
-
-
 
             <Hand />
 

@@ -3,14 +3,14 @@ import type { NetworkNode } from '../engine/types';
 
 interface NodeState {
     activeServers: NetworkNode[];
-    deepMap: NetworkNode[];
+    networkGraph: NetworkNode[];
     setActiveServers: (servers: NetworkNode[]) => void;
-    setDeepMap: (map: NetworkNode[]) => void;
+    setNetworkGraph: (graph: NetworkNode[]) => void;
 }
 
 export const useServerStore = create<NodeState>((set) => ({
     activeServers: [],
-    deepMap: [],
+    networkGraph: [],
     setActiveServers: (activeServers) => set({ activeServers }),
-    setDeepMap: (deepMap) => set({ deepMap }),
+    setNetworkGraph: (networkGraph) => set({ networkGraph }),
 }));

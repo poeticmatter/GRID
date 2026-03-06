@@ -1,5 +1,6 @@
 import { createGrid } from '../grid-logic';
 import { createStartingDeck } from '../game-logic';
+import { generateGraph } from '../graph-logic';
 import type { GameSnapshot, StateDeltas, ReadonlyDeep } from './types';
 import type { Card, NetworkNode } from '../types';
 import { nodeRegistry } from '../registry/NodeRegistry';
@@ -11,12 +12,13 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
     const hand: Card[] = [...deck];
     const currentDeck: Card[] = [];
 
-    // Generate Servers
-    const activeServers: NetworkNode[] = [
-        nodeRegistry.selectNode(nodeRegistry.getRandomPoolId(), 1),
-        nodeRegistry.selectNode(nodeRegistry.getRandomPoolId(), 2),
-        nodeRegistry.selectNode(nodeRegistry.getRandomPoolId(), 1)
-    ];
+    // Generate Graph
+    const networkGraph: NetworkNode[] = generateGraph();
+
+    // Initial active servers are the children of the HOME node
+    const homeNode = networkGraph.find(n => n.type === 'HOME');
+    const activeServerIds = homeNode ? homeNode.children : [];
+    const activeServers = networkGraph.filter(n => activeServerIds.includes(n.id));
 
     return {
         grid,
@@ -25,7 +27,7 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
         discardPile: [],
         trashPile: [],
         activeServers,
-        deepMap: [],
+        networkGraph,
         playerStats: {
             hardwareHealth: 3,
             maxHardwareHealth: 3,

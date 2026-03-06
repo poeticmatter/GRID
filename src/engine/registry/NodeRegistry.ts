@@ -109,7 +109,9 @@ export class NodeRegistry {
             progress: newProgress,
             countermeasures: { ...def.countermeasures },
             resetTrace: def.resetTrace,
-            status: 'ACTIVE'
+            status: 'ACTIVE',
+            visibility: 'HIDDEN',
+            children: []
         };
     }
 }

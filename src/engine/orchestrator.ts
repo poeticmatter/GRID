@@ -30,7 +30,7 @@ function buildSnapshot(): GameSnapshot {
         grid: gridStore.grid,
         refillRate: gridStore.refillRate,
         activeServers: serverStore.activeServers,
-        deepMap: serverStore.deepMap,
+        networkGraph: serverStore.networkGraph,
         hand: deckStore.hand,
         deck: deckStore.deck,
         discardPile: deckStore.discardPile,
@@ -60,7 +60,7 @@ export function applyDeltas(deltas: StateDeltas) {
     if (deltas.refillRate !== undefined) gridStore.setRefillRate(deltas.refillRate);
 
     if (deltas.activeServers !== undefined) serverStore.setActiveServers(deltas.activeServers);
-    if (deltas.deepMap !== undefined) serverStore.setDeepMap(deltas.deepMap);
+    if (deltas.networkGraph !== undefined) serverStore.setNetworkGraph(deltas.networkGraph);
 
     if (deltas.hand !== undefined) deckStore.setHand(deltas.hand);
     if (deltas.deck !== undefined) deckStore.setDeck(deltas.deck);

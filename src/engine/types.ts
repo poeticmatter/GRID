@@ -57,7 +57,7 @@ export type NodeLayers = Partial<Record<CellColor, LayerSlot[]>>;
 export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
 export type CountermeasureDict = Partial<Record<CellSymbol, CountermeasurePayload>>;
 
-export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME';
+export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME' | 'HOME';
 
 export interface NodeDefinition {
   type: NodeType;
@@ -79,6 +79,8 @@ export interface NetworkNode {
   countermeasures: CountermeasureDict;
   resetTrace: number;
   status: 'ACTIVE' | 'HACKED' | 'LOCKED';
+  visibility: 'REVEALED' | 'HIDDEN';
+  children: string[];
 }
 
 export interface PlayerStats {

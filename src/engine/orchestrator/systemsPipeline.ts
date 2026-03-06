@@ -66,41 +66,69 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
 
     const newEvents: Array<{ type: string; payload?: any; durationMs?: number }> = [];
     const newPlayerStats = { ...(deltas.playerStats || snapshot.playerStats) };
-    const remainingServers: NetworkNode[] = [];
-    const newDeepMap = deltas.deepMap ? [...deltas.deepMap] : [...snapshot.deepMap];
     let hasTargetHacked = false;
+    let newlyHackedNodeIds: string[] = [];
+
+    // Sync networkGraph with any progress made in activeServers this tick
+    const baseGraph = deltas.networkGraph ? deltas.networkGraph : snapshot.networkGraph;
+    const newGraph: NetworkNode[] = baseGraph.map(node => {
+        const activeMatch = deltas.activeServers!.find(s => s.id === node.id);
+        if (activeMatch) {
+            return { ...activeMatch }; // Copy the updated state from activeServers
+        }
+        return { ...node, children: [...node.children] };
+    });
 
     deltas.activeServers.forEach((s) => {
-        if (s.status !== 'HACKED') {
-            remainingServers.push(s);
-        } else {
+        if (s.status === 'HACKED') {
             const oldServer = snapshot.activeServers.find((oldS: any) => oldS.id === s.id);
             if (oldServer && oldServer.status !== 'HACKED') {
+                newlyHackedNodeIds.push(s.id);
                 newPlayerStats.credits += s.difficulty * 10;
                 newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 500 });
 
                 if (s.type === 'MAINFRAME') {
                     hasTargetHacked = true;
-                } else {
-                    const numChildren = Math.random() < 0.5 ? 1 : 2;
-                    for (let i = 0; i < numChildren; i++) {
-                        const nextDifficulty = s.difficulty + 1;
-                        const poolId = nodeRegistry.getRandomPoolId();
-                        const newNode = nodeRegistry.selectNode(poolId, nextDifficulty);
-                        newDeepMap.push(newNode);
-                    }
                 }
             }
         }
     });
 
-    while (remainingServers.length < 3 && newDeepMap.length > 0) {
-        remainingServers.push(newDeepMap.shift() as NetworkNode);
+    if (newlyHackedNodeIds.length === 0) {
+        return mergeDeltas(deltas, {
+            networkGraph: newGraph,
+            playerStats: newPlayerStats,
+            events: newEvents.length > 0 ? newEvents : undefined,
+            ...(hasTargetHacked ? { targetHacked: true } : {})
+        });
     }
+
+    // Process progression mechanic
+    let activeServerIds = deltas.activeServers.map(s => s.id);
+
+    newlyHackedNodeIds.forEach(hackedId => {
+        const hackedNode = newGraph.find(n => n.id === hackedId);
+        if (!hackedNode) return;
+
+        // Remove hacked node from active servers
+        activeServerIds = activeServerIds.filter(id => id !== hackedId);
+
+        // Promote immediate children
+        hackedNode.children.forEach(childId => {
+            const childNode = newGraph.find(n => n.id === childId);
+            if (childNode && childNode.status !== 'HACKED' && !activeServerIds.includes(childId)) {
+                childNode.visibility = 'REVEALED';
+                activeServerIds.push(childId);
+            }
+        });
+    });
+
+    // Rebuild activeServers array based on activeServerIds from the updated newGraph
+    const remainingServers = activeServerIds.map(id => newGraph.find(n => n.id === id)).filter(Boolean) as NetworkNode[];
 
     return mergeDeltas(deltas, {
         activeServers: remainingServers,
-        deepMap: newDeepMap as NetworkNode[],
+        networkGraph: newGraph,
         playerStats: newPlayerStats,
         events: newEvents.length > 0 ? newEvents : undefined,
         ...(hasTargetHacked ? { targetHacked: true } : {})

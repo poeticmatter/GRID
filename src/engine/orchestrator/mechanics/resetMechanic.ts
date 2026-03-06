@@ -36,7 +36,8 @@ export const resetMechanic: IEffectMechanic = {
             if (c) finalHand.push(c);
         }
 
-        const traceIncrease = snapshot.activeServers?.reduce((sum: number, s: any) => sum + (s.resetTrace || 0), 0) ?? 0;
+        const REVEALED_SERVERS = snapshot.activeServers?.filter(s => s.visibility === 'REVEALED') || [];
+        const traceIncrease = REVEALED_SERVERS.reduce((sum: number, s: any) => sum + (s.resetTrace || 0), 0);
         const newTrace = snapshot.playerStats.trace + traceIncrease;
 
         const endTurnDeltas = {
