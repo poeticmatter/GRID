@@ -1,75 +1,61 @@
-import type { NetworkNode, Cell, CellColor, CellSymbol, NodeRequirements, Card, Coordinate } from './types';
+import type { NetworkNode, Cell, CellColor, CellSymbol, Card, Coordinate, CountermeasurePayload } from './types';
 
 export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): {
   updatedServer: NetworkNode,
   hacked: boolean,
-  penaltyTriggered: boolean
+  pushedCountermeasures: CountermeasurePayload[]
 } => {
-  // Deep copy server progress
-  const newProgress: NodeRequirements = {
-    colors: { ...server.progress.colors },
-    symbols: { ...(server.progress.symbols || {}) }
-  };
-
-  // Tally cut cells
-  const cutColors: Record<string, number> = {};
-  const cutSymbols: Record<string, number> = {};
+  // Pool of available resources
+  const availableColors: Partial<Record<CellColor, number>> = {};
+  const availableSymbols: Partial<Record<CellSymbol, number>> = {};
 
   cutCells.forEach(cell => {
-    cutColors[cell.color] = (cutColors[cell.color] || 0) + 1;
+    availableColors[cell.color] = (availableColors[cell.color] || 0) + 1;
     if (cell.symbol !== 'NONE') {
-      cutSymbols[cell.symbol] = (cutSymbols[cell.symbol] || 0) + 1;
+      availableSymbols[cell.symbol] = (availableSymbols[cell.symbol] || 0) + 1;
     }
   });
 
-  // Update progress
-  let hacked = true;
+  const newProgress = [...server.progress];
+  const pushedCountermeasures: CountermeasurePayload[] = [];
 
-  // Check Color Requirements
-  const reqColors = server.requirements.colors;
-  if (reqColors) {
-    (Object.entries(reqColors) as [CellColor, number][]).forEach(([color, reqAmount]) => {
-      if (!reqAmount) return;
-      const current = newProgress.colors[color] || 0;
-      const added = cutColors[color] || 0;
+  for (let i = 0; i < server.requirements.length; i++) {
+    if (newProgress[i]) continue; // Already cleared
 
-      // Update progress
-      const total = current + added;
-      newProgress.colors[color] = Math.min(reqAmount, total);
+    const slot = server.requirements[i];
 
-      // Check if this specific requirement is met
-      if (total < reqAmount) {
-        hacked = false;
+    // Check if we have the color
+    if ((availableColors[slot.color] || 0) > 0) {
+      // Consume color and mark cleared
+      availableColors[slot.color]! -= 1;
+      newProgress[i] = true;
+
+      // Crucial Logic: If the cleared slot contains a symbol, check if the program's pool also contains that symbol.
+      if (slot.symbol !== 'NONE') {
+        if ((availableSymbols[slot.symbol] || 0) > 0) {
+          // Consume symbol
+          availableSymbols[slot.symbol]! -= 1;
+        } else {
+          // Did not have symbol, push countermeasure
+          const cm = server.countermeasures[slot.symbol];
+          if (cm) {
+            pushedCountermeasures.push({ ...cm }); // copy it to be safe
+          }
+        }
       }
-    });
-  } else {
-    // Should not happen, but if no requirements, assume hacked?
-    hacked = true;
+    }
   }
 
-  // Check Countermeasures (Symbols)
-  let penaltyTriggered = false;
-  const reqSymbols = server.requirements.symbols || {};
-
-  if (reqSymbols) {
-    (Object.entries(reqSymbols) as [CellSymbol, number][]).forEach(([symbol, reqAmount]) => {
-      if (!reqAmount) return;
-      // Check if this cut provides the symbol
-      if ((cutSymbols[symbol] || 0) < reqAmount) {
-        penaltyTriggered = true;
-      }
-    });
-  }
+  const hacked = newProgress.every(p => p) && newProgress.length === server.requirements.length;
 
   return {
     updatedServer: {
       ...server,
       progress: newProgress,
-      status: hacked ? 'HACKED' : 'ACTIVE' // Only updates status if hacked.
-      // If it was already HACKED, it should stay HACKED, but this function is likely called on ACTIVE servers.
+      status: hacked ? 'HACKED' : server.status
     },
     hacked,
-    penaltyTriggered
+    pushedCountermeasures
   };
 };
 

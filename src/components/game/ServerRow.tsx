@@ -34,44 +34,43 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
       </div>
 
       {/* Requirements */}
-      <div className="flex flex-col gap-1">
-        {/* Colors */}
-        {Object.entries(server.requirements.colors).map(([color, req]) => {
-          if (!req) return null;
-          const progress = server.progress.colors[color as CellColor] || 0;
-          const percent = Math.min(100, (progress / req) * 100);
+      <div className="flex flex-wrap gap-1 mt-2 mb-2">
+        {server.requirements.map((req, idx) => {
+          const isCleared = server.progress[idx];
+          const colorClass = COLOR_TEXT_MAP[req.color];
+          const bgClass = colorClass.replace('text-', 'bg-') + '/20';
+          const borderClass = colorClass.replace('text-', 'border-');
 
           return (
-            <div key={color} className="text-xs">
-              <div className="flex justify-between mb-0.5">
-                <span className={clsx('font-bold', COLOR_TEXT_MAP[color as CellColor])}>{color}</span>
-                <span className="text-white/60">{progress}/{req}</span>
-              </div>
-              <div className="h-1 bg-slate-900 rounded-full overflow-hidden">
-                <div
-                  className={clsx('h-full transition-all duration-300', COLOR_TEXT_MAP[color as CellColor].replace('text-', 'bg-'))}
-                  style={{ width: `${percent}%` }}
-                />
-              </div>
-            </div>
-          );
-        })}
-
-        {/* Countermeasures */}
-        {Object.entries(server.requirements.symbols || {}).map(([symbol, req]) => {
-          if (!req) return null;
-          return (
-            <div key={symbol} className="text-[10px] text-red-400 flex items-center gap-1 mt-1 border-t border-white/5 pt-1">
-              <span>TRAP:</span>
-              {SYMBOL_ICON_MAP[symbol as CellSymbol]}
-              <span>x{req} REQUIRED</span>
+            <div
+              key={idx}
+              className={clsx(
+                "w-6 h-6 flex items-center justify-center rounded border transition-all duration-300",
+                isCleared ? "bg-slate-900 border-slate-800 opacity-20 grayscale" : `${bgClass} ${borderClass}`
+              )}
+            >
+              {req.symbol !== 'NONE' && (
+                <div className={clsx("drop-shadow-md", isCleared ? "text-slate-500" : "text-white")}>
+                  {SYMBOL_ICON_MAP[req.symbol]}
+                </div>
+              )}
             </div>
           );
         })}
       </div>
 
-      <div className="text-[10px] text-white/40 italic text-center mt-auto">
-        Penalty: {server.penaltyType} ({server.penaltyValue})
+      <div className="mt-auto flex flex-col gap-1 border-t border-white/5 pt-2">
+        {Object.entries(server.countermeasures || {}).map(([symbol, effect]) => {
+          if (!effect) return null;
+          return (
+            <div key={symbol} className="text-[10px] flex items-center gap-1.5 text-white/50">
+              <span className="text-white/80">{SYMBOL_ICON_MAP[symbol as CellSymbol]}</span>
+              <span className="font-mono">
+                {effect.value} {effect.type.replace('_', ' ')}
+              </span>
+            </div>
+          );
+        })}
       </div>
     </motion.div>
   );

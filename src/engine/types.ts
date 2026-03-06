@@ -48,10 +48,10 @@ export interface Card {
   effects: Effect[];
 }
 
-export interface NodeRequirements {
-  colors: Partial<Record<CellColor, number>>;
-  symbols?: Partial<Record<CellSymbol, number>>; // e.g. Requires 2 Shields to avoid penalty
-}
+export type NodeRequirements = Array<{ color: CellColor, symbol: CellSymbol | 'NONE' }>;
+
+export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
+export type CountermeasureDict = Partial<Record<CellSymbol, CountermeasurePayload>>;
 
 export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME';
 
@@ -61,8 +61,8 @@ export interface NodeDefinition {
   baseDifficulty: number;
   weight: number;
   requirements: NodeRequirements;
-  penaltyType: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE';
-  penaltyValue: number;
+  countermeasures: CountermeasureDict;
+  resetTrace: number;
 }
 
 export interface NetworkNode {
@@ -71,9 +71,9 @@ export interface NetworkNode {
   name: string;
   difficulty: number;
   requirements: NodeRequirements;
-  progress: NodeRequirements; // Progress towards hacking requirements
-  penaltyType: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE';
-  penaltyValue: number;
+  progress: boolean[]; // Progress towards hacking requirements
+  countermeasures: CountermeasureDict;
+  resetTrace: number;
   status: 'ACTIVE' | 'HACKED' | 'LOCKED';
 }
 

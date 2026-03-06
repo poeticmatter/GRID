@@ -24,21 +24,23 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
         const server = { ...readonlyServer } as NetworkNode;
         const result = calculateServerProgress(server, deltas.harvestedCells!);
 
-        if (result.penaltyTriggered) {
+        if (result.pushedCountermeasures.length > 0) {
             newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 });
-            if (server.penaltyType === 'TRACE') {
-                newPlayerStats.trace = Math.min(100, newPlayerStats.trace + server.penaltyValue);
-            } else if (server.penaltyType === 'HARDWARE_DAMAGE') {
-                newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - server.penaltyValue);
-            } else if (server.penaltyType === 'NET_DAMAGE') {
-                for (let p = 0; p < server.penaltyValue; p++) {
-                    if (newHand.length > 0) {
-                        const idx = Math.floor(Math.random() * newHand.length);
-                        const trashed = newHand.splice(idx, 1)[0] as Card;
-                        newTrashPile.push(trashed);
-                    } else if (newDeck.length > 0) {
-                        const trashed = newDeck.pop() as Card;
-                        newTrashPile.push(trashed);
+            for (const cm of result.pushedCountermeasures) {
+                if (cm.type === 'TRACE') {
+                    newPlayerStats.trace = Math.min(100, newPlayerStats.trace + cm.value);
+                } else if (cm.type === 'HARDWARE_DAMAGE') {
+                    newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - cm.value);
+                } else if (cm.type === 'NET_DAMAGE') {
+                    for (let p = 0; p < cm.value; p++) {
+                        if (newHand.length > 0) {
+                            const idx = Math.floor(Math.random() * newHand.length);
+                            const trashed = newHand.splice(idx, 1)[0] as Card;
+                            newTrashPile.push(trashed);
+                        } else if (newDeck.length > 0) {
+                            const trashed = newDeck.pop() as Card;
+                            newTrashPile.push(trashed);
+                        }
                     }
                 }
             }

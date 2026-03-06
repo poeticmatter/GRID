@@ -34,9 +34,9 @@ export class NodeRegistry {
                 name: 'Fallback Node',
                 baseDifficulty: 1,
                 weight: 1,
-                requirements: { colors: { RED: 1 } },
-                penaltyType: 'TRACE',
-                penaltyValue: 5
+                requirements: [{ color: 'RED', symbol: 'NONE' }],
+                countermeasures: { EYE: { type: 'TRACE', value: 5 } },
+                resetTrace: 1
             });
         }
 
@@ -94,13 +94,10 @@ export class NodeRegistry {
             type: def.type,
             name: def.name,
             difficulty: def.baseDifficulty,
-            requirements: {
-                colors: { ...def.requirements.colors },
-                symbols: { ...(def.requirements.symbols || {}) }
-            },
-            progress: { colors: {}, symbols: {} },
-            penaltyType: def.penaltyType,
-            penaltyValue: def.penaltyValue,
+            requirements: [...def.requirements],
+            progress: Array(def.requirements.length).fill(false),
+            countermeasures: { ...def.countermeasures },
+            resetTrace: def.resetTrace,
             status: 'ACTIVE'
         };
     }
