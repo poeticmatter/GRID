@@ -132,6 +132,34 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
     );
 };
 
+const TopologyToggleButton = ({ isOpen, onClick }: { isOpen: boolean, onClick: () => void }) => {
+    return (
+        <div className="fixed top-6 w-full flex justify-center z-[110] pointer-events-none">
+            <motion.button
+                onClick={onClick}
+                className={clsx(
+                    "pointer-events-auto bg-slate-900 rounded-xl flex items-center justify-center gap-3 transition-colors text-white group",
+                    isOpen
+                        ? "border border-cyan-500/50 px-8 py-3 hover:bg-slate-800 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                        : "border border-slate-700/80 px-8 py-3 hover:bg-slate-800 shadow-lg shadow-black/50"
+                )}
+            >
+                <Globe className={clsx(
+                    "w-5 h-5 transition-all duration-500",
+                    isOpen ? "text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]" : "text-white/40 group-hover:text-cyan-400/70"
+                )} />
+                <span className={clsx(
+                    "text-sm font-mono font-bold tracking-[0.2em] transition-colors uppercase",
+                    isOpen ? "text-white group-hover:text-cyan-200" : "text-white/80 group-hover:text-white"
+                )}>
+                    {isOpen ? 'Close Topology' : 'View Topology'}
+                </span>
+                {isOpen ? <ChevronUp className="w-5 h-5 text-white/80" /> : <ChevronDown className="w-5 h-5 text-white/40" />}
+            </motion.button>
+        </div>
+    );
+};
+
 export const NetworkMap = () => {
     const { activeServers, networkGraph } = useServerStore();
     const [isOpen, setIsOpen] = useState(false);
@@ -192,22 +220,12 @@ export const NetworkMap = () => {
 
     return (
         <>
+            <TopologyToggleButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+
             <div className="absolute top-24 w-full z-40 flex flex-col items-center pointer-events-none">
                 <div className="w-full relative flex justify-center mt-2">
                     {!isOpen && (
                         <div className="absolute top-0 flex flex-col items-center w-full">
-                            <div className="flex gap-4 p-2 relative z-50">
-                                <motion.button
-                                    onClick={() => setIsOpen(true)}
-                                    className="pointer-events-auto bg-slate-900 border border-slate-700/80 px-6 py-2 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-lg shadow-black/50 text-white group"
-                                >
-                                    <Globe className="w-4 h-4 text-white/40 group-hover:text-cyan-400/70 transition-all duration-500" />
-                                    <span className="text-xs font-mono font-bold tracking-[0.15em] text-white/80 group-hover:text-white transition-colors uppercase">
-                                        View Topology
-                                    </span>
-                                    <ChevronDown className="w-4 h-4 text-white/40" />
-                                </motion.button>
-                            </div>
                             <div className="flex gap-4 p-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto min-h-[140px] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                 <AnimatePresence>
                                     {activeServers.filter(s => s.type !== 'HOME').map((server) => (
@@ -234,19 +252,6 @@ export const NetworkMap = () => {
                         transition={{ duration: 0.3 }}
                         className="fixed inset-0 w-screen h-screen z-[100] bg-slate-950 pointer-events-auto overflow-hidden flex flex-col"
                     >
-                        {/* Close Button Pinned to Top */}
-                        <div className="absolute top-6 w-full flex justify-center z-[110]">
-                            <motion.button
-                                onClick={() => setIsOpen(false)}
-                                className="pointer-events-auto bg-slate-900 border border-cyan-500/50 px-8 py-3 rounded-xl flex items-center justify-center gap-3 hover:bg-slate-800 transition-colors shadow-[0_0_15px_rgba(6,182,212,0.3)] text-white group"
-                            >
-                                <Globe className="w-5 h-5 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)] transition-all duration-500" />
-                                <span className="text-sm font-mono font-bold tracking-[0.2em] text-white group-hover:text-cyan-200 transition-colors uppercase">
-                                    Close Topology
-                                </span>
-                                <ChevronUp className="w-5 h-5 text-white/80" />
-                            </motion.button>
-                        </div>
                         {/* Z-0: City Background Layer */}
                         <CityBackground nodeCoords={nodeCoords} />
 
