@@ -1,9 +1,10 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useServerStore } from '../../store/useServerStore';
 import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
-import { Lock, Database, Globe, ChevronDown, ChevronUp, Shield, Eye, Skull } from 'lucide-react';
+import { Lock, Database, Globe, ChevronDown, ChevronUp, Shield, Eye, Skull, Server as ServerIcon } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
+import { CityBackground } from './CityBackground';
 
 const COLOR_TEXT_MAP: Record<CellColor, string> = {
     RED: 'text-rose-400',
@@ -88,42 +89,45 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
     );
 };
 
-
-const MiniNodeCard = ({ server, state }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'LOCKED' | 'HOME' }) => {
+const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'LOCKED' | 'HOME' }) => {
     const isCleared = state === 'CLEARED';
     const isLocked = state === 'LOCKED';
     const isActive = state === 'ACTIVE';
     const isHome = state === 'HOME';
 
-    let bgClass = "bg-slate-800/90 border-slate-600";
-    if (isHome) bgClass = "bg-cyan-950/40 border-cyan-500/50";
-    if (isCleared) bgClass = "bg-emerald-950/40 border-emerald-500/50 opacity-60";
-    if (isLocked) bgClass = "bg-slate-900 border-slate-700/50 opacity-40 grayscale";
-    if (isActive) bgClass = "bg-slate-800/90 border-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.4)] relative z-50";
+    let bgClass = "bg-slate-800 border-slate-600 text-slate-400";
+    if (isHome) bgClass = "bg-cyan-950 border-cyan-500 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]";
+    if (isCleared) bgClass = "bg-emerald-950 border-emerald-500 text-emerald-400 opacity-80 grid-clear";
+    if (isLocked) bgClass = "bg-slate-900 border-slate-700 text-slate-600 opacity-50 grayscale";
+    if (isActive) bgClass = "bg-slate-800 border-cyan-400 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] z-50";
 
     return (
         <motion.div
             layoutId={`server-${server.id}`}
-            className={`w-36 rounded p-2 flex flex-col items-center gap-1 border-2 backdrop-blur-sm ${bgClass}`}
+            className={`w-12 h-12 rounded-full flex flex-col items-center justify-center border-2 backdrop-blur-md relative cursor-default group shadow-lg pointer-events-auto ${bgClass}`}
         >
-            {isHome ? <Globe className="w-5 h-5 text-cyan-400" /> :
-                server.type === 'MAINFRAME' ? <Database className="w-5 h-5 text-slate-400" /> :
-                    <Lock className="w-5 h-5 text-slate-400" />}
+            {isHome ? <Globe className="w-6 h-6" /> :
+                server.type === 'MAINFRAME' ? <Database className="w-5 h-5" /> :
+                    server.type === 'ICE' ? <Lock className="w-5 h-5" /> :
+                        <ServerIcon className="w-5 h-5" />}
 
-            <div className="text-[10px] font-mono font-bold text-center truncate w-full text-white">
-                {server.name}
-            </div>
-
-            {!isHome && (
-                <div className="text-[8px] flex justify-between w-full text-white/50 px-1 font-mono">
-                    <span>{server.type.substring(0, 3)}</span>
-                    <span className={isActive ? "text-cyan-400 font-bold" : ""}>L{server.difficulty}</span>
-                </div>
+            {isActive && (
+                <div className="absolute -inset-2 border-2 border-cyan-400/50 rounded-full animate-ping pointer-events-none" />
             )}
 
-            {isCleared && <div className="text-[9px] text-emerald-400 font-bold font-mono uppercase tracking-widest mt-1">BYPASSED</div>}
-            {isLocked && <div className="text-[9px] text-slate-500 font-bold font-mono tracking-widest mt-1">ENCRYPTED</div>}
-            {isActive && <div className="text-[9px] text-cyan-400 font-bold font-mono uppercase tracking-widest mt-1">VULNERABLE</div>}
+            {/* Tooltip on hover */}
+            <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/95 text-white text-[10px] py-1.5 px-3 rounded pointer-events-none whitespace-nowrap font-mono border border-slate-600/50 z-50 flex flex-col items-center shadow-xl">
+                <span className="font-bold text-cyan-400 text-xs mb-0.5">{server.name}</span>
+                <span className="text-white/60">{server.type} {server.type !== 'HOME' && `L${server.difficulty}`}</span>
+            </div>
+
+            {/* Sub-label for status */}
+            <div className="absolute -bottom-5 text-[9px] font-mono font-bold tracking-widest text-slate-400 pointer-events-none drop-shadow-md whitespace-nowrap">
+                {isHome && 'HOME'}
+                {isCleared && 'BYPASSED'}
+                {isLocked && 'ENCRYPTED'}
+                {isActive && 'TARGET'}
+            </div>
         </motion.div>
     );
 };
@@ -131,6 +135,51 @@ const MiniNodeCard = ({ server, state }: { server: NetworkNode, state: 'ACTIVE' 
 export const NetworkMap = () => {
     const { activeServers, networkGraph } = useServerStore();
     const [isOpen, setIsOpen] = useState(false);
+
+    const nodeCoords = useMemo(() => {
+        if (!networkGraph || networkGraph.length === 0) return {};
+
+        // Calculate depths iteratively
+        const layoutLevels: NetworkNode[][] = [];
+        const visited = new Set<string>();
+
+        let currentLevelIds = [networkGraph.find(n => n.type === 'HOME')?.id].filter(Boolean) as string[];
+
+        while (currentLevelIds.length > 0) {
+            const levelNodes = currentLevelIds.map(id => networkGraph.find(n => n.id === id)).filter(Boolean) as NetworkNode[];
+            layoutLevels.push(levelNodes);
+
+            levelNodes.forEach(n => visited.add(n.id));
+
+            const nextLevelIds = new Set<string>();
+            levelNodes.forEach(n => {
+                n.children.forEach(childId => {
+                    if (!visited.has(childId)) {
+                        nextLevelIds.add(childId);
+                    }
+                });
+            });
+            currentLevelIds = Array.from(nextLevelIds);
+        }
+
+        const coords: Record<string, { x: number, y: number }> = {};
+        const maxDepth = layoutLevels.length;
+
+        layoutLevels.forEach((level, depth) => {
+            // Home is at depth 0 (bottom). Deepest nodes are at maxDepth-1 (top).
+            // So y % goes from 90% (bottom) to 15% (top).
+            const y = maxDepth > 1 ? 85 - (depth / (maxDepth - 1)) * 65 : 85;
+
+            level.forEach((node, i) => {
+                const count = level.length;
+                // Distribute evenly horizontally between 20% and 80%
+                const x = count > 1 ? 20 + (i / (count - 1)) * 60 : 50;
+                coords[node.id] = { x, y };
+            });
+        });
+
+        return coords;
+    }, [networkGraph]);
 
     if (!networkGraph || networkGraph.length === 0) return null;
 
@@ -140,29 +189,6 @@ export const NetworkMap = () => {
         if (activeServers.some(s => s.id === node.id)) return 'ACTIVE';
         return 'LOCKED';
     };
-
-    // Calculate depths iteratively
-    const layoutLevels: NetworkNode[][] = [];
-    const visited = new Set<string>();
-
-    let currentLevelIds = [networkGraph.find(n => n.type === 'HOME')?.id].filter(Boolean) as string[];
-
-    while (currentLevelIds.length > 0) {
-        const levelNodes = currentLevelIds.map(id => networkGraph.find(n => n.id === id)).filter(Boolean) as NetworkNode[];
-        layoutLevels.push(levelNodes);
-
-        levelNodes.forEach(n => visited.add(n.id));
-
-        const nextLevelIds = new Set<string>();
-        levelNodes.forEach(n => {
-            n.children.forEach(childId => {
-                if (!visited.has(childId)) {
-                    nextLevelIds.add(childId);
-                }
-            });
-        });
-        currentLevelIds = Array.from(nextLevelIds);
-    }
 
     return (
         <div className="absolute top-24 w-full z-40 flex flex-col items-center pointer-events-none">
@@ -206,25 +232,53 @@ export const NetworkMap = () => {
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, scale: 0.95, filter: 'blur(10px)' }}
                             transition={{ type: "spring", stiffness: 300, damping: 25 }}
-                            className="pointer-events-auto w-[90%] max-w-5xl bg-slate-950/95 border border-slate-700/50 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.7)] backdrop-blur-xl p-8 flex flex-col items-center gap-10 relative overflow-y-auto max-h-[60vh] custom-scrollbar z-40"
+                            className="pointer-events-auto w-[95%] max-w-6xl h-[70vh] border border-cyan-500/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.8)] relative overflow-hidden z-40 bg-slate-950"
                         >
-                            {/* Topological Layout (Bottom Up) */}
-                            {layoutLevels.slice().reverse().map((level, reversedDepthIndex) => {
-                                const depth = layoutLevels.length - 1 - reversedDepthIndex;
-                                return (
-                                    <div key={depth} className="flex gap-10 relative justify-center w-full">
-                                        {level.map(node => (
-                                            <div key={node.id} className="relative z-10 flex flex-col items-center">
-                                                <MiniNodeCard server={node} state={getNodeState(node)} />
+                            {/* Z-0: City Background Layer */}
+                            <CityBackground nodeCoords={nodeCoords} />
 
-                                                {/* Draw line downwards visually connecting to children below it -> wait, reversed array means children are ABOVE it! */}
-                                                {/* If Home is on bottom, its children (depth 1) are visually rendered above Home. So Home draws lines UP to children. */}
-                                                {/* Wait, the children array gives us IDs. Since flex layout handles flow natively, we can just draw generic upward stems. */}
-                                                {node.type !== 'HOME' && (
-                                                    <div className="absolute -bottom-10 w-0.5 h-10 bg-cyan-900/50 z-0 pointer-events-none" />
-                                                )}
-                                            </div>
-                                        ))}
+                            {/* Z-10: SVG Edge Lines Layer */}
+                            <svg className="absolute inset-0 w-full h-full z-10 pointer-events-none">
+                                {networkGraph.map(node => {
+                                    const p1 = nodeCoords[node.id];
+                                    if (!p1) return null;
+                                    return node.children.map(childId => {
+                                        const p2 = nodeCoords[childId];
+                                        if (!p2) return null;
+
+                                        const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
+                                        const isChildActive = activeServers.some(s => s.id === childId);
+                                        const isActiveConnection = isParentCleared && isChildActive;
+
+                                        return (
+                                            <line
+                                                key={`${node.id}-${childId}`}
+                                                x1={`${p1.x}%`} y1={`${p1.y}%`}
+                                                x2={`${p2.x}%`} y2={`${p2.y}%`}
+                                                stroke={isActiveConnection ? "rgba(34, 211, 238, 0.4)" : "rgba(6, 182, 212, 0.15)"}
+                                                strokeWidth={isActiveConnection ? "3" : "1.5"}
+                                                strokeDasharray={!isActiveConnection ? "5 5" : "none"}
+                                            />
+                                        );
+                                    });
+                                })}
+                            </svg>
+
+                            {/* Z-20: Absolute Positioned Node Circles Layer */}
+                            {networkGraph.map(node => {
+                                const coord = nodeCoords[node.id];
+                                if (!coord) return null;
+                                return (
+                                    <div
+                                        key={node.id}
+                                        className="absolute z-20"
+                                        style={{
+                                            left: `${coord.x}%`,
+                                            top: `${coord.y}%`,
+                                            transform: 'translate(-50%, -50%)'
+                                        }}
+                                    >
+                                        <CircularNodeIcon server={node} state={getNodeState(node)} />
                                     </div>
                                 );
                             })}
