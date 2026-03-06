@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useServerStore } from '../../store/useServerStore';
 import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
-import { Lock, Database, Globe, ChevronDown, ChevronUp, Shield, Eye, Skull, Server as ServerIcon } from 'lucide-react';
+import { Lock, Database, Globe, ChevronDown, ChevronUp, Shield, Eye, Skull, Server as ServerIcon, HelpCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
@@ -101,18 +101,50 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
     if (isLocked) bgClass = "bg-slate-900 border-slate-700 text-slate-600 opacity-50 grayscale";
     if (isActive) bgClass = "bg-slate-800 border-cyan-400 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] z-50";
 
+    const STEP_TIME = 0.5;
+    const CYCLE_TIME = 4;
+    const isReadyToAnimateDelay = server.gridY * STEP_TIME;
+
     return (
         <motion.div
             layoutId={`server-${server.id}`}
             className={`w-12 h-12 rounded-full flex flex-col items-center justify-center border-2 backdrop-blur-md relative cursor-default group shadow-lg pointer-events-auto ${bgClass}`}
         >
             {isHome ? <Globe className="w-6 h-6" /> :
-                server.type === 'MAINFRAME' ? <Database className="w-5 h-5" /> :
-                    server.type === 'ICE' ? <Lock className="w-5 h-5" /> :
-                        <ServerIcon className="w-5 h-5" />}
+                isLocked ? <HelpCircle className="w-5 h-5" /> :
+                    server.type === 'MAINFRAME' ? <Database className="w-5 h-5" /> :
+                        server.type === 'ICE' ? <Lock className="w-5 h-5" /> :
+                            <ServerIcon className="w-5 h-5" />}
+
+            {/* Active Server Layer Preview */}
+            {isActive && (
+                <div className="absolute -top-5 flex gap-0.5 flex-wrap justify-center w-full max-w-[60px] pointer-events-none z-[60]">
+                    {Object.entries(server.layers || {}).map(([colorStr, layerSlots]) => {
+                        const color = colorStr as CellColor;
+                        if (!layerSlots || layerSlots.length === 0) return null;
+
+                        const colorClass = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
+
+                        return layerSlots.map((_, idx) => (
+                            <div key={`${color}-${idx}`} className={`w-1 h-2 rounded-sm ${colorClass} shadow-sm shadow-black/50`} />
+                        ));
+                    })}
+                </div>
+            )}
 
             {isActive && (
-                <div className="absolute -inset-2 border-2 border-cyan-400/50 rounded-full animate-ping pointer-events-none" />
+                <motion.div
+                    className="absolute -inset-2 border-2 border-cyan-400 rounded-full pointer-events-none"
+                    initial={{ scale: 1, opacity: 0.8 }}
+                    animate={{ scale: 1.5, opacity: 0 }}
+                    transition={{
+                        duration: 0.6,
+                        repeat: Infinity,
+                        repeatDelay: CYCLE_TIME - 0.6,
+                        delay: isReadyToAnimateDelay,
+                        ease: "easeOut"
+                    }}
+                />
             )}
 
             {/* Tooltip on hover */}
@@ -123,10 +155,10 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
 
             {/* Sub-label for status */}
             <div className="absolute -bottom-5 text-[9px] font-mono font-bold tracking-widest text-slate-400 pointer-events-none drop-shadow-md whitespace-nowrap">
-                {isHome && 'HOME'}
+                {isHome && 'GATEWAY'}
                 {isCleared && 'BYPASSED'}
                 {isLocked && 'ENCRYPTED'}
-                {isActive && 'TARGET'}
+                {isActive && server.type}
             </div>
         </motion.div>
     );
@@ -239,18 +271,42 @@ export const NetworkMap = () => {
                                     if (!p2) return null;
 
                                     const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
+                                    const childNode = networkGraph.find(n => n.id === childId);
                                     const isChildActive = activeServers.some(s => s.id === childId);
-                                    const isActiveConnection = isParentCleared && isChildActive;
+                                    const isChildActiveOrHacked = isChildActive || (childNode && childNode.status === 'HACKED');
+                                    const isActiveConnection = isParentCleared && isChildActiveOrHacked;
+
+                                    const STEP_TIME = 0.5;
+                                    const CYCLE_TIME = 4;
+                                    const pulseDelay = (node.gridY || 0) * STEP_TIME;
 
                                     return (
-                                        <line
-                                            key={`${node.id}-${childId}`}
-                                            x1={`${p1.x}%`} y1={`${p1.y}%`}
-                                            x2={`${p2.x}%`} y2={`${p2.y}%`}
-                                            stroke={isActiveConnection ? "rgba(34, 211, 238, 0.4)" : "rgba(6, 182, 212, 0.15)"}
-                                            strokeWidth={isActiveConnection ? "3" : "1.5"}
-                                            strokeDasharray={!isActiveConnection ? "5 5" : "none"}
-                                        />
+                                        <g key={`${node.id}-${childId}`}>
+                                            <line
+                                                x1={`${p1.x}%`} y1={`${p1.y}%`}
+                                                x2={`${p2.x}%`} y2={`${p2.y}%`}
+                                                stroke={isActiveConnection ? "rgba(34, 211, 238, 0.4)" : "rgba(6, 182, 212, 0.15)"}
+                                                strokeWidth={isActiveConnection ? "3" : "1.5"}
+                                                strokeDasharray={!isActiveConnection ? "5 5" : "none"}
+                                            />
+                                            {isActiveConnection && (
+                                                <motion.circle
+                                                    r="4"
+                                                    fill="#22d3ee"
+                                                    style={{ filter: 'drop-shadow(0 0 6px #22d3ee)' }}
+                                                    initial={{ cx: `${p1.x}%`, cy: `${p1.y}%`, opacity: 0 }}
+                                                    animate={{ cx: `${p2.x}%`, cy: `${p2.y}%`, opacity: [0, 1, 1, 0] }}
+                                                    transition={{
+                                                        duration: STEP_TIME,
+                                                        repeat: Infinity,
+                                                        repeatDelay: CYCLE_TIME - STEP_TIME,
+                                                        delay: pulseDelay,
+                                                        ease: "linear",
+                                                        times: [0, 0.1, 0.9, 1] // Fade in/out at edges
+                                                    }}
+                                                />
+                                            )}
+                                        </g>
                                     );
                                 });
                             })}
