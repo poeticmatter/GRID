@@ -1,14 +1,14 @@
 import { create } from 'zustand';
-import type { ServerNode } from '../engine/types';
+import type { NetworkNode } from '../engine/types';
 
-interface ServerState {
-    activeServers: ServerNode[];
-    deepMap: ServerNode[];
-    setActiveServers: (servers: ServerNode[]) => void;
-    setDeepMap: (map: ServerNode[]) => void;
+interface NodeState {
+    activeServers: NetworkNode[];
+    deepMap: NetworkNode[];
+    setActiveServers: (servers: NetworkNode[]) => void;
+    setDeepMap: (map: NetworkNode[]) => void;
 }
 
-export const useServerStore = create<ServerState>((set) => ({
+export const useServerStore = create<NodeState>((set) => ({
     activeServers: [],
     deepMap: [],
     setActiveServers: (activeServers) => set({ activeServers }),

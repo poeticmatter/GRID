@@ -1,5 +1,5 @@
 import { useServerStore } from '../../store/useServerStore';
-import type { ServerNode, CellColor, CellSymbol } from '../../engine/types';
+import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
 import { Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -19,7 +19,7 @@ const SYMBOL_ICON_MAP: Record<CellSymbol, React.ReactNode> = {
   NONE: null,
 };
 
-const ServerCard = ({ server }: { server: ServerNode }) => {
+const ServerCard = ({ server }: { server: NetworkNode }) => {
   return (
     <motion.div
       layoutId={`server-${server.id}`}
@@ -30,7 +30,7 @@ const ServerCard = ({ server }: { server: ServerNode }) => {
     >
       <div className="flex justify-between items-center border-b border-white/10 pb-1">
         <span className="text-xs font-mono font-bold text-white/80 truncate w-32">{server.name}</span>
-        <span className="text-[10px] bg-slate-900 px-1 rounded text-white/50">Lvl {server.difficulty}</span>
+        <span className="text-[10px] bg-slate-900 px-1 rounded text-white/50">{server.type} L{server.difficulty}</span>
       </div>
 
       {/* Requirements */}

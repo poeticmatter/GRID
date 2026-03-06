@@ -1,4 +1,4 @@
-import type { Grid, Card, ServerNode, PlayerStats, Effect, Coordinate, ActiveEffect, Cell } from '../types';
+import type { Grid, Card, NetworkNode, PlayerStats, Effect, Coordinate, ActiveEffect, Cell } from '../types';
 
 export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'GAME_OVER' | 'VICTORY';
 
@@ -17,8 +17,8 @@ export type ReadonlyDeep<T> = T extends Builtin
 export interface GameSnapshot {
     grid: Grid;
     refillRate: number;
-    activeServers: ServerNode[];
-    deepMap: ServerNode[];
+    activeServers: NetworkNode[];
+    deepMap: NetworkNode[];
     hand: Card[];
     deck: Card[];
     discardPile: Card[];
@@ -38,8 +38,8 @@ export interface GameSnapshot {
 export interface StateDeltas {
     grid?: Grid;
     refillRate?: number;
-    activeServers?: ServerNode[];
-    deepMap?: ServerNode[];
+    activeServers?: NetworkNode[];
+    deepMap?: NetworkNode[];
     hand?: Card[];
     deck?: Card[];
     discardPile?: Card[];

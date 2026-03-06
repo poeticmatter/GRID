@@ -1,52 +1,12 @@
-import type { ServerNode, Cell, CellColor, CellSymbol, ServerRequirements, Card, Coordinate } from './types';
+import type { NetworkNode, Cell, CellColor, CellSymbol, NodeRequirements, Card, Coordinate } from './types';
 
-const SERVER_NAMES = [
-  'Node-Alpha', 'Proxy-Beta', 'Firewall-Gamma', 'Gateway-Delta',
-  'Core-Epsilon', 'Data-Zeta', 'Link-Eta', 'Root-Theta'
-];
-
-export const generateServerNode = (difficulty: number, idOffset: number): ServerNode => {
-  const colorReqs: Partial<Record<CellColor, number>> = {};
-  const colors: CellColor[] = ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'];
-
-  // Randomly pick 1-2 colors for requirements
-  const numColors = Math.random() < 0.7 ? 1 : 2;
-  for (let i = 0; i < numColors; i++) {
-    const color = colors[Math.floor(Math.random() * colors.length)];
-    // Base requirement scales with difficulty
-    const amount = Math.floor(2 + difficulty * 1.5);
-    colorReqs[color] = (colorReqs[color] || 0) + amount;
-  }
-
-  // Random countermeasure (symbol requirement)
-  const symbolReqs: Partial<Record<CellSymbol, number>> = {};
-  if (difficulty > 2 && Math.random() < 0.4) {
-    const symbols: CellSymbol[] = ['SHIELD', 'EYE', 'SKULL'];
-    const symbol = symbols[Math.floor(Math.random() * symbols.length)];
-    symbolReqs[symbol] = 1; // Require 1 symbol to avoid penalty
-  }
-
-  const penaltyType = Math.random() < 0.33 ? 'TRACE' : (Math.random() < 0.5 ? 'HARDWARE_DAMAGE' : 'NET_DAMAGE');
-
-  return {
-    id: `server-${idOffset}`,
-    name: SERVER_NAMES[idOffset % SERVER_NAMES.length] + `-${difficulty}`,
-    difficulty,
-    requirements: { colors: colorReqs, symbols: symbolReqs },
-    progress: { colors: {}, symbols: {} },
-    penaltyType: penaltyType as 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE',
-    penaltyValue: Math.floor(10 + difficulty * 5),
-    status: 'ACTIVE',
-  };
-};
-
-export const calculateServerProgress = (server: ServerNode, cutCells: Cell[]): {
-  updatedServer: ServerNode,
+export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): {
+  updatedServer: NetworkNode,
   hacked: boolean,
   penaltyTriggered: boolean
 } => {
   // Deep copy server progress
-  const newProgress: ServerRequirements = {
+  const newProgress: NodeRequirements = {
     colors: { ...server.progress.colors },
     symbols: { ...(server.progress.symbols || {}) }
   };

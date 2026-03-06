@@ -48,17 +48,30 @@ export interface Card {
   effects: Effect[];
 }
 
-export interface ServerRequirements {
+export interface NodeRequirements {
   colors: Partial<Record<CellColor, number>>;
   symbols?: Partial<Record<CellSymbol, number>>; // e.g. Requires 2 Shields to avoid penalty
 }
 
-export interface ServerNode {
+export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME';
+
+export interface NodeDefinition {
+  type: NodeType;
+  name: string;
+  baseDifficulty: number;
+  weight: number;
+  requirements: NodeRequirements;
+  penaltyType: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE';
+  penaltyValue: number;
+}
+
+export interface NetworkNode {
   id: string;
+  type: NodeType;
   name: string;
   difficulty: number;
-  requirements: ServerRequirements;
-  progress: ServerRequirements; // Progress towards hacking requirements
+  requirements: NodeRequirements;
+  progress: NodeRequirements; // Progress towards hacking requirements
   penaltyType: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE';
   penaltyValue: number;
   status: 'ACTIVE' | 'HACKED' | 'LOCKED';

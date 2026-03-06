@@ -1,7 +1,7 @@
-import { handleEndTurn } from '../endTurnHandler';
+import { refillGrid } from '../../grid-logic';
 import { mergeDeltas } from '../deltaUtils';
 import type { IEffectMechanic } from '../mechanicRegistry';
-import type { Card } from '../../types';
+import type { Card, Grid } from '../../types';
 
 export const resetMechanic: IEffectMechanic = {
     type: 'IMMEDIATE',
@@ -10,16 +10,46 @@ export const resetMechanic: IEffectMechanic = {
         const card = snapshot.hand.find((c: any) => c.id === cardId);
         if (!card) return {};
 
-        const baseEvents = [{ type: 'AUDIO_PLAY_SFX', payload: 'select', durationMs: 200 }]; // will use special reset later
+        const baseEvents = [{ type: 'AUDIO_PLAY_SFX', payload: 'select', durationMs: 200 }];
 
         const newHand = [...snapshot.hand.filter((c: any) => c.id !== cardId)] as Card[];
         newHand.push(...snapshot.discardPile as Card[]);
 
-        const newDiscard = [card as Card];
+        let currentDiscard = [card as Card];
 
-        const endTurnDeltas = handleEndTurn(snapshot, 10, newHand, newDiscard);
+        // End turn logic
+        const newGrid = refillGrid(snapshot.grid as unknown as Grid, snapshot.refillRate);
+        let currentDeck = [...snapshot.deck] as Card[];
+        let finalHand = newHand;
 
-        // Explicitly merge the starting base event with whatever handleEndTurn outputs
+        while (finalHand.length < snapshot.maxHandSize) {
+            if (currentDeck.length === 0) {
+                if (currentDiscard.length === 0) break;
+                currentDeck = [...currentDiscard];
+                for (let j = currentDeck.length - 1; j > 0; j--) {
+                    const k = Math.floor(Math.random() * (j + 1));
+                    [currentDeck[j], currentDeck[k]] = [currentDeck[k], currentDeck[j]];
+                }
+                currentDiscard = [];
+            }
+            const c = currentDeck.pop();
+            if (c) finalHand.push(c);
+        }
+
+        const newTrace = snapshot.playerStats.trace + 10;
+
+        const endTurnDeltas = {
+            grid: newGrid,
+            hand: finalHand,
+            deck: currentDeck,
+            discardPile: currentDiscard,
+            playerStats: { ...snapshot.playerStats, trace: newTrace },
+            turn: snapshot.turn + 1,
+            selectedCardId: null,
+            rotation: 0,
+            durationMs: 600
+        };
+
         return mergeDeltas(endTurnDeltas, { events: baseEvents });
     }
 };

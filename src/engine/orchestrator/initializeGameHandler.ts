@@ -1,8 +1,8 @@
 import { createGrid } from '../grid-logic';
 import { createStartingDeck } from '../game-logic';
-import { SERVER_GRAPH, STARTING_NODES } from '../graph-logic';
 import type { GameSnapshot, StateDeltas, ReadonlyDeep } from './types';
-import type { Card, ServerNode } from '../types';
+import type { Card, NetworkNode } from '../types';
+import { nodeRegistry } from '../registry/NodeRegistry';
 
 export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): StateDeltas => {
     const grid = createGrid(6, 6);
@@ -12,20 +12,11 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
     const currentDeck: Card[] = [];
 
     // Generate Servers
-    const activeServers: ServerNode[] = STARTING_NODES.map(id => {
-        const node = SERVER_GRAPH[id];
-        return {
-            ...node,
-            requirements: {
-                colors: { ...node.requirements.colors },
-                symbols: { ...(node.requirements.symbols || {}) }
-            },
-            progress: {
-                colors: { ...node.progress.colors },
-                symbols: { ...(node.progress.symbols || {}) }
-            }
-        };
-    });
+    const activeServers: NetworkNode[] = [
+        nodeRegistry.selectNode(nodeRegistry.getRandomPoolId(), 1),
+        nodeRegistry.selectNode(nodeRegistry.getRandomPoolId(), 2),
+        nodeRegistry.selectNode(nodeRegistry.getRandomPoolId(), 1)
+    ];
 
     return {
         grid,

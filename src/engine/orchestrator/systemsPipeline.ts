@@ -1,6 +1,6 @@
 import { calculateServerProgress } from '../game-logic';
-import { SERVER_GRAPH } from '../graph-logic';
-import type { ServerNode, Card, Cell } from '../types';
+import { nodeRegistry } from '../registry/NodeRegistry';
+import type { NetworkNode, Card } from '../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
 import { mergeDeltas } from './deltaHelpers';
 
@@ -18,10 +18,10 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
     const newTrashPile = deltas.trashPile ? [...deltas.trashPile] : [...snapshot.trashPile];
 
     const activeServers = deltas.activeServers || snapshot.activeServers;
-    const newActiveServers: ServerNode[] = [];
+    const newActiveServers: NetworkNode[] = [];
 
     activeServers.forEach((readonlyServer: any) => {
-        const server = { ...readonlyServer } as ServerNode;
+        const server = { ...readonlyServer } as NetworkNode;
         const result = calculateServerProgress(server, deltas.harvestedCells!);
 
         if (result.penaltyTriggered) {
@@ -64,7 +64,7 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
 
     const newEvents: Array<{ type: string; payload?: any; durationMs?: number }> = [];
     const newPlayerStats = { ...(deltas.playerStats || snapshot.playerStats) };
-    const remainingServers: ServerNode[] = [];
+    const remainingServers: NetworkNode[] = [];
     const newDeepMap = deltas.deepMap ? [...deltas.deepMap] : [...snapshot.deepMap];
     let hasTargetHacked = false;
 
@@ -77,47 +77,28 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
                 newPlayerStats.credits += s.difficulty * 10;
                 newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 500 });
 
-                const graphNode = SERVER_GRAPH[s.id];
-                if (graphNode) {
-                    if (graphNode.isTarget) {
-                        hasTargetHacked = true;
+                if (s.type === 'MAINFRAME') {
+                    hasTargetHacked = true;
+                } else {
+                    const numChildren = Math.random() < 0.5 ? 1 : 2;
+                    for (let i = 0; i < numChildren; i++) {
+                        const nextDifficulty = s.difficulty + 1;
+                        const poolId = nodeRegistry.getRandomPoolId();
+                        const newNode = nodeRegistry.selectNode(poolId, nextDifficulty);
+                        newDeepMap.push(newNode);
                     }
-
-                    graphNode.edges.forEach((childId: string) => {
-                        const existsActive = deltas.activeServers!.some((activeS: any) => activeS.id === childId) ||
-                            snapshot.activeServers.some((activeS: any) => activeS.id === childId);
-                        const existsDeep = newDeepMap.some((deepS: any) => deepS.id === childId);
-
-                        if (!existsActive && !existsDeep) {
-                            const childNodeTemplate = SERVER_GRAPH[childId];
-                            if (childNodeTemplate) {
-                                const newChild: ServerNode = {
-                                    ...childNodeTemplate,
-                                    requirements: {
-                                        colors: { ...childNodeTemplate.requirements.colors },
-                                        symbols: { ...(childNodeTemplate.requirements.symbols || {}) }
-                                    },
-                                    progress: {
-                                        colors: { ...childNodeTemplate.progress.colors },
-                                        symbols: { ...(childNodeTemplate.progress.symbols || {}) }
-                                    }
-                                };
-                                newDeepMap.push(newChild);
-                            }
-                        }
-                    });
                 }
             }
         }
     });
 
     while (remainingServers.length < 3 && newDeepMap.length > 0) {
-        remainingServers.push(newDeepMap.shift() as ServerNode);
+        remainingServers.push(newDeepMap.shift() as NetworkNode);
     }
 
     return mergeDeltas(deltas, {
         activeServers: remainingServers,
-        deepMap: newDeepMap as ServerNode[],
+        deepMap: newDeepMap as NetworkNode[],
         playerStats: newPlayerStats,
         events: newEvents.length > 0 ? newEvents : undefined,
         ...(hasTargetHacked ? { targetHacked: true } : {})
