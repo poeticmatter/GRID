@@ -41,11 +41,21 @@ export interface EffectEndTurn {
 
 export type Effect = EffectCut | EffectReprogram | EffectSystemReset | EffectEndTurn;
 
+export interface CardDefinition {
+  name: string;
+  visualColor: CellColor;
+  effects: Effect[];
+  memory: number;
+  weight: number;
+  isStartingCard: boolean;
+}
+
 export interface Card {
   id: string;
   name: string;
   visualColor: CellColor;
   effects: Effect[];
+  memory: number;
 }
 
 export interface LayerSlot {

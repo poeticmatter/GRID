@@ -1,4 +1,5 @@
-import type { NetworkNode, Cell, CellColor, CellSymbol, Card, Coordinate, CountermeasurePayload } from './types';
+import type { NetworkNode, Cell, CellColor, CellSymbol, Card, CountermeasurePayload } from './types';
+import { cardRegistry } from './registry/CardRegistry';
 
 export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): {
   updatedServer: NetworkNode,
@@ -82,41 +83,7 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
 };
 
 export const createStartingDeck = (): Card[] => {
-  const basicPatterns: { name: string, pattern: Coordinate[], color: CellColor }[] = [
-    { name: 'Line H', pattern: [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }], color: 'BLUE' },
-    { name: 'Line V', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }], color: 'RED' },
-    { name: 'Square', pattern: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }], color: 'GREEN' },
-    { name: 'T-Shape', pattern: [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }], color: 'YELLOW' },
-    { name: 'L-Shape', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }], color: 'PURPLE' },
-  ];
-
-  // Create exactly 4 cut cards
-  const deck: Card[] = [];
-  let id = 0;
-
-  for (let i = 0; i < 4; i++) {
-    const p = basicPatterns[i];
-    deck.push({
-      id: `card-${id++}`,
-      name: p.name,
-      visualColor: p.color,
-      effects: [
-        { type: 'CUT', pattern: p.pattern },
-        { type: 'REPROGRAM', amount: 2 }
-      ]
-    });
-  }
-
-  // Add 1 Reset Card
-  deck.push({
-    id: `card-${id++}`,
-    name: 'SYS/RESET',
-    visualColor: 'RED',
-    effects: [
-      { type: 'SYSTEM_RESET' },
-      { type: 'REPROGRAM', amount: 2 }
-    ]
-  });
+  const deck = cardRegistry.getStartingCards();
 
   // Shuffle
   for (let i = deck.length - 1; i > 0; i--) {
