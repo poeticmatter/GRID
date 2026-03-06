@@ -5,48 +5,70 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
   hacked: boolean,
   pushedCountermeasures: CountermeasurePayload[]
 } => {
-  // Pool of available resources
-  const availableColors: Partial<Record<CellColor, number>> = {};
-  const availableSymbols: Partial<Record<CellSymbol, number>> = {};
+  // Tally harvested Code
+  const codeColors = {} as Record<CellColor, number>;
+  const codeSymbols = {} as Record<CellSymbol, number>;
 
   cutCells.forEach(cell => {
-    availableColors[cell.color] = (availableColors[cell.color] || 0) + 1;
+    codeColors[cell.color] = (codeColors[cell.color] || 0) + 1;
     if (cell.symbol !== 'NONE') {
-      availableSymbols[cell.symbol] = (availableSymbols[cell.symbol] || 0) + 1;
+      codeSymbols[cell.symbol] = (codeSymbols[cell.symbol] || 0) + 1;
     }
   });
 
-  const newProgress = [...server.progress];
-  const pushedCountermeasures: CountermeasurePayload[] = [];
-
-  for (let i = 0; i < server.requirements.length; i++) {
-    if (newProgress[i]) continue; // Already cleared
-
-    const slot = server.requirements[i];
-
-    // Check if we have the color
-    if ((availableColors[slot.color] || 0) > 0) {
-      // Consume color and mark cleared
-      availableColors[slot.color]! -= 1;
-      newProgress[i] = true;
-
-      // Crucial Logic: If the cleared slot contains a symbol, check if the program's pool also contains that symbol.
-      if (slot.symbol !== 'NONE') {
-        if ((availableSymbols[slot.symbol] || 0) > 0) {
-          // Consume symbol
-          availableSymbols[slot.symbol]! -= 1;
-        } else {
-          // Did not have symbol, push countermeasure
-          const cm = server.countermeasures[slot.symbol];
-          if (cm) {
-            pushedCountermeasures.push({ ...cm }); // copy it to be safe
-          }
-        }
-      }
+  // Deep copy the progress dictionaries
+  const newProgress: Partial<Record<CellColor, boolean[]>> = {};
+  for (const [colorStr, lanes] of Object.entries(server.progress)) {
+    const color = colorStr as CellColor;
+    if (lanes) {
+      newProgress[color] = [...lanes];
     }
   }
 
-  const hacked = newProgress.every(p => p) && newProgress.length === server.requirements.length;
+  const pushedCountermeasures: CountermeasurePayload[] = [];
+  let hacked = true;
+
+  // Iterate over only the Layer lanes matching the node's definition
+  for (const [colorStr, requirements] of Object.entries(server.layers)) {
+    const color = colorStr as CellColor;
+    if (!requirements || requirements.length === 0) continue;
+
+    const progressLane = newProgress[color] || [];
+
+    for (let i = 0; i < requirements.length; i++) {
+      if (progressLane[i]) continue; // Already cleared
+
+      const slot = requirements[i];
+
+      // Check if we have Code of this color available
+      if ((codeColors[color] || 0) > 0) {
+        // Consume one color Code and mark cleared
+        codeColors[color]! -= 1;
+        progressLane[i] = true;
+
+        if (slot.symbol !== 'NONE') {
+          if ((codeSymbols[slot.symbol] || 0) > 0) {
+            codeSymbols[slot.symbol]! -= 1;
+          } else {
+            const cm = server.countermeasures[slot.symbol];
+            if (cm) {
+              pushedCountermeasures.push({ ...cm });
+            }
+          }
+        }
+      } else {
+        // Out of Code for this color lane, break and move to the next color lane
+        break;
+      }
+    }
+
+    // After attempting to clear, check if this lane is fully cleared
+    if (progressLane.some(p => !p) || progressLane.length < requirements.length) {
+      hacked = false;
+    }
+
+    newProgress[color] = progressLane;
+  }
 
   return {
     updatedServer: {

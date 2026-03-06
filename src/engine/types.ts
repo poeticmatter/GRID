@@ -48,7 +48,11 @@ export interface Card {
   effects: Effect[];
 }
 
-export type NodeRequirements = Array<{ color: CellColor, symbol: CellSymbol | 'NONE' }>;
+export interface LayerSlot {
+  symbol: CellSymbol | 'NONE';
+}
+
+export type NodeLayers = Partial<Record<CellColor, LayerSlot[]>>;
 
 export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
 export type CountermeasureDict = Partial<Record<CellSymbol, CountermeasurePayload>>;
@@ -60,7 +64,7 @@ export interface NodeDefinition {
   name: string;
   baseDifficulty: number;
   weight: number;
-  requirements: NodeRequirements;
+  layers: NodeLayers;
   countermeasures: CountermeasureDict;
   resetTrace: number;
 }
@@ -70,8 +74,8 @@ export interface NetworkNode {
   type: NodeType;
   name: string;
   difficulty: number;
-  requirements: NodeRequirements;
-  progress: boolean[]; // Progress towards hacking requirements
+  layers: NodeLayers;
+  progress: Partial<Record<CellColor, boolean[]>>; // Progress towards hacking layers
   countermeasures: CountermeasureDict;
   resetTrace: number;
   status: 'ACTIVE' | 'HACKED' | 'LOCKED';

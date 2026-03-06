@@ -34,7 +34,7 @@ export class NodeRegistry {
                 name: 'Fallback Node',
                 baseDifficulty: 1,
                 weight: 1,
-                requirements: [{ color: 'RED', symbol: 'NONE' }],
+                layers: { RED: [{ symbol: 'NONE' }] },
                 countermeasures: { EYE: { type: 'TRACE', value: 5 } },
                 resetTrace: 1
             });
@@ -89,13 +89,24 @@ export class NodeRegistry {
 
     private createNetworkNode(def: NodeDefinition): NetworkNode {
         this.idCounter++;
+        const newLayers: Partial<Record<CellColor, any>> = {};
+        const newProgress: Partial<Record<CellColor, boolean[]>> = {};
+
+        for (const [colorStr, lanes] of Object.entries(def.layers)) {
+            const color = colorStr as CellColor;
+            if (lanes && lanes.length > 0) {
+                newLayers[color] = [...lanes];
+                newProgress[color] = Array(lanes.length).fill(false);
+            }
+        }
+
         return {
             id: `node-${this.idCounter}-${Date.now()}`,
             type: def.type,
             name: def.name,
             difficulty: def.baseDifficulty,
-            requirements: [...def.requirements],
-            progress: Array(def.requirements.length).fill(false),
+            layers: newLayers,
+            progress: newProgress,
             countermeasures: { ...def.countermeasures },
             resetTrace: def.resetTrace,
             status: 'ACTIVE'

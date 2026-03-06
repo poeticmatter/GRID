@@ -33,27 +33,38 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
         <span className="text-[10px] bg-slate-900 px-1 rounded text-white/50">{server.type} L{server.difficulty}</span>
       </div>
 
-      {/* Requirements */}
-      <div className="flex flex-wrap gap-1 mt-2 mb-2">
-        {server.requirements.map((req, idx) => {
-          const isCleared = server.progress[idx];
-          const colorClass = COLOR_TEXT_MAP[req.color];
-          const bgClass = colorClass.replace('text-', 'bg-') + '/20';
-          const borderClass = colorClass.replace('text-', 'border-');
+      {/* Layers */}
+      <div className="flex flex-col gap-2 mt-2 mb-2">
+        {Object.entries(server.layers || {}).map(([colorStr, layerSlots]) => {
+          const color = colorStr as CellColor;
+          if (!layerSlots || layerSlots.length === 0) return null;
+
+          const progressLane = server.progress[color] || [];
 
           return (
-            <div
-              key={idx}
-              className={clsx(
-                "w-6 h-6 flex items-center justify-center rounded border transition-all duration-300",
-                isCleared ? "bg-slate-900 border-slate-800 opacity-20 grayscale" : `${bgClass} ${borderClass}`
-              )}
-            >
-              {req.symbol !== 'NONE' && (
-                <div className={clsx("drop-shadow-md", isCleared ? "text-slate-500" : "text-white")}>
-                  {SYMBOL_ICON_MAP[req.symbol]}
-                </div>
-              )}
+            <div key={color} className="flex gap-1 flex-wrap">
+              {layerSlots.map((slot, idx) => {
+                const isCleared = progressLane[idx];
+                const colorClass = COLOR_TEXT_MAP[color];
+                const bgClass = colorClass.replace('text-', 'bg-') + '/20';
+                const borderClass = colorClass.replace('text-', 'border-');
+
+                return (
+                  <div
+                    key={idx}
+                    className={clsx(
+                      "w-6 h-6 flex items-center justify-center rounded border transition-all duration-300",
+                      isCleared ? "bg-slate-900 border-slate-800 opacity-20 grayscale" : `${bgClass} ${borderClass}`
+                    )}
+                  >
+                    {slot.symbol !== 'NONE' && (
+                      <div className={clsx("drop-shadow-md", isCleared ? "text-slate-500" : "text-white")}>
+                        {SYMBOL_ICON_MAP[slot.symbol]}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           );
         })}
