@@ -37,7 +37,7 @@ export const GameLayout = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80" />
 
             {/* HUD Layer (Top) */}
-            <div className="absolute top-0 left-0 right-0 p-4 z-40 flex justify-between items-start pointer-events-none">
+            <div className="absolute top-0 left-0 right-0 p-4 z-40 flex flex-wrap gap-4 justify-between items-start pointer-events-none">
                 <div className="bg-black/50 p-2 rounded border border-white/10 backdrop-blur-sm">
                     <h1 className="text-xl font-bold text-cyan-400 tracking-tighter">CYBER//DECK</h1>
                     <div className="text-xs text-white/50 font-mono">MVP BUILD v1.0</div>
@@ -79,8 +79,8 @@ export const GameLayout = () => {
             <NetworkMap />
 
             {/* Main Game Area */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pt-48 pb-32 pointer-events-none">
-                <div className="pointer-events-auto">
+            <div className="absolute inset-0 flex flex-col items-center justify-center pt-48 pb-32 pointer-events-none overflow-hidden">
+                <div className="pointer-events-auto scale-75 sm:scale-100 origin-center transition-transform">
                     <Board />
                 </div>
             </div>
