@@ -9,7 +9,6 @@ export const CardPool: Record<string, CardDefinition> = {
         isStartingCard: true,
         effects: [
             { type: 'CUT', pattern: [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }] },
-            { type: 'REPROGRAM', amount: 2 }
         ]
     },
     'line-v': {
@@ -20,7 +19,6 @@ export const CardPool: Record<string, CardDefinition> = {
         isStartingCard: true,
         effects: [
             { type: 'CUT', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }] },
-            { type: 'REPROGRAM', amount: 2 }
         ]
     },
     'square': {
@@ -31,7 +29,6 @@ export const CardPool: Record<string, CardDefinition> = {
         isStartingCard: true,
         effects: [
             { type: 'CUT', pattern: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }] },
-            { type: 'REPROGRAM', amount: 2 }
         ]
     },
     't-shape': {
@@ -42,7 +39,6 @@ export const CardPool: Record<string, CardDefinition> = {
         isStartingCard: true,
         effects: [
             { type: 'CUT', pattern: [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }] },
-            { type: 'REPROGRAM', amount: 2 }
         ]
     },
     'l-shape': {
@@ -53,7 +49,6 @@ export const CardPool: Record<string, CardDefinition> = {
         isStartingCard: true,
         effects: [
             { type: 'CUT', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }] },
-            { type: 'REPROGRAM', amount: 2 }
         ]
     },
     'sys-reset': {
@@ -64,7 +59,6 @@ export const CardPool: Record<string, CardDefinition> = {
         isStartingCard: true,
         effects: [
             { type: 'SYSTEM_RESET' },
-            { type: 'REPROGRAM', amount: 2 }
         ]
     }
 };
