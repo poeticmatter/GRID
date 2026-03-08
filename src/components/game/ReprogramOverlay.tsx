@@ -1,11 +1,12 @@
 import { useGridStore } from '../../store/useGridStore';
 import { useGameStore } from '../../store/useGameStore';
+import { useTargetingStore } from '../../store/useTargetingStore';
 import type { EffectReprogram } from '../../engine/types';
-import { Dispatch } from '../../engine/orchestrator';
 
 export const ReprogramOverlay = () => {
     const { grid } = useGridStore();
     const { gameState, effectQueue, reprogramTargetSource } = useGameStore();
+    const hoveredCoordinate = useTargetingStore(state => state.hoveredCoordinate);
 
     const activeEffect = effectQueue[0]?.effect;
 
@@ -13,36 +14,28 @@ export const ReprogramOverlay = () => {
 
     const reprogramEffect = activeEffect as EffectReprogram;
 
-    const handleClick = (x: number, y: number) => {
-        if (!reprogramTargetSource) {
-            const cell = grid[y][x];
-            if (cell.state !== 'BROKEN') {
-                Dispatch({ type: 'SET_REPROGRAM_SOURCE', payload: { source: { x, y } } });
-            }
-        } else {
-            Dispatch({ type: 'RESOLVE_REPROGRAM', payload: { source: reprogramTargetSource, dest: { x, y } } });
-        }
-    };
-
     return (
-        <div className="absolute inset-2 grid grid-cols-6 gap-1 z-30 pointer-events-auto">
+        <div className="absolute inset-2 grid grid-cols-6 gap-1 z-30 pointer-events-none">
             {grid.map((row, y) => (
                 row.map((cell, x) => {
                     const isSource = reprogramTargetSource?.x === x && reprogramTargetSource?.y === y;
+                    const isHovered = hoveredCoordinate?.x === x && hoveredCoordinate?.y === y;
+
                     return (
                         <div
-                            key={`reprog-${x}-${y}`}
-                            className="w-12 h-12 relative cursor-pointer"
-                            onClick={() => handleClick(x, y)}
+                            key={`reprog-visual-${x}-${y}`}
+                            className="w-12 h-12 relative"
                         >
                             {isSource && (
                                 <div className="absolute inset-0 border-4 border-yellow-400/80 animate-pulse rounded-sm" />
                             )}
+
                             {!isSource && !reprogramTargetSource && cell.state !== 'BROKEN' && (
-                                <div className="absolute inset-0 bg-yellow-400/20 hover:bg-yellow-400/40 rounded-sm transition-colors" />
+                                <div className={`absolute inset-0 rounded-sm transition-colors ${isHovered ? 'bg-yellow-400/40' : 'bg-yellow-400/20'}`} />
                             )}
+
                             {reprogramTargetSource && !isSource && (
-                                <div className="absolute inset-0 bg-blue-400/20 hover:bg-blue-400/50 rounded-sm transition-colors" />
+                                <div className={`absolute inset-0 rounded-sm transition-colors ${isHovered ? 'bg-blue-400/50' : 'bg-blue-400/20'}`} />
                             )}
                         </div>
                     );
@@ -55,3 +48,4 @@ export const ReprogramOverlay = () => {
         </div>
     );
 };
+
