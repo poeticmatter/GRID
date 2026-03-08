@@ -3,7 +3,6 @@ import { useTargetingStore } from '../../store/useTargetingStore';
 import { useUIStore } from '../../store/useUIStore';
 import { useGridStore } from '../../store/useGridStore';
 import { Dispatch } from '../../engine/orchestrator';
-import { rotatePattern } from '../../engine/grid-logic';
 import type { Effect, Coordinate, Cell } from '../../engine/types';
 
 export interface TargetingContext {
@@ -25,8 +24,7 @@ export const TargetingRegistry: Record<string, TargetingStrategy> = {
     'CUT': {
         onClick: (ctx) => {
             if (ctx.effect.type !== 'CUT') return;
-            const rotatedPattern = rotatePattern(ctx.effect.pattern, ctx.rotation);
-            Dispatch({ type: 'RESOLVE_CUT', payload: { x: ctx.x, y: ctx.y, pattern: rotatedPattern } });
+            Dispatch({ type: 'RESOLVE_CUT', payload: { x: ctx.x, y: ctx.y, pattern: ctx.effect.pattern } });
             ctx.setHoveredCoordinate(null);
         }
     },
