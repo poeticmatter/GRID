@@ -88,7 +88,7 @@ export interface NetworkNode {
   progress: Partial<Record<CellColor, boolean[]>>; // Progress towards hacking layers
   countermeasures: CountermeasureDict;
   resetTrace: number;
-  status: 'ACTIVE' | 'HACKED' | 'LOCKED';
+  status: 'ACTIVE' | 'HACKED' | 'LOCKED' | 'BYPASSED';
   visibility: 'REVEALED' | 'HIDDEN';
   children: string[];
   gridX: number;

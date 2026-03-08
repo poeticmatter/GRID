@@ -28,6 +28,7 @@ export const generateGraph = (): NetworkNode[] => {
             const mfPool = nodeRegistry.getRandomPoolId();
             node = nodeRegistry.selectNode(mfPool, 5);
             node.id = `node-${nodeIdCounter++}-MAINFRAME-${Date.now()}`;
+            node.type = typeOverride;
             node.gridX = gridX;
             node.gridY = gridY;
             node.status = 'ACTIVE';

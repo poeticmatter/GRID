@@ -32,11 +32,11 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
         >
             <div className="flex justify-between items-center border-b border-white/10 pb-1">
                 <span className="text-xs font-mono font-bold text-white/80 truncate w-32">{server.name}</span>
-                <span className="text-[10px] bg-slate-900 px-1 rounded text-white/50">{server.type.substring(0, 3)} L{server.difficulty}</span>
+                <span className="text-[10px] bg-slate-900 px-1 rounded text-white/50">{server.type.substring(0, 3)}</span>
             </div>
 
             {/* Layers */}
-            <div className="flex flex-col gap-2 mt-2 mb-2">
+            <div className="flex flex-row gap-2 mt-2 mb-2">
                 {Object.entries(server.layers || {}).map(([colorStr, layerSlots]) => {
                     const color = colorStr as CellColor;
                     if (!layerSlots || layerSlots.length === 0) return null;
@@ -44,7 +44,7 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                     const progressLane = server.progress[color] || [];
 
                     return (
-                        <div key={color} className="flex gap-1 flex-wrap">
+                        <div key={color} className="flex flex-col gap-1">
                             {layerSlots.map((slot, idx) => {
                                 const isCleared = progressLane[idx];
                                 const colorClass = COLOR_TEXT_MAP[color];
@@ -89,8 +89,9 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
     );
 };
 
-const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'LOCKED' | 'HOME' }) => {
+const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'BYPASSED' | 'LOCKED' | 'HOME' }) => {
     const isCleared = state === 'CLEARED';
+    const isBypassed = state === 'BYPASSED';
     const isLocked = state === 'LOCKED';
     const isActive = state === 'ACTIVE';
     const isHome = state === 'HOME';
@@ -98,6 +99,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
     let bgClass = "bg-slate-800 border-slate-600 text-slate-400";
     if (isHome) bgClass = "bg-cyan-950 border-cyan-500 text-cyan-400 drop-shadow-[0_0_8px_rgba(6,182,212,0.8)]";
     if (isCleared) bgClass = "bg-emerald-950 border-emerald-500 text-emerald-400 opacity-80 grid-clear";
+    if (isBypassed) bgClass = "bg-slate-900 border-slate-700 text-slate-600 opacity-40 grayscale";
     if (isLocked) bgClass = "bg-slate-900 border-slate-700 text-slate-600 opacity-50 grayscale";
     if (isActive) bgClass = "bg-slate-800 border-cyan-400 text-cyan-400 drop-shadow-[0_0_8px_rgba(34,211,238,0.8)] z-50";
 
@@ -156,7 +158,8 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
             {/* Sub-label for status */}
             <div className="absolute -bottom-5 text-[9px] font-mono font-bold tracking-widest text-slate-400 pointer-events-none drop-shadow-md whitespace-nowrap">
                 {isHome && 'GATEWAY'}
-                {isCleared && 'BYPASSED'}
+                {isCleared && 'HACKED'}
+                {isBypassed && 'BYPASSED'}
                 {isLocked && 'ENCRYPTED'}
                 {isActive && server.type}
             </div>
@@ -220,6 +223,7 @@ export const NetworkMap = () => {
     const getNodeState = (node: NetworkNode) => {
         if (node.type === 'HOME') return 'HOME';
         if (node.status === 'HACKED') return 'CLEARED';
+        if (node.status === 'BYPASSED') return 'BYPASSED';
         if (activeServers.some(s => s.id === node.id)) return 'ACTIVE';
         return 'LOCKED';
     };
@@ -234,9 +238,12 @@ export const NetworkMap = () => {
                         <div className="absolute top-0 flex flex-col items-center w-full">
                             <div className="flex gap-4 p-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto min-h-[140px] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                                 <AnimatePresence>
-                                    {activeServers.filter(s => s.type !== 'HOME').map((server) => (
-                                        <ServerCard key={server.id} server={server} />
-                                    ))}
+                                    {[...activeServers]
+                                        .filter(s => s.type !== 'HOME')
+                                        .sort((a, b) => a.gridX - b.gridX)
+                                        .map((server) => (
+                                            <ServerCard key={server.id} server={server} />
+                                        ))}
                                 </AnimatePresence>
                                 {activeServers.filter(s => s.type !== 'HOME').length === 0 && (
                                     <div className="text-white/30 text-sm font-mono animate-pulse">

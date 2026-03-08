@@ -81,7 +81,7 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
     deltas.activeServers.forEach((s) => {
         if (s.status === 'HACKED') {
             const oldServer = snapshot.activeServers.find((oldS: any) => oldS.id === s.id);
-            if (oldServer && oldServer.status !== 'HACKED') {
+            if (oldServer && oldServer.status !== 'HACKED' && oldServer.status !== 'BYPASSED') {
                 newlyHackedNodeIds.push(s.id);
                 newPlayerStats.credits += s.difficulty * 10;
                 newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 500 });
@@ -115,15 +115,66 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
         // Promote immediate children
         hackedNode.children.forEach(childId => {
             const childNode = newGraph.find(n => n.id === childId);
-            if (childNode && childNode.status !== 'HACKED' && !activeServerIds.includes(childId)) {
+            if (childNode && childNode.status !== 'HACKED' && childNode.status !== 'BYPASSED' && !activeServerIds.includes(childId)) {
                 childNode.visibility = 'REVEALED';
                 activeServerIds.push(childId);
             }
         });
     });
 
+    const memo = new Map<string, boolean>();
+    const isRedundant = (nodeId: string, visited: Set<string>): boolean => {
+        if (memo.has(nodeId)) return memo.get(nodeId)!;
+        if (visited.has(nodeId)) return false;
+
+        const node = newGraph.find(n => n.id === nodeId);
+        if (!node) return false;
+
+        if (node.type === 'MAINFRAME' || node.type === 'HOME' || node.status === 'HACKED') {
+            memo.set(nodeId, false);
+            return false;
+        }
+
+        if (node.status === 'BYPASSED') {
+            memo.set(nodeId, true);
+            return true;
+        }
+
+        visited.add(nodeId);
+
+        let redundant = false;
+        if (node.children.length === 0) {
+            redundant = false; // A node with 0 children is the terminal destination, and therefore integral to the graph.
+        } else {
+            redundant = node.children.every(childId => {
+                const childNode = newGraph.find(n => n.id === childId);
+                if (!childNode) return true;
+
+                if (childNode.status === 'HACKED') return true;
+                if (activeServerIds.includes(childId)) return true;
+
+                return isRedundant(childId, visited);
+            });
+        }
+
+        visited.delete(nodeId);
+        memo.set(nodeId, redundant);
+        return redundant;
+    };
+
+    newGraph.forEach(node => {
+        if (node.type !== 'HOME' && node.status !== 'HACKED') {
+            if (isRedundant(node.id, new Set<string>())) {
+                node.status = 'BYPASSED';
+                activeServerIds = activeServerIds.filter(id => id !== node.id);
+            }
+        }
+    });
+
     // Rebuild activeServers array based on activeServerIds from the updated newGraph
-    const remainingServers = activeServerIds.map(id => newGraph.find(n => n.id === id)).filter(Boolean) as NetworkNode[];
+    const remainingServers = activeServerIds
+        .map(id => newGraph.find(n => n.id === id))
+        .filter(n => n && n.status !== 'BYPASSED') as NetworkNode[];
 
     return mergeDeltas(deltas, {
         activeServers: remainingServers,
