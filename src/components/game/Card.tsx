@@ -17,6 +17,14 @@ const COLOR_MAP: Record<CellColor, string> = {
   PURPLE: 'border-fuchsia-500 shadow-fuchsia-500/20 bg-fuchsia-950/40',
 };
 
+const BADGE_COLOR_MAP: Record<CellColor, string> = {
+  RED: 'border-rose-500 shadow-rose-500/20 bg-rose-950',
+  BLUE: 'border-cyan-500 shadow-cyan-500/20 bg-cyan-950',
+  GREEN: 'border-emerald-500 shadow-emerald-500/20 bg-emerald-950',
+  YELLOW: 'border-amber-500 shadow-amber-500/20 bg-amber-950',
+  PURPLE: 'border-fuchsia-500 shadow-fuchsia-500/20 bg-fuchsia-950',
+};
+
 // Helper to check if a mini-grid cell is part of pattern
 const isPatternCell = (x: number, y: number, pattern: Coordinate[]) => {
   return pattern.some(p => p.x === x && p.y === y);
@@ -99,7 +107,13 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
       }}
     >
       {/* Memory Badge */}
-      <div className="absolute -top-3 -right-3 w-6 h-6 bg-slate-800 border-2 border-slate-400 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg z-10" title="Memory Cost">
+      <div
+        className={clsx(
+          "absolute -top-2 -left-2 w-6 h-6 border-2 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg z-10",
+          BADGE_COLOR_MAP[visualColor]
+        )}
+        title="Memory Cost"
+      >
         {memory}
       </div>
 
