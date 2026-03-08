@@ -1,4 +1,4 @@
-import type { NetworkNode, Cell, CellColor, CellSymbol, Card, CountermeasurePayload } from './types';
+import type { NetworkNode, Cell, CellColor, Card, CountermeasurePayload } from './types';
 import { cardRegistry } from './registry/CardRegistry';
 
 export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): {
@@ -8,13 +8,9 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
 } => {
   // Tally harvested Code
   const codeColors = {} as Record<CellColor, number>;
-  const codeSymbols = {} as Record<CellSymbol, number>;
 
   cutCells.forEach(cell => {
     codeColors[cell.color] = (codeColors[cell.color] || 0) + 1;
-    if (cell.symbol !== 'NONE') {
-      codeSymbols[cell.symbol] = (codeSymbols[cell.symbol] || 0) + 1;
-    }
   });
 
   // Deep copy the progress dictionaries
@@ -34,32 +30,34 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
     const color = colorStr as CellColor;
     if (!requirements || requirements.length === 0) continue;
 
-    const progressLane = newProgress[color] || [];
+    const progressLane = newProgress[color] || new Array(requirements.length).fill(false);
 
-    for (let i = 0; i < requirements.length; i++) {
-      if (progressLane[i]) continue; // Already cleared
+    const firstActiveIndex = progressLane.findIndex(p => !p);
 
-      const slot = requirements[i];
+    if (firstActiveIndex !== -1) {
+      const harvested = codeColors[color] || 0;
 
-      // Check if we have Code of this color available
-      if ((codeColors[color] || 0) > 0) {
-        // Consume one color Code and mark cleared
-        codeColors[color]! -= 1;
-        progressLane[i] = true;
+      if (harvested > 0) {
+        // Countermeasure Rule: Interacted with an active layer color, trigger countermeasure unconditionally exactly once
+        const cm = server.countermeasures[color];
+        if (cm) {
+          pushedCountermeasures.push({ ...cm });
+        }
 
-        if (slot.symbol !== 'NONE') {
-          if ((codeSymbols[slot.symbol] || 0) > 0) {
-            codeSymbols[slot.symbol]! -= 1;
-          } else {
-            const cm = server.countermeasures[slot.symbol];
-            if (cm) {
-              pushedCountermeasures.push({ ...cm });
+        let harvested_accumulator = harvested;
+
+        // The Cascading Threshold Rule
+        for (let i = firstActiveIndex; i < requirements.length; i++) {
+          if (!progressLane[i]) {
+            const requirement = requirements[i];
+            if (harvested_accumulator >= requirement) {
+              progressLane[i] = true;
+              harvested_accumulator -= requirement;
+            } else {
+              break; // Halt progression for this color immediately
             }
           }
         }
-      } else {
-        // Out of Code for this color lane, break and move to the next color lane
-        break;
       }
     }
 

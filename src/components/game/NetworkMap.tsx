@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useServerStore } from '../../store/useServerStore';
-import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
-import { Lock, Database, Globe, ChevronDown, ChevronUp, Shield, Eye, Skull, Server as ServerIcon, HelpCircle } from 'lucide-react';
+import type { NetworkNode, CellColor } from '../../engine/types';
+import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
@@ -12,13 +12,6 @@ const COLOR_TEXT_MAP: Record<CellColor, string> = {
     GREEN: 'text-emerald-400',
     YELLOW: 'text-amber-400',
     PURPLE: 'text-fuchsia-400',
-};
-
-const SYMBOL_ICON_MAP: Record<CellSymbol, React.ReactNode> = {
-    SHIELD: <Shield className="w-3 h-3 inline" />,
-    EYE: <Eye className="w-3 h-3 inline" />,
-    SKULL: <Skull className="w-3 h-3 inline" />,
-    NONE: null,
 };
 
 const ServerCard = ({ server }: { server: NetworkNode }) => {
@@ -37,15 +30,15 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
 
             {/* Layers */}
             <div className="flex flex-row gap-2 mt-2 mb-2">
-                {Object.entries(server.layers || {}).map(([colorStr, layerSlots]) => {
+                {Object.entries(server.layers || {}).map(([colorStr, requirements]) => {
                     const color = colorStr as CellColor;
-                    if (!layerSlots || layerSlots.length === 0) return null;
+                    if (!requirements || requirements.length === 0) return null;
 
                     const progressLane = server.progress[color] || [];
 
                     return (
                         <div key={color} className="flex flex-col gap-1">
-                            {layerSlots.map((slot, idx) => {
+                            {requirements.map((req, idx) => {
                                 const isCleared = progressLane[idx];
                                 const colorClass = COLOR_TEXT_MAP[color];
                                 const bgClass = colorClass.replace('text-', 'bg-') + '/20';
@@ -59,11 +52,9 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                                             isCleared ? "bg-slate-900 border-slate-800 opacity-20 grayscale" : `${bgClass} ${borderClass}`
                                         )}
                                     >
-                                        {slot.symbol !== 'NONE' && (
-                                            <div className={clsx("drop-shadow-md", isCleared ? "text-slate-500" : "text-white")}>
-                                                {SYMBOL_ICON_MAP[slot.symbol]}
-                                            </div>
-                                        )}
+                                        <div className={clsx("drop-shadow-md font-mono text-xs font-bold", isCleared ? "text-slate-500" : "text-white")}>
+                                            {req}
+                                        </div>
                                     </div>
                                 );
                             })}
@@ -73,11 +64,13 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
             </div>
 
             <div className="mt-auto flex flex-col gap-1 border-t border-white/5 pt-2">
-                {Object.entries(server.countermeasures || {}).map(([symbol, effect]) => {
+                {Object.entries(server.countermeasures || {}).map(([colorStr, effect]) => {
                     if (!effect) return null;
+                    const color = colorStr as CellColor;
+                    const colorClass = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
                     return (
-                        <div key={symbol} className="text-[10px] flex items-center gap-1.5 text-white/50">
-                            <span className="text-white/80">{SYMBOL_ICON_MAP[symbol as CellSymbol]}</span>
+                        <div key={color} className="text-[10px] flex items-center gap-1.5 text-white/50">
+                            <div className={clsx("w-2 h-2 rounded-sm shadow-sm", colorClass)} />
                             <span className="font-mono">
                                 {effect.value} {effect.type.replace('_', ' ')}
                             </span>
@@ -120,16 +113,31 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
 
             {/* Active Server Layer Preview */}
             {isActive && (
-                <div className="absolute -top-5 flex gap-0.5 flex-wrap justify-center w-full max-w-[60px] pointer-events-none z-[60]">
-                    {Object.entries(server.layers || {}).map(([colorStr, layerSlots]) => {
+                <div className="absolute -top-5 flex gap-1 flex-wrap justify-center w-full max-w-[80px] pointer-events-none z-[60]">
+                    {Object.entries(server.layers || {}).map(([colorStr, requirements]) => {
                         const color = colorStr as CellColor;
-                        if (!layerSlots || layerSlots.length === 0) return null;
+                        if (!requirements || requirements.length === 0) return null;
 
-                        const colorClass = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
+                        const colorBorder = COLOR_TEXT_MAP[color].replace('text-', 'border-');
+                        const colorBg = COLOR_TEXT_MAP[color].replace('text-', 'bg-') + '/20';
+                        const progressLane = server.progress[color] || [];
 
-                        return layerSlots.map((_, idx) => (
-                            <div key={`${color}-${idx}`} className={`w-1 h-2 rounded-sm ${colorClass} shadow-sm shadow-black/50`} />
-                        ));
+                        return requirements.map((req, idx) => {
+                            const isCleared = progressLane[idx];
+                            return (
+                                <div
+                                    key={`${color}-${idx}`}
+                                    className={clsx(
+                                        "px-1 py-0.5 min-w-[12px] h-[14px] flex items-center justify-center rounded-sm text-[8px] font-mono font-bold border shadow-md transition-all duration-300",
+                                        isCleared
+                                            ? "bg-slate-900 border-slate-700 text-slate-600 opacity-40 grayscale"
+                                            : `${colorBg} ${colorBorder} text-white`
+                                    )}
+                                >
+                                    {req}
+                                </div>
+                            );
+                        });
                     })}
                 </div>
             )}

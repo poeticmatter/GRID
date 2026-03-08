@@ -58,14 +58,10 @@ export interface Card {
   memory: number;
 }
 
-export interface LayerSlot {
-  symbol: CellSymbol | 'NONE';
-}
-
-export type NodeLayers = Partial<Record<CellColor, LayerSlot[]>>;
+export type NodeLayers = Partial<Record<CellColor, number[]>>;
 
 export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
-export type CountermeasureDict = Partial<Record<CellSymbol, CountermeasurePayload>>;
+export type CountermeasureDict = Partial<Record<CellColor, CountermeasurePayload>>;
 
 export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME' | 'HOME';
 
