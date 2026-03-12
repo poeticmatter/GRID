@@ -1,8 +1,8 @@
 import type { CardDefinition } from '../engine/types';
 
 export const CardPool: Record<string, CardDefinition> = {
-    'line-h': {
-        name: 'Line H',
+    'line-shell': {
+        name: 'Line Shell',
         visualColor: 'BLUE',
         memory: 2,
         weight: 10,
@@ -11,18 +11,8 @@ export const CardPool: Record<string, CardDefinition> = {
             { type: 'CUT', pattern: [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }] },
         ]
     },
-    'line-v': {
-        name: 'Line V',
-        visualColor: 'RED',
-        memory: 2,
-        weight: 10,
-        isStartingCard: true,
-        effects: [
-            { type: 'CUT', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 0, y: 1 }] },
-        ]
-    },
-    'square': {
-        name: 'Square',
+    'square-shell': {
+        name: 'Square Shell',
         visualColor: 'GREEN',
         memory: 2,
         weight: 10,
@@ -31,8 +21,8 @@ export const CardPool: Record<string, CardDefinition> = {
             { type: 'CUT', pattern: [{ x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }, { x: 1, y: 1 }] },
         ]
     },
-    't-shape': {
-        name: 'T-Shape',
+    't-shell': {
+        name: 'T-Shell',
         visualColor: 'YELLOW',
         memory: 2,
         weight: 10,
@@ -41,14 +31,34 @@ export const CardPool: Record<string, CardDefinition> = {
             { type: 'CUT', pattern: [{ x: -1, y: 0 }, { x: 0, y: 0 }, { x: 1, y: 0 }, { x: 0, y: 1 }] },
         ]
     },
-    'l-shape': {
-        name: 'L-Shape',
+    'l-shell': {
+        name: 'L-Shell',
         visualColor: 'PURPLE',
         memory: 2,
         weight: 10,
         isStartingCard: true,
         effects: [
             { type: 'CUT', pattern: [{ x: 0, y: -1 }, { x: 0, y: 0 }, { x: 1, y: 0 }] },
+        ]
+    },
+    'reprogram-2': {
+        name: 'Reprogram 2',
+        visualColor: 'PURPLE',
+        memory: 2,
+        weight: 10,
+        isStartingCard: true,
+        effects: [
+            { type: 'REPROGRAM', amount: 2 },
+        ]
+    },
+    'reprogram-4': {
+        name: 'Reprogram 4',
+        visualColor: 'PURPLE',
+        memory: 2,
+        weight: 10,
+        isStartingCard: true,
+        effects: [
+            { type: 'REPROGRAM', amount: 4 },
         ]
     },
     'sys-reset': {
