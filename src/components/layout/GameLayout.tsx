@@ -36,7 +36,7 @@ export const GameLayout = () => {
     }, []);
 
     return (
-        <div className="h-dvh w-screen bg-slate-900 text-white overflow-hidden grid grid-rows-[auto_1fr_auto] relative font-sans">
+        <div className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-slate-900 text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans">
             <PlaybackController />
             <AudioController />
             {/* Background Ambience & Widescreen Gutters */}
@@ -45,7 +45,7 @@ export const GameLayout = () => {
 
             {/* Floating Menu Button */}
             {gameState !== 'MENU' && (
-                <div className="absolute top-4 left-4 z-[120]">
+                <div className="absolute top-2 left-2 z-[120] scale-75 origin-top-left sm:scale-100 sm:top-4 sm:left-4">
                     <button
                         onClick={handleMenu}
                         className="bg-black/50 hover:bg-black/80 p-2 rounded border border-white/10 backdrop-blur-sm text-white/70 hover:text-white transition-colors flex items-center gap-2 shadow-lg"
@@ -58,13 +58,13 @@ export const GameLayout = () => {
             )}
 
             {/* Top Header / Network Map Zone */}
-            <div className="relative w-full z-[60] pointer-events-none">
+            <div className="relative w-full min-w-0 z-[60] pointer-events-none">
                 <NetworkMap />
             </div>
 
             {/* Center Play Area */}
-            <div className="relative w-full h-full z-10 grid place-items-center overflow-hidden min-h-0 pointer-events-none py-4">
-                <div className="h-full max-h-full max-w-full aspect-square pointer-events-auto">
+            <div className="relative w-full h-full min-w-0 z-10 grid place-items-center overflow-hidden min-h-0 pointer-events-none py-4">
+                <div className="h-full max-h-[45vh] sm:max-h-full max-w-full aspect-square pointer-events-auto">
                     <Board />
                 </div>
             </div>

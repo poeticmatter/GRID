@@ -31,7 +31,7 @@ export const Hand = () => {
     const isReset = selectedCard?.effects?.some(e => e.type === 'SYSTEM_RESET');
 
     return (
-        <div className="w-full flex flex-col justify-center items-center gap-4 pb-4 z-50 pointer-events-auto">
+        <div className="w-full min-w-0 max-w-full flex flex-col justify-center items-center gap-4 pb-4 z-50 pointer-events-auto transition-transform">
             <AnimatePresence mode="wait">
                 {selectedCard && isPlayingPhase && (
                     <motion.div
@@ -62,11 +62,12 @@ export const Hand = () => {
                 )}
             </AnimatePresence>
 
-            <div className="flex items-end justify-center -space-x-[min(4vw,1rem)] hover:-space-x-[min(1vw,0.25rem)] transition-all duration-500 will-change-transform pt-[clamp(1rem,4vh,2rem)]">
+            <div className="flex items-end justify-start sm:justify-center w-full max-w-full overflow-x-auto sm:overflow-visible px-6 sm:px-0 gap-4 sm:gap-0 sm:-space-x-4 sm:hover:space-x-2 snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                 <AnimatePresence>
                     {hand.map((card) => (
                         <motion.div
                             key={card.id}
+                            className="shrink-0 snap-center flex justify-center"
                             initial={{ opacity: 0, y: 50, scale: 0.8 }}
                             animate={{ opacity: 1, y: 0, scale: 1 }}
                             exit={{ opacity: 0, y: 50, scale: 0.5 }}

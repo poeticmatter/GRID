@@ -95,7 +95,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
     <motion.div
       layoutId={`card-${card.id}`}
       className={clsx(
-        'h-[clamp(120px,22vh,192px)] aspect-[2/3] border-2 rounded-lg p-2 flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md',
+        'h-[clamp(140px,22vh,192px)] aspect-[2/3] border-2 rounded-lg p-2 flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md',
         COLOR_MAP[visualColor],
         isSelected ? 'border-white shadow-xl scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
       )}

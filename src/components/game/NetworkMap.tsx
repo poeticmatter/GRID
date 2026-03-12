@@ -243,7 +243,7 @@ export const NetworkMap = () => {
 
                 {!isOpen && (
                     <div className="w-full flex justify-center z-40">
-                        <div className="flex gap-4 px-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                        <div className="w-full flex gap-4 px-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
                             <AnimatePresence>
                                 {[...activeServers]
                                     .filter(s => s.type !== 'HOME')
