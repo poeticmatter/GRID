@@ -21,15 +21,15 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-            className="w-48 bg-slate-800/80 border border-slate-600 rounded p-2 flex flex-col gap-2 backdrop-blur-sm shadow-lg pointer-events-auto min-h-[140px]"
+            className="w-[clamp(140px,25vw,192px)] bg-slate-800/80 border border-slate-600 rounded p-[clamp(0.375rem,1vh,0.5rem)] flex flex-col gap-1 backdrop-blur-sm shadow-lg pointer-events-auto min-h-0"
         >
             <div className="flex justify-between items-center border-b border-white/10 pb-1">
-                <span className="text-xs font-mono font-bold text-white/80 truncate w-32">{server.name}</span>
-                <span className="text-[10px] bg-slate-900 px-1 rounded text-white/50">{server.type.substring(0, 3)}</span>
+                <span className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-mono font-bold text-white/80 truncate w-32">{server.name}</span>
+                <span className="text-[clamp(0.5rem,1vh,0.625rem)] bg-slate-900 px-1 rounded text-white/50 leading-none">{server.type.substring(0, 3)}</span>
             </div>
 
             {/* Layers */}
-            <div className="flex flex-row gap-2 mt-2 mb-2">
+            <div className="flex flex-row my-[clamp(0.25rem,1.5vh,0.5rem)] gap-[clamp(0.25rem,1vh,0.5rem)]">
                 {Object.entries(server.layers || {}).map(([colorStr, requirements]) => {
                     const color = colorStr as CellColor;
                     if (!requirements || requirements.length === 0) return null;
@@ -37,7 +37,7 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                     const progressLane = server.progress[color] || [];
 
                     return (
-                        <div key={color} className="flex flex-col gap-1">
+                        <div key={color} className="flex flex-col gap-[clamp(2px,0.5vh,4px)]">
                             {requirements.map((req, idx) => {
                                 const isCleared = progressLane[idx];
                                 const colorClass = COLOR_TEXT_MAP[color];
@@ -48,11 +48,11 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                                     <div
                                         key={idx}
                                         className={clsx(
-                                            "w-6 h-6 flex items-center justify-center rounded border transition-all duration-300",
+                                            "w-[clamp(1rem,2.5vh,1.25rem)] h-[clamp(1rem,2.5vh,1.25rem)] flex items-center justify-center rounded border transition-all duration-300",
                                             isCleared ? "bg-slate-900 border-slate-800 opacity-20 grayscale" : `${bgClass} ${borderClass}`
                                         )}
                                     >
-                                        <div className={clsx("drop-shadow-md font-mono text-xs font-bold", isCleared ? "text-slate-500" : "text-white")}>
+                                        <div className={clsx("drop-shadow-md font-mono text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold", isCleared ? "text-slate-500" : "text-white")}>
                                             {req}
                                         </div>
                                     </div>
@@ -63,13 +63,13 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                 })}
             </div>
 
-            <div className="mt-auto flex flex-col gap-1 border-t border-white/5 pt-2">
+            <div className="mt-auto flex flex-col gap-1 border-t border-white/5 pt-[clamp(0.25rem,1vh,0.5rem)]">
                 {Object.entries(server.countermeasures || {}).map(([colorStr, effect]) => {
                     if (!effect) return null;
                     const color = colorStr as CellColor;
                     const colorClass = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
                     return (
-                        <div key={color} className="text-[10px] flex items-center gap-1.5 text-white/50">
+                        <div key={color} className="text-[clamp(0.5rem,1.2vh,0.625rem)] flex items-center gap-1.5 text-white/50">
                             <div className={clsx("w-2 h-2 rounded-sm shadow-sm", colorClass)} />
                             <span className="font-mono">
                                 {effect.value} {effect.type.replace('_', ' ')}
@@ -177,14 +177,14 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
 
 const TopologyToggleButton = ({ isOpen, onClick }: { isOpen: boolean, onClick: () => void }) => {
     return (
-        <div className="fixed top-6 w-full flex justify-center z-[110] pointer-events-none">
+        <div className="w-full flex justify-center z-[110] pointer-events-none">
             <motion.button
                 onClick={onClick}
                 className={clsx(
                     "pointer-events-auto bg-slate-900 rounded-xl flex items-center justify-center gap-3 transition-colors text-white group",
                     isOpen
-                        ? "border border-cyan-500/50 px-8 py-3 hover:bg-slate-800 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
-                        : "border border-slate-700/80 px-8 py-3 hover:bg-slate-800 shadow-lg shadow-black/50"
+                        ? "border border-cyan-500/50 px-8 py-2 hover:bg-slate-800 shadow-[0_0_15px_rgba(6,182,212,0.3)]"
+                        : "border border-slate-700/80 px-8 py-2 hover:bg-slate-800 shadow-lg shadow-black/50"
                 )}
             >
                 <Globe className={clsx(
@@ -238,30 +238,28 @@ export const NetworkMap = () => {
 
     return (
         <>
-            <TopologyToggleButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+            <div className="w-full flex flex-col items-center pt-[clamp(0.5rem,2vh,1.5rem)] gap-[clamp(0.25rem,1vh,0.75rem)] pointer-events-none">
+                <TopologyToggleButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
 
-            <div className="absolute top-24 w-full z-40 flex flex-col items-center pointer-events-none">
-                <div className="w-full relative flex justify-center mt-2">
-                    {!isOpen && (
-                        <div className="absolute top-0 flex flex-col items-center w-full">
-                            <div className="flex gap-4 p-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto min-h-[140px] snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-                                <AnimatePresence>
-                                    {[...activeServers]
-                                        .filter(s => s.type !== 'HOME')
-                                        .sort((a, b) => a.gridX - b.gridX)
-                                        .map((server) => (
-                                            <ServerCard key={server.id} server={server} />
-                                        ))}
-                                </AnimatePresence>
-                                {activeServers.filter(s => s.type !== 'HOME').length === 0 && (
-                                    <div className="text-white/30 text-sm font-mono animate-pulse">
-                                        SCANNING FOR TARGETS...
-                                    </div>
-                                )}
-                            </div>
+                {!isOpen && (
+                    <div className="w-full flex justify-center z-40">
+                        <div className="flex gap-4 px-4 items-start justify-start md:justify-center overflow-x-auto overflow-y-visible max-w-full pointer-events-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+                            <AnimatePresence>
+                                {[...activeServers]
+                                    .filter(s => s.type !== 'HOME')
+                                    .sort((a, b) => a.gridX - b.gridX)
+                                    .map((server) => (
+                                        <ServerCard key={server.id} server={server} />
+                                    ))}
+                            </AnimatePresence>
+                            {activeServers.filter(s => s.type !== 'HOME').length === 0 && (
+                                <div className="text-white/30 text-sm font-mono animate-pulse">
+                                    SCANNING FOR TARGETS...
+                                </div>
+                            )}
                         </div>
-                    )}
-                </div>
+                    </div>
+                )}
             </div>
 
             <AnimatePresence>

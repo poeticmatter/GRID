@@ -57,11 +57,11 @@ export const Board = () => {
 
   return (
     <div
-      className="bg-slate-900 border border-slate-700 p-2 rounded-lg shadow-xl relative backdrop-blur-sm"
+      className="bg-slate-900 border border-slate-700 p-2 rounded-lg shadow-xl relative backdrop-blur-sm w-full h-full flex flex-col items-center justify-center p-2"
     >
       <div
         ref={gridRef}
-        className="grid grid-cols-6 gap-1 relative z-10 pointer-events-none"
+        className="grid grid-cols-6 grid-rows-6 gap-1 w-full h-full relative z-10 pointer-events-none"
       >
         {grid.map((row) => (
           row.map((cell) => {

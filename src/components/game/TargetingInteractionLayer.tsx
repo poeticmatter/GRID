@@ -82,14 +82,14 @@ export const TargetingInteractionLayer = () => {
 
     return (
         <div
-            className="absolute inset-2 grid grid-cols-6 gap-1 z-40 pointer-events-auto"
+            className="absolute inset-2 w-full h-full grid grid-cols-6 grid-rows-6 gap-1 z-40 pointer-events-auto"
             onMouseLeave={() => setHoveredCoordinate(null)}
         >
             {grid.map((row, y) => (
                 row.map((_, x) => (
                     <div
                         key={`interact-${x}-${y}`}
-                        className="w-12 h-12 relative cursor-pointer"
+                        className="w-full h-full relative cursor-pointer"
                         onMouseEnter={() => handleMouseEnter(x, y)}
                         onClick={() => handleClick(x, y)}
                     />

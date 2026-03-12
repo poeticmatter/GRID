@@ -15,7 +15,7 @@ export const ReprogramOverlay = () => {
     const reprogramEffect = activeEffect as EffectReprogram;
 
     return (
-        <div className="absolute inset-2 grid grid-cols-6 gap-1 z-30 pointer-events-none">
+        <div className="absolute inset-2 w-full h-full grid grid-cols-6 grid-rows-6 gap-1 z-30 pointer-events-none">
             {grid.map((row, y) => (
                 row.map((cell, x) => {
                     const isSource = reprogramTargetSource?.x === x && reprogramTargetSource?.y === y;
@@ -24,7 +24,7 @@ export const ReprogramOverlay = () => {
                     return (
                         <div
                             key={`reprog-visual-${x}-${y}`}
-                            className="w-12 h-12 relative"
+                            className="w-full h-full relative"
                         >
                             {isSource && (
                                 <div className="absolute inset-0 border-4 border-yellow-400/80 animate-pulse rounded-sm" />

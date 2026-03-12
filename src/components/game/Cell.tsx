@@ -33,7 +33,7 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
   if (state === 'BROKEN') {
     return (
       <div
-        className="w-12 h-12 bg-slate-900/50 border border-slate-800 rounded-sm"
+        className="w-full h-full bg-slate-900/50 border border-slate-800 rounded-sm"
         data-x={x}
         data-y={y}
       />
@@ -41,7 +41,7 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
   }
 
   const baseClasses = clsx(
-    'w-12 h-12 flex items-center justify-center rounded-sm border-2 transition-all duration-100',
+    'w-full h-full flex items-center justify-center rounded-sm border-2 transition-all duration-100',
     COLOR_MAP[color],
     'relative overflow-hidden cursor-pointer'
   );

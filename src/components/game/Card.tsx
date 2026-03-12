@@ -95,21 +95,19 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
     <motion.div
       layoutId={`card-${card.id}`}
       className={clsx(
-        'w-32 h-48 border-2 rounded-lg p-2 flex flex-col relative cursor-pointer transition-colors backdrop-blur-md',
+        'h-[clamp(120px,22vh,192px)] aspect-[2/3] border-2 rounded-lg p-2 flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md',
         COLOR_MAP[visualColor],
-        isSelected ? 'border-white shadow-xl scale-105 z-20' : 'opacity-90 hover:opacity-100 hover:scale-105'
+        isSelected ? 'border-white shadow-xl scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
       )}
       onClick={onClick}
-      whileHover={{ y: -5 }}
       animate={{
-        y: isSelected ? -20 : 0,
-        scale: isSelected ? 1.1 : 1
+        y: isSelected ? -30 : 0
       }}
     >
       {/* Memory Badge */}
       <div
         className={clsx(
-          "absolute -top-2 -left-2 w-6 h-6 border-2 rounded-full flex items-center justify-center text-xs font-bold text-white shadow-lg z-10",
+          "absolute -top-2 -left-2 w-[clamp(1.5rem,3vh,2rem)] h-[clamp(1.5rem,3vh,2rem)] border-2 rounded-full flex items-center justify-center text-[clamp(0.6rem,1.2vh,0.875rem)] font-bold text-white shadow-lg z-10",
           BADGE_COLOR_MAP[visualColor]
         )}
         title="Memory Cost"
@@ -117,7 +115,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
         {memory}
       </div>
 
-      <div className="text-xs font-bold uppercase tracking-wider text-center mb-1 border-b border-white/20 pb-1 truncate">
+      <div className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center mb-1 border-b border-white/20 pb-1 truncate leading-tight">
         {name}
       </div>
 

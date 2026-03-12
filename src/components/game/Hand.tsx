@@ -31,7 +31,7 @@ export const Hand = () => {
     const isReset = selectedCard?.effects?.some(e => e.type === 'SYSTEM_RESET');
 
     return (
-        <div className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50 flex flex-col items-center gap-4 pointer-events-auto scale-75 sm:scale-100 origin-bottom transition-transform">
+        <div className="w-full flex flex-col justify-center items-center gap-4 pb-4 z-50 pointer-events-auto">
             <AnimatePresence mode="wait">
                 {selectedCard && isPlayingPhase && (
                     <motion.div
@@ -62,7 +62,7 @@ export const Hand = () => {
                 )}
             </AnimatePresence>
 
-            <div className="flex items-end justify-center -space-x-4 hover:space-x-2 transition-all duration-300">
+            <div className="flex items-end justify-center -space-x-[min(4vw,1rem)] hover:-space-x-[min(1vw,0.25rem)] transition-all duration-500 will-change-transform pt-[clamp(1rem,4vh,2rem)]">
                 <AnimatePresence>
                     {hand.map((card) => (
                         <motion.div

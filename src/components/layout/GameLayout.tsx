@@ -36,11 +36,12 @@ export const GameLayout = () => {
     }, []);
 
     return (
-        <div className="h-screen w-screen bg-slate-900 text-white overflow-hidden relative font-sans">
+        <div className="h-dvh w-screen bg-slate-900 text-white overflow-hidden grid grid-rows-[auto_1fr_auto] relative font-sans">
             <PlaybackController />
             <AudioController />
-            {/* Background Ambience */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80" />
+            {/* Background Ambience & Widescreen Gutters */}
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80 pointer-events-none" />
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4vw_4vw] pointer-events-none mask-image-[radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" style={{ WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 40%, black 100%)' }} />
 
             {/* Floating Menu Button */}
             {gameState !== 'MENU' && (
@@ -56,17 +57,22 @@ export const GameLayout = () => {
                 </div>
             )}
 
-            {/* Network Map Overlay (Handles both Active Targets and Topology) */}
-            <NetworkMap />
+            {/* Top Header / Network Map Zone */}
+            <div className="relative w-full z-[60] pointer-events-none">
+                <NetworkMap />
+            </div>
 
-            {/* Main Game Area */}
-            <div className="absolute inset-0 flex flex-col items-center justify-center pt-48 pb-32 pointer-events-none overflow-hidden">
-                <div className="pointer-events-auto scale-75 sm:scale-100 origin-center transition-transform">
+            {/* Center Play Area */}
+            <div className="relative w-full h-full z-10 grid place-items-center overflow-hidden min-h-0 pointer-events-none py-4">
+                <div className="h-full max-h-full max-w-full aspect-square pointer-events-auto">
                     <Board />
                 </div>
             </div>
 
-            <Hand />
+            {/* Bottom Hand Zone */}
+            <div className="relative w-full z-50 pointer-events-none">
+                <Hand />
+            </div>
 
             <EffectOrderingUI />
 
