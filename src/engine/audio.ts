@@ -3,18 +3,11 @@ import * as Tone from 'tone';
 let synth: Tone.PolySynth;
 let noise: Tone.NoiseSynth;
 let membrane: Tone.MembraneSynth;
-let drone: Tone.Oscillator;
-let filter: Tone.Filter;
-let lfo: Tone.LFO;
 let isInitialized = false;
 
 export const initAudio = async () => {
   if (isInitialized) {
-      // Just ensure drone is running
-      if (drone && drone.state !== 'started') {
-          drone.start();
-      }
-      return;
+    return;
   }
 
   await Tone.start();
@@ -33,25 +26,10 @@ export const initAudio = async () => {
   }).toDestination();
 
   membrane = new Tone.MembraneSynth({
-      volume: -15
+    volume: -15
   }).toDestination();
 
-  // Background Drone (Dark Cyberpunk Ambience)
-  filter = new Tone.Filter(200, "lowpass").toDestination();
-  drone = new Tone.Oscillator(55, "sawtooth").connect(filter);
-  drone.volume.value = -30;
-
-  // Add some movement to the drone
-  lfo = new Tone.LFO(0.1, 100, 300).start();
-  lfo.connect(filter.frequency);
-
-  drone.start();
-
   isInitialized = true;
-};
-
-export const stopAudio = () => {
-    if (drone) drone.stop();
 };
 
 export const playSfx = (type: 'hover' | 'select' | 'cut' | 'error' | 'hack' | 'game_over' | 'victory' | 'click') => {
@@ -84,7 +62,6 @@ export const playSfx = (type: 'hover' | 'select' | 'cut' | 'error' | 'hack' | 'g
     case 'game_over':
       // Descending
       synth.triggerAttackRelease(["C4", "B3", "Bb3", "A3"], "0.5", undefined, 0.5);
-      if (drone) drone.stop();
       break;
     case 'victory':
       // Ascending
