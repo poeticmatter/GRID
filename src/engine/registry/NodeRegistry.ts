@@ -1,5 +1,5 @@
 import { NodePools } from '../../data/nodes';
-import type { NodeDefinition, NetworkNode, CellColor } from '../types';
+import type { NodeDefinition, NetworkNode, NodeType, CellColor } from '../types';
 
 export class NodeRegistry {
     private static instance: NodeRegistry;
@@ -34,8 +34,8 @@ export class NodeRegistry {
                 name: 'Fallback Node',
                 baseDifficulty: 1,
                 weight: 1,
-                layers: { RED: [{ symbol: 'NONE' }] },
-                countermeasures: { EYE: { type: 'TRACE', value: 5 } },
+                layers: { RED: [1] },
+                countermeasures: { RED: { type: 'TRACE', value: 5 } },
                 resetTrace: 1
             });
         }
@@ -76,6 +76,66 @@ export class NodeRegistry {
 
         const roll = Math.random() * totalWeight;
         let selectedDef = candidates[candidates.length - 1]; // fallback
+
+        for (let i = 0; i < cumulativeWeights.length; i++) {
+            if (roll <= cumulativeWeights[i]) {
+                selectedDef = candidates[i];
+                break;
+            }
+        }
+
+        return this.createNetworkNode(selectedDef);
+    }
+
+    /**
+     * Select a node filtered by NodeType across ALL pools.
+     * Uses weighted random selection among matching definitions.
+     */
+    public selectNodeByType(nodeType: NodeType, targetDifficulty?: number): NetworkNode {
+        // Aggregate all definitions from every pool
+        const allDefs: NodeDefinition[] = Object.values(NodePools).flat();
+
+        // Filter by requested type
+        let candidates = allDefs.filter(d => d.type === nodeType);
+
+        if (candidates.length === 0) {
+            console.warn(`No definitions found for type ${nodeType}. Falling back to selectNode.`);
+            const poolId = this.getRandomPoolId();
+            return this.selectNode(poolId, targetDifficulty);
+        }
+
+        if (targetDifficulty !== undefined) {
+            let filtered = candidates.filter(n => n.baseDifficulty === targetDifficulty);
+
+            if (filtered.length === 0) {
+                // Closest difficulty fallback
+                let closestDiff = -1;
+                let minDiffDiff = Infinity;
+                candidates.forEach(n => {
+                    const diff = Math.abs(n.baseDifficulty - targetDifficulty);
+                    if (diff < minDiffDiff) {
+                        minDiffDiff = diff;
+                        closestDiff = n.baseDifficulty;
+                    } else if (diff === minDiffDiff && n.baseDifficulty < closestDiff) {
+                        closestDiff = n.baseDifficulty;
+                    }
+                });
+                filtered = candidates.filter(n => n.baseDifficulty === closestDiff);
+            }
+            candidates = filtered;
+        }
+
+        // Weighted random selection
+        let totalWeight = 0;
+        const cumulativeWeights: number[] = [];
+
+        for (const candidate of candidates) {
+            totalWeight += candidate.weight;
+            cumulativeWeights.push(totalWeight);
+        }
+
+        const roll = Math.random() * totalWeight;
+        let selectedDef = candidates[candidates.length - 1];
 
         for (let i = 0; i < cumulativeWeights.length; i++) {
             if (roll <= cumulativeWeights[i]) {
