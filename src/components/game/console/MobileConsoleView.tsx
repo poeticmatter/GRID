@@ -35,7 +35,11 @@ export const MobileConsoleView = ({
             transition={{ type: 'spring', damping: 25, stiffness: 200 }}
             className="fixed inset-x-0 bottom-0 z-[80] pointer-events-none flex flex-col items-center"
         >
-            <div className="w-full max-w-md pointer-events-auto bg-slate-900/95 backdrop-blur-2xl border-t border-cyan-500/30 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] pb-[max(1rem,env(safe-area-inset-bottom))]">
+            <div 
+                onClick={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
+                className="w-full max-w-md pointer-events-auto bg-slate-900/95 backdrop-blur-2xl border-t border-cyan-500/30 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] pb-[max(1rem,env(safe-area-inset-bottom))]"
+            >
                 <button 
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="w-full p-3 flex items-center justify-between group"

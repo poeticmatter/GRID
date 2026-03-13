@@ -17,7 +17,7 @@ export const ConsoleController = () => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const activeEffect = effectQueue[0]?.effect;
-    const isResolving = gameState === 'EFFECT_RESOLUTION' && activeEffect?.type === 'RUN';
+    const isResolving = gameState === 'EFFECT_RESOLUTION' && (activeEffect?.type === 'RUN' || activeEffect?.type === 'REPROGRAM');
     const isVisible = (gameState === 'EFFECT_ORDERING' || gameState === 'EFFECT_RESOLUTION') && (pendingEffects.length > 0 || isResolving);
 
     // Auto-open drawer when console becomes active on mobile
@@ -29,7 +29,7 @@ export const ConsoleController = () => {
 
     // Mobile Virtual Cursor Initialization
     useEffect(() => {
-        if (isMobile && gameState === 'EFFECT_RESOLUTION' && activeEffect?.type === 'RUN' && hoveredCoordinate === null) {
+        if (isMobile && gameState === 'EFFECT_RESOLUTION' && (activeEffect?.type === 'RUN' || activeEffect?.type === 'REPROGRAM') && hoveredCoordinate === null) {
             const centerY = Math.floor(grid.length / 2);
             const centerX = Math.floor(grid[0]?.length / 2) || 0;
             setHoveredCoordinate({ x: centerX, y: centerY });
@@ -47,8 +47,26 @@ export const ConsoleController = () => {
         if (activeEffect?.type === 'RUN' && hoveredCoordinate) {
             Dispatch({ type: 'RESOLVE_RUN', payload: { x: hoveredCoordinate.x, y: hoveredCoordinate.y, pattern: activeEffect.pattern } });
             setHoveredCoordinate(null);
+        } else if (activeEffect?.type === 'REPROGRAM' && hoveredCoordinate) {
+            const { reprogramTargetSource } = useGameStore.getState();
+            
+            if (!reprogramTargetSource) {
+                // Phase 1: Select Source
+                const nodeAtCoord = grid[hoveredCoordinate.y]?.[hoveredCoordinate.x];
+                // We use type narrowing or just check state if it's available on ViewModel node objects
+                // Based on types.ts, Cell has 'state'. Nodes are in the graph.
+                // However, 'grid' from useViewModel() seems to be a Grid (Cell[][]).
+                // Let's verify what 'grid' item represents.
+                if (nodeAtCoord?.state !== 'BROKEN') {
+                    Dispatch({ type: 'SET_REPROGRAM_SOURCE', payload: { source: hoveredCoordinate } });
+                }
+            } else {
+                // Phase 2: Select Destination
+                Dispatch({ type: 'RESOLVE_REPROGRAM', payload: { source: reprogramTargetSource, dest: hoveredCoordinate } });
+                setHoveredCoordinate(null);
+            }
         }
-    }, [activeEffect, hoveredCoordinate, setHoveredCoordinate]);
+    }, [activeEffect, hoveredCoordinate, setHoveredCoordinate, grid]);
 
     const handleQueueEffect = useCallback((effect: Effect) => {
         if (gameState === 'EFFECT_ORDERING') {
@@ -84,6 +102,7 @@ export const ConsoleController = () => {
                         gameState={gameState}
                         onQueueEffect={handleQueueEffect}
                         onRotate={handleRotate}
+                        activeEffectType={activeEffect?.type}
                     />
                 )
             )}

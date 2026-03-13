@@ -9,6 +9,7 @@ interface DesktopConsoleViewProps {
     gameState: string;
     onQueueEffect: (effect: Effect) => void;
     onRotate: () => void;
+    activeEffectType?: string;
 }
 
 export const DesktopConsoleView = ({
@@ -16,7 +17,8 @@ export const DesktopConsoleView = ({
     pendingEffects,
     gameState,
     onQueueEffect,
-    onRotate
+    onRotate,
+    activeEffectType
 }: DesktopConsoleViewProps) => {
     return (
         <motion.div
@@ -60,7 +62,7 @@ export const DesktopConsoleView = ({
                     )}
                 </div>
 
-                {isResolving && (
+                {isResolving && activeEffectType === 'RUN' && (
                     <div className="mt-6 pt-6 border-t border-cyan-500/20 animate-in fade-in slide-in-from-bottom-2">
                             <button
                             onClick={onRotate}
