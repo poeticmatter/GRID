@@ -123,6 +123,7 @@ export const Dispatch = (action: GameAction) => {
                 deltas = [{
                     gameState: 'EFFECT_ORDERING',
                     activeCardId: cardId,
+                    selectedCardId: cardId,
                     pendingEffects: [...effects],
                     effectQueue: [],
                     reprogramTargetSource: null,
@@ -131,6 +132,7 @@ export const Dispatch = (action: GameAction) => {
                 const initDeltas: StateDeltas = {
                     gameState: 'EFFECT_RESOLUTION',
                     activeCardId: cardId,
+                    selectedCardId: cardId,
                     pendingEffects: [],
                     effectQueue: [{ cardId, effect: effects[0] }],
                     reprogramTargetSource: null,
@@ -142,8 +144,26 @@ export const Dispatch = (action: GameAction) => {
 
         case 'QUEUE_EFFECT': {
             const pendingEffects = snapshot.pendingEffects.filter(e => e !== action.payload.effect);
-            const effectQueue = [...snapshot.effectQueue, { cardId: snapshot.activeCardId!, effect: action.payload.effect }];
-            deltas = [{ pendingEffects, effectQueue }];
+            const effectQueue = [{ cardId: snapshot.activeCardId!, effect: action.payload.effect }];
+            const initDeltas: StateDeltas = {
+                gameState: 'EFFECT_RESOLUTION',
+                pendingEffects,
+                effectQueue
+            };
+            deltas = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
+            break;
+        }
+
+        case 'CANCEL_CARD': {
+            deltas = [{
+                gameState: 'PLAYING',
+                activeCardId: null,
+                selectedCardId: null,
+                pendingEffects: [],
+                effectQueue: [],
+                reprogramTargetSource: null,
+                rotation: 0
+            }];
             break;
         }
 

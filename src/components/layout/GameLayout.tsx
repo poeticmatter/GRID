@@ -5,7 +5,7 @@ import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
 import { Hand } from '../game/Hand';
 import { NetworkMap } from '../game/NetworkMap';
-import { EffectOrderingUI } from '../game/EffectOrderingUI';
+import { ActiveEffectStack } from '../game/ActiveEffectStack';
 import { AudioController } from '../audio/AudioController';
 import { PlaybackController } from '../game/PlaybackController';
 import { gameEventBus } from '../../engine/eventBus';
@@ -36,7 +36,10 @@ export const GameLayout = () => {
     }, []);
 
     return (
-        <div className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-slate-900 text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans">
+        <div
+            onClick={() => { if (gameState === 'EFFECT_ORDERING') Dispatch({ type: 'CANCEL_CARD' }); }}
+            className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-slate-900 text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans"
+        >
             <PlaybackController />
             <AudioController />
             {/* Background Ambience & Widescreen Gutters */}
@@ -74,7 +77,7 @@ export const GameLayout = () => {
                 <Hand />
             </div>
 
-            <EffectOrderingUI />
+            <ActiveEffectStack />
 
             {/* Overlays */}
             <AnimatePresence>

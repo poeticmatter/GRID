@@ -72,4 +72,5 @@ export type GameAction =
     | { type: 'SET_REPROGRAM_SOURCE'; payload: { source: Coordinate | null } }
     | { type: 'RESOLVE_SYSTEM_RESET' }
     | { type: 'RESOLVE_REPROGRAM'; payload: { source: Coordinate; dest: Coordinate } }
-    | { type: 'FINISH_CARD_RESOLUTION' };
+    | { type: 'FINISH_CARD_RESOLUTION' }
+    | { type: 'CANCEL_CARD' };

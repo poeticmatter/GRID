@@ -1,7 +1,10 @@
 {
-    "card_1773401341912": {
-        "name": "Shell",
+    "card_1773404065295": {
+        "name": "New Card",
         "visualColor": "BLUE",
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": true,
         "effects": [
             {
                 "type": "CUT",
@@ -13,114 +16,17 @@
                     {
                         "x": 0,
                         "y": -1
-                    },
-                    {
-                        "x": 0,
-                        "y": 1
-                    }
-                ]
-            }
-        ],
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true
-    },
-    "card_1773401369865": {
-        "name": "Shell",
-        "visualColor": "BLUE",
-        "effects": [
-            {
-                "type": "CUT",
-                "pattern": [
-                    {
-                        "x": 0,
-                        "y": 0
-                    },
-                    {
-                        "x": 0,
-                        "y": -1
-                    },
-                    {
-                        "x": 1,
-                        "y": 0
-                    }
-                ]
-            }
-        ],
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true
-    },
-    "card_1773401383411": {
-        "name": "Shell",
-        "visualColor": "BLUE",
-        "effects": [
-            {
-                "type": "CUT",
-                "pattern": [
-                    {
-                        "x": 0,
-                        "y": 0
                     },
                     {
                         "x": -1,
-                        "y": 0
-                    },
-                    {
-                        "x": 0,
                         "y": -1
-                    },
-                    {
-                        "x": 1,
-                        "y": 0
                     }
                 ]
-            }
-        ],
-        "memory": 2,
-        "weight": 10,
-        "isStartingCard": true
-    },
-    "card_1773401394373": {
-        "name": "Shell",
-        "visualColor": "BLUE",
-        "effects": [
+            },
             {
-                "type": "CUT",
-                "pattern": [
-                    {
-                        "x": 0,
-                        "y": 0
-                    },
-                    {
-                        "x": 0,
-                        "y": -1
-                    },
-                    {
-                        "x": 0,
-                        "y": 1
-                    },
-                    {
-                        "x": 1,
-                        "y": 1
-                    }
-                ]
+                "type": "REPROGRAM",
+                "amount": 1
             }
-        ],
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true
-    },
-    "card_1773401415031": {
-        "name": "System Reset",
-        "visualColor": "BLUE",
-        "effects": [
-            {
-                "type": "SYSTEM_RESET"
-            }
-        ],
-        "memory": 0,
-        "weight": 10,
-        "isStartingCard": true
+        ]
     }
 }

@@ -16,6 +16,16 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
             : currentSnapshot.effectQueue;
 
         if (queue.length === 0) {
+            const pending = accumulatedDeltas.pendingEffects !== undefined
+                ? accumulatedDeltas.pendingEffects
+                : currentSnapshot.pendingEffects;
+
+            if (pending && pending.length > 0) {
+                const stepDeltas = { gameState: 'EFFECT_ORDERING' as const };
+                history.push(stepDeltas);
+                return history;
+            }
+
             const finalMechanic = getMechanic('FINISH_CARD_RESOLUTION');
             const finalDeltas = finalMechanic ? finalMechanic.execute(currentSnapshot) : {};
             history.push(finalDeltas);
