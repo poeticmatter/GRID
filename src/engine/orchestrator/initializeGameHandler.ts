@@ -2,7 +2,7 @@ import { createGrid } from '../grid-logic';
 import { createStartingDeck } from '../game-logic';
 import { generateGraph } from '../graph-logic';
 import type { GameSnapshot, StateDeltas, ReadonlyDeep } from './types';
-import type { Card, NetworkNode } from '../types';
+import type { Card, NetworkNode, NodeRecord } from '../types';
 
 export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): StateDeltas => {
     const grid = createGrid(6, 6);
@@ -11,13 +11,16 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
     const hand: Card[] = [...deck];
     const currentDeck: Card[] = [];
 
-    // Generate Graph
-    const networkGraph: NetworkNode[] = generateGraph();
+    // Generate the full graph and normalize it into a flat NodeRecord dictionary.
+    const graphArray: NetworkNode[] = generateGraph();
+    const nodes: NodeRecord = {};
+    for (const node of graphArray) {
+        nodes[node.id] = node;
+    }
 
-    // Initial active servers are the children of the HOME node
-    const homeNode = networkGraph.find(n => n.type === 'HOME');
-    const activeServerIds = homeNode ? homeNode.children : [];
-    const activeServers = networkGraph.filter(n => activeServerIds.includes(n.id));
+    // Active servers are the immediate children of the HOME node.
+    const homeNode = graphArray.find(n => n.type === 'HOME');
+    const activeServerIds: string[] = homeNode ? homeNode.children : [];
 
     return {
         grid,
@@ -25,8 +28,8 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
         hand,
         discardPile: [],
         trashPile: [],
-        activeServers,
-        networkGraph,
+        nodes,
+        activeServerIds,
         playerStats: {
             hardwareHealth: 3,
             maxHardwareHealth: 3,

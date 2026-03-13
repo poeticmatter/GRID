@@ -1,15 +1,13 @@
 import { create } from 'zustand';
-import type { StateDeltas } from '../engine/orchestrator/types';
+import type { PlaybackEvent } from '../engine/orchestrator/types';
 
-export interface VisualAction {
-    deltas: StateDeltas;
-}
+export type { PlaybackEvent };
 
 interface VisualQueueState {
-    queue: VisualAction[];
+    queue: PlaybackEvent[];
     isPlaying: boolean;
-    enqueue: (actions: StateDeltas[]) => void;
-    dequeue: () => VisualAction | undefined;
+    enqueue: (events: PlaybackEvent[]) => void;
+    dequeue: () => PlaybackEvent | undefined;
     setPlaying: (playing: boolean) => void;
 }
 
@@ -17,15 +15,14 @@ export const useVisualQueueStore = create<VisualQueueState>((set, get) => ({
     queue: [],
     isPlaying: false,
 
-    enqueue: (deltasArray: StateDeltas[]) => {
-        // Only enqueue steps that actually change something (or have events) to avoid empty zero-frames
-        const actions = deltasArray
-            .filter(deltas => Object.keys(deltas).length > 0)
-            .map(deltas => ({ deltas }));
+    enqueue: (events: PlaybackEvent[]) => {
+        // Only enqueue events that carry meaningful duration or payload
+        const filtered = events.filter(e => e.durationMs > 0 || e.payload !== undefined);
+        if (filtered.length === 0) return;
 
         set(state => ({
-            queue: [...state.queue, ...actions],
-            isPlaying: true // Start playing automatically
+            queue: [...state.queue, ...filtered],
+            isPlaying: true
         }));
     },
 
@@ -35,10 +32,9 @@ export const useVisualQueueStore = create<VisualQueueState>((set, get) => ({
             if (state.isPlaying) set({ isPlaying: false });
             return undefined;
         }
-
-        const nextAction = state.queue[0];
+        const next = state.queue[0];
         set({ queue: state.queue.slice(1) });
-        return nextAction;
+        return next;
     },
 
     setPlaying: (isPlaying) => set({ isPlaying })

@@ -1,4 +1,4 @@
-import { useGridStore } from '../../store/useGridStore';
+import { useViewModel } from '../../hooks/useViewModel';
 import { useGameStore } from '../../store/useGameStore';
 import { useUIStore } from '../../store/useUIStore';
 import type { SpatialMetrics } from '../../store/useUIStore';
@@ -85,7 +85,7 @@ const getInternalConnectionsPath = (cells: { x: number, y: number }[], metrics: 
 };
 
 export const GhostOverlay = () => {
-    const { grid } = useGridStore();
+    const { grid } = useViewModel();
     const { gameState, effectQueue } = useGameStore();
     const { rotation, spatialMetrics } = useUIStore();
     const hoveredCell = useTargetingStore(state => state.hoveredCoordinate);

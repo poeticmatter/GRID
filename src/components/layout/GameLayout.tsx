@@ -13,6 +13,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useVisualQueueStore } from '../../store/useVisualQueueStore';
 import { Menu } from 'lucide-react';
 import { useGameInput } from '../../hooks/useGameInput';
+import { useViewModelManager } from '../../hooks/useViewModel';
 
 export const GameLayout = () => {
     const gameState = useGameStore(state => state.gameState);
@@ -20,6 +21,7 @@ export const GameLayout = () => {
     const credits = usePlayerStore(state => state.playerStats.credits);
 
     useGameInput();
+    useViewModelManager();
 
     const handleStart = () => {
         gameEventBus.emit('AUDIO_INIT');

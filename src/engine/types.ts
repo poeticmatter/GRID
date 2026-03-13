@@ -39,6 +39,9 @@ export interface NetworkNode {
   gridY: number;
 }
 
+// Normalized dictionary: the Single Source of Truth for all NetworkNode entities.
+export type NodeRecord = Record<string, NetworkNode>;
+
 export interface PlayerStats {
   hardwareHealth: number;
   trace: number;

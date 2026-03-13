@@ -1,7 +1,8 @@
+import { produce } from 'immer';
 import { refillGrid } from '../../grid-logic';
-import { mergeDeltas } from '../deltaUtils';
+import { mergeDeltas } from '../deltaHelpers';
 import type { IEffectMechanic } from '../mechanicRegistry';
-import type { Card, Grid } from '../../types';
+import type { Card, Grid, NetworkNode } from '../../types';
 
 export const resetMechanic: IEffectMechanic = {
     type: 'IMMEDIATE',
@@ -18,7 +19,11 @@ export const resetMechanic: IEffectMechanic = {
         let currentDiscard = [card as Card];
 
         // End turn logic
-        const newGrid = refillGrid(snapshot.grid as unknown as Grid, snapshot.refillRate);
+        const newGrid = produce(snapshot.grid as Grid, draft => {
+            // refillGrid returns a new grid, so we assign wholesale
+            const refilled = refillGrid(snapshot.grid as Grid, snapshot.refillRate);
+            draft.splice(0, draft.length, ...refilled);
+        });
         let currentDeck = [...snapshot.deck] as Card[];
         let finalHand = newHand;
 
@@ -36,8 +41,13 @@ export const resetMechanic: IEffectMechanic = {
             if (c) finalHand.push(c);
         }
 
-        const REVEALED_SERVERS = snapshot.activeServers?.filter(s => s.visibility === 'REVEALED') || [];
-        const traceIncrease = REVEALED_SERVERS.reduce((sum: number, s: any) => sum + (s.resetTrace || 0), 0);
+        // Derive active servers from the normalized node SSOT
+        const activeServerIds = snapshot.activeServerIds as string[];
+        const nodes = snapshot.nodes as Record<string, NetworkNode>;
+        const REVEALED_SERVERS = activeServerIds
+            .map(id => nodes[id])
+            .filter((s): s is NetworkNode => !!s && s.visibility === 'REVEALED');
+        const traceIncrease = REVEALED_SERVERS.reduce((sum: number, s) => sum + (s.resetTrace || 0), 0);
         const newTrace = snapshot.playerStats.trace + traceIncrease;
 
         const endTurnDeltas = {

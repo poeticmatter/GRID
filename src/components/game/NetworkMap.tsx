@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { useServerStore } from '../../store/useServerStore';
+import { useViewModel } from '../../hooks/useViewModel';
 import type { NetworkNode, CellColor } from '../../engine/types';
 import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -204,8 +204,17 @@ const TopologyToggleButton = ({ isOpen, onClick }: { isOpen: boolean, onClick: (
 };
 
 export const NetworkMap = () => {
-    const { activeServers, networkGraph } = useServerStore();
+    // Consume normalized node state from the ViewModel for temporal decoupling.
+    const { nodes, activeServerIds } = useViewModel();
     const [isOpen, setIsOpen] = useState(false);
+
+    // Derived: all nodes as an array (for topology rendering)
+    const networkGraph = useMemo(() => Object.values(nodes), [nodes]);
+
+    // Derived: active server objects (for the server card list)
+    const activeServers = useMemo(() => {
+        return activeServerIds.map(id => nodes[id]).filter(Boolean) as NetworkNode[];
+    }, [nodes, activeServerIds]);
 
     const nodeCoords = useMemo(() => {
         if (!networkGraph || networkGraph.length === 0) return {};
@@ -228,11 +237,13 @@ export const NetworkMap = () => {
 
     if (!networkGraph || networkGraph.length === 0) return null;
 
+    // Derive node visual state purely from the SSOT — no cross-referencing two arrays.
     const getNodeState = (node: NetworkNode) => {
         if (node.type === 'HOME') return 'HOME';
         if (node.status === 'HACKED') return 'CLEARED';
         if (node.status === 'BYPASSED') return 'BYPASSED';
-        if (activeServers.some(s => s.id === node.id)) return 'ACTIVE';
+        // A node is ACTIVE if it appears in the activeServerIds index
+        if (activeServerIds.includes(node.id)) return 'ACTIVE';
         return 'LOCKED';
     };
 
@@ -284,8 +295,8 @@ export const NetworkMap = () => {
                                     if (!p2) return null;
 
                                     const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
-                                    const childNode = networkGraph.find(n => n.id === childId);
-                                    const isChildActive = activeServers.some(s => s.id === childId);
+                                    const childNode = nodes[childId];
+                                    const isChildActive = activeServerIds.includes(childId);
                                     const isChildActiveOrHacked = isChildActive || (childNode && childNode.status === 'HACKED');
                                     const isActiveConnection = isParentCleared && isChildActiveOrHacked;
 
@@ -315,7 +326,7 @@ export const NetworkMap = () => {
                                                         repeatDelay: CYCLE_TIME - STEP_TIME,
                                                         delay: pulseDelay,
                                                         ease: "linear",
-                                                        times: [0, 0.1, 0.9, 1] // Fade in/out at edges
+                                                        times: [0, 0.1, 0.9, 1]
                                                     }}
                                                 />
                                             )}

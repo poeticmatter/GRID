@@ -1,3 +1,4 @@
+import { produce } from 'immer';
 import { refillGrid } from '../../grid-logic';
 import type { GameSnapshot, StateDeltas, ReadonlyDeep } from '../types';
 import type { Card, Grid, EffectEndTurn } from '../../types';
@@ -13,7 +14,9 @@ export const endTurnMechanic: IEffectMechanic = {
 
         const tracePenalty = effect?.tracePenalty ?? 2;
 
-        const newGrid = refillGrid(snapshot.grid as unknown as Grid, snapshot.refillRate);
+        // refillGrid returns a fresh grid; no need to draft-mutate.
+        const newGrid = refillGrid(snapshot.grid as Grid, snapshot.refillRate);
+
         let currentDeck = [...snapshot.deck] as Card[];
         let currentDiscard = [...snapshot.discardPile] as Card[];
         let finalHand = [...snapshot.hand] as Card[];
@@ -21,15 +24,17 @@ export const endTurnMechanic: IEffectMechanic = {
         while (finalHand.length < snapshot.maxHandSize) {
             if (currentDeck.length === 0) {
                 if (currentDiscard.length === 0) break;
-                currentDeck = [...currentDiscard];
-                for (let j = currentDeck.length - 1; j > 0; j--) {
-                    const k = Math.floor(Math.random() * (j + 1));
-                    [currentDeck[j], currentDeck[k]] = [currentDeck[k], currentDeck[j]];
-                }
+                // Shuffle discard → deck
+                currentDeck = produce(currentDiscard, draft => {
+                    for (let j = draft.length - 1; j > 0; j--) {
+                        const k = Math.floor(Math.random() * (j + 1));
+                        [draft[j], draft[k]] = [draft[k], draft[j]];
+                    }
+                });
                 currentDiscard = [];
             }
             const card = currentDeck.pop();
-            if (card) finalHand.push(card);
+            if (card) finalHand.push(card as Card);
         }
 
         const newTrace = snapshot.playerStats.trace + tracePenalty;

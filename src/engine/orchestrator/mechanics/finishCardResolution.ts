@@ -1,3 +1,4 @@
+import { produce } from 'immer';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from '../types';
 import type { Card } from '../../types';
 import type { IEffectMechanic } from '../mechanicRegistry';
@@ -16,17 +17,22 @@ export const finishCardResolution: IEffectMechanic = {
             };
         }
 
-        const card = snapshot.hand.find((c: any) => c.id === cardId);
-        let newHand = [...snapshot.hand] as Card[];
-        let newDiscard = [...snapshot.discardPile] as Card[];
+        const card = snapshot.hand.find((c: any) => c.id === cardId) as Card | undefined;
+        const hasReset = card?.effects.some((e: any) => e.type === 'SYSTEM_RESET') ?? false;
 
-        if (card) {
-            const hasReset = card.effects.some((e: any) => e.type === 'SYSTEM_RESET');
-            if (!hasReset) {
-                newHand = newHand.filter((c: any) => c.id !== cardId);
-                newDiscard.push(card as Card);
+        // Use immer to derive the new hand and discard without unsafe casts
+        const newHand = produce(snapshot.hand as Card[], draft => {
+            if (card && !hasReset) {
+                const idx = draft.findIndex(c => c.id === cardId);
+                if (idx !== -1) draft.splice(idx, 1);
             }
-        }
+        });
+
+        const newDiscard = produce(snapshot.discardPile as Card[], draft => {
+            if (card && !hasReset) {
+                draft.push(card);
+            }
+        });
 
         return {
             hand: newHand,

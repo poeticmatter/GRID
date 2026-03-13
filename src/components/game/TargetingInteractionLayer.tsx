@@ -2,7 +2,7 @@ import React from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { useTargetingStore } from '../../store/useTargetingStore';
 import { useUIStore } from '../../store/useUIStore';
-import { useGridStore } from '../../store/useGridStore';
+import { useViewModel } from '../../hooks/useViewModel';
 import { Dispatch } from '../../engine/orchestrator';
 import type { Effect, Coordinate, Cell } from '../../engine/types';
 
@@ -48,7 +48,7 @@ export const TargetingInteractionLayer = () => {
     const { gameState, effectQueue, reprogramTargetSource } = useGameStore();
     const { rotation } = useUIStore();
     const setHoveredCoordinate = useTargetingStore(state => state.setHoveredCoordinate);
-    const { grid } = useGridStore();
+    const { grid } = useViewModel();
 
     if (gameState !== 'EFFECT_RESOLUTION') return null;
 

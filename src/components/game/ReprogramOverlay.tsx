@@ -1,10 +1,10 @@
-import { useGridStore } from '../../store/useGridStore';
+import { useViewModel } from '../../hooks/useViewModel';
 import { useGameStore } from '../../store/useGameStore';
 import { useTargetingStore } from '../../store/useTargetingStore';
 import type { EffectReprogram } from '../../engine/types';
 
 export const ReprogramOverlay = () => {
-    const { grid } = useGridStore();
+    const { grid } = useViewModel();
     const { gameState, effectQueue, reprogramTargetSource } = useGameStore();
     const hoveredCoordinate = useTargetingStore(state => state.hoveredCoordinate);
 

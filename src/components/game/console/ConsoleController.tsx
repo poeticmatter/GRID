@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useGameStore } from '../../../store/useGameStore';
 import { useTargetingStore } from '../../../store/useTargetingStore';
-import { useGridStore } from '../../../store/useGridStore';
+import { useViewModel } from '../../../hooks/useViewModel';
 import { useIsMobile } from '../../../hooks/useMediaQuery';
 import { Dispatch } from '../../../engine/orchestrator';
 import { AnimatePresence } from 'framer-motion';
@@ -12,7 +12,7 @@ import type { Effect } from '../../../engine/types';
 export const ConsoleController = () => {
     const { gameState, pendingEffects, effectQueue } = useGameStore();
     const { hoveredCoordinate, setHoveredCoordinate } = useTargetingStore();
-    const { grid } = useGridStore();
+    const { grid } = useViewModel();
     const isMobile = useIsMobile();
     const [isExpanded, setIsExpanded] = useState(false);
 

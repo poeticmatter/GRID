@@ -1,5 +1,5 @@
 import { useEffect, useRef } from 'react';
-import { useGridStore } from '../../store/useGridStore';
+import { useViewModel } from '../../hooks/useViewModel';
 import { useUIStore } from '../../store/useUIStore';
 import { Cell } from './Cell';
 import { GhostOverlay } from './GhostOverlay';
@@ -7,7 +7,7 @@ import { ReprogramOverlay } from './ReprogramOverlay';
 import { TargetingInteractionLayer } from './TargetingInteractionLayer';
 
 export const Board = () => {
-  const { grid } = useGridStore();
+  const { grid } = useViewModel();
   const setSpatialMetrics = useUIStore(state => state.setSpatialMetrics);
   const gridRef = useRef<HTMLDivElement>(null);
 
