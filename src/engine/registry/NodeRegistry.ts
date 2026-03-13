@@ -1,9 +1,9 @@
-import { NodePools } from '../../data/nodes';
 import type { NodeDefinition, NetworkNode, NodeType, CellColor } from '../types';
 
 export class NodeRegistry {
     private static instance: NodeRegistry;
     private idCounter = 0;
+    private pool: Record<string, NodeDefinition[]> = {};
 
     private constructor() { }
 
@@ -14,10 +14,14 @@ export class NodeRegistry {
         return NodeRegistry.instance;
     }
 
+    public initialize(pool: Record<string, NodeDefinition[]>) {
+        this.pool = pool;
+    }
+
     public getRandomPoolId(): string {
-        const poolKeys = Object.keys(NodePools);
+        const poolKeys = Object.keys(this.pool);
         if (poolKeys.length === 0) {
-            console.warn('NodePools is empty, returning fallback name');
+            console.warn('NodeRegistry pool is empty, returning fallback name');
             return 'FallbackPool';
         }
         const index = Math.floor(Math.random() * poolKeys.length);
@@ -25,7 +29,7 @@ export class NodeRegistry {
     }
 
     public selectNode(poolId: string, targetDifficulty?: number): NetworkNode {
-        const pool = NodePools[poolId];
+        const pool = this.pool[poolId];
         if (!pool || pool.length === 0) {
             // Fallback for missing pool
             console.warn(`Pool ${String(poolId)} is missing or empty. Using default node.`);
@@ -93,7 +97,7 @@ export class NodeRegistry {
      */
     public selectNodeByType(nodeType: NodeType, targetDifficulty?: number): NetworkNode {
         // Aggregate all definitions from every pool
-        const allDefs: NodeDefinition[] = Object.values(NodePools).flat();
+        const allDefs: NodeDefinition[] = Object.values(this.pool).flat();
 
         // Filter by requested type
         let candidates = allDefs.filter(d => d.type === nodeType);

@@ -1,9 +1,9 @@
-import { CardPool } from '../../data/cards';
 import type { CardDefinition, Card } from '../types';
 
 export class CardRegistry {
     private static instance: CardRegistry;
     private idCounter = 0;
+    private pool: Record<string, CardDefinition> = {};
 
     private constructor() { }
 
@@ -14,11 +14,14 @@ export class CardRegistry {
         return CardRegistry.instance;
     }
 
+    public initialize(pool: Record<string, CardDefinition>) {
+        this.pool = pool;
+    }
+
     public getStartingCards(): Card[] {
         const startingCards: Card[] = [];
-        for (const def of Object.values(CardPool)) {
+        for (const def of Object.values(this.pool)) {
             if (def.isStartingCard) {
-
                 startingCards.push(this.createCard(def));
             }
         }
@@ -26,12 +29,12 @@ export class CardRegistry {
     }
 
     public getRandomCardsWeighted(count: number): Card[] {
-        const poolKeys = Object.keys(CardPool);
+        const poolKeys = Object.keys(this.pool);
         if (poolKeys.length === 0) return [];
 
         let totalWeight = 0;
         const cumulativeWeights: number[] = [];
-        const candidates = Object.values(CardPool);
+        const candidates = Object.values(this.pool);
 
         for (const candidate of candidates) {
             totalWeight += candidate.weight;

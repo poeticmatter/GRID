@@ -1,16 +1,11 @@
-// Core types for the game engine
+import type { CellColor, Effect, NodeType, NodeLayers, CountermeasureDict } from '@grid/shared';
+export * from '@grid/shared';
 
-export type CellColor = 'RED' | 'BLUE' | 'GREEN' | 'YELLOW' | 'PURPLE';
 export type CellSymbol = 'SHIELD' | 'EYE' | 'SKULL' | 'NONE';
 export type CellState = 'LOCKED' | 'BROKEN' | 'CORRUPTED';
 
-export interface Coordinate {
-  x: number;
-  y: number;
-}
-
 export interface Cell {
-  id: string; // Unique ID for key prop
+  id: string;
   x: number;
   y: number;
   color: CellColor;
@@ -20,36 +15,6 @@ export interface Cell {
 
 export type Grid = Cell[][];
 
-export interface EffectCut {
-  type: 'CUT';
-  pattern: Coordinate[];
-}
-
-export interface EffectReprogram {
-  type: 'REPROGRAM';
-  amount: number;
-}
-
-export interface EffectSystemReset {
-  type: 'SYSTEM_RESET';
-}
-
-export interface EffectEndTurn {
-  type: 'END_TURN';
-  tracePenalty?: number;
-}
-
-export type Effect = EffectCut | EffectReprogram | EffectSystemReset | EffectEndTurn;
-
-export interface CardDefinition {
-  name: string;
-  visualColor: CellColor;
-  effects: Effect[];
-  memory: number;
-  weight: number;
-  isStartingCard: boolean;
-}
-
 export interface Card {
   id: string;
   name: string;
@@ -58,30 +23,13 @@ export interface Card {
   memory: number;
 }
 
-export type NodeLayers = Partial<Record<CellColor, number[]>>;
-
-export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
-export type CountermeasureDict = Partial<Record<CellColor, CountermeasurePayload>>;
-
-export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME' | 'HOME';
-
-export interface NodeDefinition {
-  type: NodeType;
-  name: string;
-  baseDifficulty: number;
-  weight: number;
-  layers: NodeLayers;
-  countermeasures: CountermeasureDict;
-  resetTrace: number;
-}
-
 export interface NetworkNode {
   id: string;
   type: NodeType;
   name: string;
   difficulty: number;
   layers: NodeLayers;
-  progress: Partial<Record<CellColor, boolean[]>>; // Progress towards hacking layers
+  progress: Partial<Record<CellColor, boolean[]>>;
   countermeasures: CountermeasureDict;
   resetTrace: number;
   status: 'ACTIVE' | 'HACKED' | 'LOCKED' | 'BYPASSED';
@@ -92,8 +40,8 @@ export interface NetworkNode {
 }
 
 export interface PlayerStats {
-  hardwareHealth: number; // Meat health
-  trace: number; // 0-100
+  hardwareHealth: number;
+  trace: number;
   credits: number;
   maxHardwareHealth: number;
 }
