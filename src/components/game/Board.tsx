@@ -8,52 +8,41 @@ import { TargetingInteractionLayer } from './TargetingInteractionLayer';
 
 export const Board = () => {
   const { grid } = useViewModel();
-  const setSpatialMetrics = useUIStore(state => state.setSpatialMetrics);
   const gridRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!gridRef.current) return;
 
-    let timeoutId: number | null = null;
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      const gridEl = gridRef.current;
+      if (!entry || !gridEl) return;
 
-    const observer = new ResizeObserver(() => {
-      if (timeoutId) {
-        window.clearTimeout(timeoutId);
-      }
+      // Use contentRect.width for sub-pixel accuracy (floating-point)
+      const containerWidth = entry.contentRect.width;
 
-      timeoutId = window.setTimeout(() => {
-        const gridEl = gridRef.current;
-        if (!gridEl || !gridEl.firstChild) return;
+      // Dynamically read CSS grid gap
+      const style = window.getComputedStyle(gridEl);
+      const gapStr = style.gap;
+      const gapSize = parseFloat(gapStr) || 4;
 
-        const firstCell = gridEl.firstChild as HTMLElement;
-        // Use offsetWidth for unscaled DOM layout values
-        const cellSize = firstCell.offsetWidth || 48;
+      // Calculate precise, floating-point cellSize: (containerWidth - (5 * gapSize)) / 6
+      // Assuming a 6-column grid as per grid-cols-6 class
+      const cellSize = (containerWidth - (5 * gapSize)) / 6;
 
-        let gapSize = 4; // Default gap
-        if (gridEl.children.length > 1) {
-          const secondCell = gridEl.children[1] as HTMLElement;
-          // Calculate grid gap from distance between first and second children
-          const gap = secondCell.offsetLeft - (firstCell.offsetLeft + firstCell.offsetWidth);
-          if (gap > 0) {
-            gapSize = gap;
-          }
-        }
+      // Dynamically compute nodeRadius -> ~8% of the cell size for proportionate HUD nodes.
+      const nodeRadius = Math.max(cellSize * 0.08, 1);
 
-        // Dynamically compute nodeRadius -> ~8% of the cell size for proportionate HUD nodes.
-        const nodeRadius = Math.max(cellSize * 0.08, 1);
-
-        setSpatialMetrics({ cellSize, gapSize, nodeRadius });
-      }, 150);
+      // Dispatch to store using getState() to avoid potential hook-driven re-renders within observer
+      useUIStore.getState().setSpatialMetrics({ cellSize, gapSize, nodeRadius });
     });
 
     observer.observe(gridRef.current);
 
-    // Also observe the first cell whenever grid renders just in case
     return () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
       observer.disconnect();
     };
-  }, [setSpatialMetrics]);
+  }, []);
 
   return (
     <div
