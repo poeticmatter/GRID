@@ -86,18 +86,6 @@ export const TargetingInteractionLayer = () => {
 
     return (
         <div className="absolute inset-0 z-40 pointer-events-none">
-            {activeEffect.type === 'RUN' && !isMobile && (
-                <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-auto">
-                    <button
-                        onClick={() => Dispatch({ type: 'ROTATE_CARD' })}
-                        className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-full font-bold transition-all border border-slate-600 hover:border-cyan-400 hover:text-cyan-400 shadow-xl hover:scale-105"
-                    >
-                        <RotateCw className="w-5 h-5" />
-                        ROTATE
-                    </button>
-                </div>
-            )}
-            
             <div
                 className="absolute inset-2 w-full h-full grid grid-cols-6 grid-rows-6 gap-1 z-40 pointer-events-auto"
                 onMouseLeave={() => setHoveredCoordinate(null)}

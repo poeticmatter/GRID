@@ -16,20 +16,19 @@ export const Console = () => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const activeEffect = effectQueue[0]?.effect;
-    const isResolving = gameState === 'EFFECT_RESOLUTION' && !!activeEffect;
+    const isResolving = gameState === 'EFFECT_RESOLUTION' && activeEffect?.type === 'RUN';
     const isVisible = (gameState === 'EFFECT_ORDERING' || gameState === 'EFFECT_RESOLUTION') && (pendingEffects.length > 0 || isResolving);
 
     // Mobile: Auto-collapse list when an effect starts resolution
     useEffect(() => {
         if (isMobile && isResolving) {
-            setIsExpanded(false);
+            setIsExpanded(true); // Direct instruction: remain open if it contains spatial controls
         }
     }, [isResolving, isMobile]);
 
     // Mobile Virtual Cursor Initialization
     useEffect(() => {
         if (isMobile && gameState === 'EFFECT_RESOLUTION' && activeEffect?.type === 'RUN' && hoveredCoordinate === null) {
-            // Find center of board. Grid is 6x6 usually.
             const centerY = Math.floor(grid.length / 2);
             const centerX = Math.floor(grid[0]?.length / 2) || 0;
             setHoveredCoordinate({ x: centerX, y: centerY });
@@ -52,43 +51,43 @@ export const Console = () => {
         }
     };
 
-    const renderDpad = () => (
-        <div className="flex flex-col items-center gap-2 bg-slate-900/40 p-4 rounded-xl border border-cyan-500/20 mb-4 backdrop-blur-sm">
-            <div className="grid grid-cols-3 gap-2">
+    const renderDpad = (compressed = false) => (
+        <div className={`flex flex-col items-center ${compressed ? 'gap-1' : 'gap-2'} w-full`}>
+            <div className={`grid grid-cols-3 ${compressed ? 'gap-1' : 'gap-2'}`}>
                 <div />
                 <button 
-                    onClick={() => handleDpadMove(0, -1)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 active:scale-95 transition-all"
+                    onPointerDown={() => handleDpadMove(0, -1)}
+                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
                 >
                     <ArrowUp className="w-6 h-6 text-cyan-400" />
                 </button>
                 <div />
                 
                 <button 
-                    onClick={() => handleDpadMove(-1, 0)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 active:scale-95 transition-all"
+                    onPointerDown={() => handleDpadMove(-1, 0)}
+                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
                 >
                     <ArrowLeft className="w-6 h-6 text-cyan-400" />
                 </button>
                 
                 <button 
-                    onClick={() => Dispatch({ type: 'ROTATE_CARD' })}
-                    className="w-12 h-12 bg-rose-500/20 border border-rose-500/40 rounded-lg flex items-center justify-center active:bg-rose-500/40 active:scale-95 transition-all"
+                    onPointerDown={() => Dispatch({ type: 'ROTATE_CARD' })}
+                    className="w-12 h-12 bg-rose-500/20 border border-rose-500/40 rounded-lg flex items-center justify-center active:bg-rose-500/40 transition-colors"
                 >
                     <RotateCw className="w-6 h-6 text-rose-400" />
                 </button>
                 
                 <button 
-                    onClick={() => handleDpadMove(1, 0)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 active:scale-95 transition-all"
+                    onPointerDown={() => handleDpadMove(1, 0)}
+                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
                 >
                     <ArrowRight className="w-6 h-6 text-cyan-400" />
                 </button>
 
                 <div />
                 <button 
-                    onClick={() => handleDpadMove(0, 1)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 active:scale-95 transition-all"
+                    onPointerDown={() => handleDpadMove(0, 1)}
+                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
                 >
                     <ArrowDown className="w-6 h-6 text-cyan-400" />
                 </button>
@@ -96,8 +95,8 @@ export const Console = () => {
             </div>
 
             <button 
-                onClick={handleConfirm}
-                className="w-full h-12 mt-2 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex items-center justify-center gap-2 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 active:scale-95 transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                onPointerDown={handleConfirm}
+                className="w-full h-12 mt-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex items-center justify-center gap-2 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
             >
                 <Check className="w-5 h-5" />
                 Confirm Run
@@ -107,69 +106,63 @@ export const Console = () => {
 
     if (isMobile) {
         return (
-            <div className="fixed inset-x-0 bottom-[120px] z-[70] px-4 pointer-events-none flex flex-col items-center">
-                <AnimatePresence>
-                    {isResolving && activeEffect?.type === 'RUN' && (
-                        <motion.div 
-                            initial={{ y: 20, opacity: 0 }}
-                            animate={{ y: 0, opacity: 1 }}
-                            exit={{ y: 20, opacity: 0 }}
-                            className="pointer-events-auto"
-                        >
-                            {renderDpad()}
-                        </motion.div>
-                    )}
-                </AnimatePresence>
-
-                <div className="w-full max-w-md pointer-events-auto">
+            <div className="fixed inset-x-0 bottom-0 z-[80] pointer-events-none flex flex-col items-center">
+                <div className="w-full max-w-md pointer-events-auto bg-slate-900/95 backdrop-blur-2xl border-t border-cyan-500/30 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] pb-[max(1rem,env(safe-area-inset-bottom))]">
                     <button 
                         onClick={() => setIsExpanded(!isExpanded)}
-                        className="w-full bg-slate-900/90 backdrop-blur-md border border-cyan-500/30 rounded-t-lg p-2 flex items-center justify-between group shadow-xl"
+                        className="w-full p-3 flex items-center justify-between group"
                     >
                         <div className="flex items-center gap-2 ml-2">
                             <Layers className="w-4 h-4 text-cyan-400" />
                             <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">
-                                {pendingEffects.length} Effects Stacked
+                                {isResolving ? 'SPATIAL OVERRIDE ACTIVE' : `${pendingEffects.length} Effects Stacked`}
                             </span>
                         </div>
                         {isExpanded ? <ChevronDown className="w-4 h-4 text-cyan-500" /> : <ChevronUp className="w-4 h-4 text-cyan-500" />}
                     </button>
 
-                    <AnimatePresence>
+                    <AnimatePresence initial={false}>
                         {isExpanded && (
                             <motion.div
-                                initial={{ height: 0 }}
-                                animate={{ height: 'auto' }}
-                                exit={{ height: 0 }}
-                                className="overflow-hidden bg-slate-900/95 border-x border-cyan-500/30 backdrop-blur-xl"
+                                initial={{ height: 0, opacity: 0 }}
+                                animate={{ height: 'auto', opacity: 1 }}
+                                exit={{ height: 0, opacity: 0 }}
+                                className="overflow-hidden"
                             >
-                                <div className="p-3 flex flex-col gap-2 max-h-[30vh] overflow-y-auto">
-                                    {pendingEffects.map((eff, i) => (
-                                        <button
-                                            key={`${eff.type}-${i}`}
-                                            onClick={() => {
-                                                if (gameState === 'EFFECT_ORDERING') {
-                                                    Dispatch({ type: 'QUEUE_EFFECT', payload: { effect: eff } });
-                                                }
-                                            }}
-                                            className={`
-                                                relative p-2 text-left rounded border transition-all
-                                                ${gameState === 'EFFECT_ORDERING' 
-                                                    ? 'bg-cyan-950/40 border-cyan-500/30 hover:border-cyan-400' 
-                                                    : 'bg-slate-800/50 border-slate-700 opacity-50'}
-                                            `}
-                                        >
-                                            <div className="flex justify-between items-center uppercase tracking-wider">
-                                                <span className="text-xs font-bold text-cyan-100">{eff.type}</span>
-                                                {eff.amount && <span className="text-[10px] text-cyan-400 bg-cyan-400/10 px-1 rounded">{eff.amount}</span>}
-                                            </div>
-                                        </button>
-                                    ))}
+                                <div className="px-4 pb-4 flex flex-col gap-2 max-h-[35vh]">
+                                    {isResolving ? (
+                                        <div className="py-2 animate-in fade-in zoom-in-95 duration-200">
+                                            {renderDpad(true)}
+                                        </div>
+                                    ) : (
+                                        <div className="flex flex-col gap-2 overflow-y-auto pr-1">
+                                            {pendingEffects.map((eff, i) => (
+                                                <button
+                                                    key={`${eff.type}-${i}`}
+                                                    onClick={() => {
+                                                        if (gameState === 'EFFECT_ORDERING') {
+                                                            Dispatch({ type: 'QUEUE_EFFECT', payload: { effect: eff } });
+                                                        }
+                                                    }}
+                                                    className={`
+                                                        relative p-3 text-left rounded-lg border transition-all active:scale-[0.98]
+                                                        ${gameState === 'EFFECT_ORDERING' 
+                                                            ? 'bg-cyan-950/40 border-cyan-500/30 hover:border-cyan-400' 
+                                                            : 'bg-slate-800/50 border-slate-700 opacity-50'}
+                                                    `}
+                                                >
+                                                    <div className="flex justify-between items-center uppercase tracking-wider">
+                                                        <span className="text-xs font-bold text-cyan-100">{eff.type}</span>
+                                                        {eff.amount && <span className="text-[10px] text-cyan-400 bg-cyan-400/10 px-1.5 rounded font-mono">x{eff.amount}</span>}
+                                                    </div>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
                                 </div>
                             </motion.div>
                         )}
                     </AnimatePresence>
-                    <div className="h-1 bg-cyan-500/30 w-full rounded-b-lg" />
                 </div>
             </div>
         );
@@ -231,7 +224,7 @@ export const Console = () => {
                         )}
                     </div>
 
-                    {isResolving && activeEffect?.type === 'RUN' && (
+                    {isResolving && (
                         <div className="mt-6 pt-6 border-t border-cyan-500/20 animate-in fade-in slide-in-from-bottom-2">
                              <button
                                 onClick={() => Dispatch({ type: 'ROTATE_CARD' })}
