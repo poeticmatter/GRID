@@ -63,8 +63,8 @@ export class CardRegistry {
         // Deep copy effects to avoid state mutation risk
         const clonedEffects = def.effects.map(effect => {
             // Simple clone works for these plain objects as they don't have nested refs
-            // except pattern array in CUT
-            if (effect.type === 'CUT') {
+            // except pattern array in RUN
+            if (effect.type === 'RUN') {
                 return {
                     ...effect,
                     pattern: effect.pattern.map(p => ({ ...p }))

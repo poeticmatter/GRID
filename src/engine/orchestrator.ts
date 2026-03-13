@@ -178,7 +178,7 @@ export const Dispatch = (action: GameAction) => {
             break;
         }
 
-        case 'RESOLVE_CUT': {
+        case 'RESOLVE_RUN': {
             deltas = evaluateQueue(snapshot, action.payload);
             break;
         }

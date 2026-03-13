@@ -3,7 +3,7 @@ import type { Grid } from '../../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from '../types';
 import type { IEffectMechanic } from '../mechanicRegistry';
 
-export const cutMechanic: IEffectMechanic = {
+export const runMechanic: IEffectMechanic = {
     type: 'DEFERRED',
     execute: (snapshot: ReadonlyDeep<GameSnapshot>, payload: { x: number; y: number; pattern: any[] }): StateDeltas => {
         const { x, y, pattern: rawPattern } = payload;
@@ -24,7 +24,7 @@ export const cutMechanic: IEffectMechanic = {
             };
         }
 
-        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'cut', durationMs: 800 });
+        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'run', durationMs: 800 });
 
         // 1. Harvest Cells & Update Grid
         const affected = getAffectedCells(activeGrid, rotatedPattern, x, y);

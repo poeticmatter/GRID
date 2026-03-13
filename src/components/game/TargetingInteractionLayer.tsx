@@ -4,6 +4,7 @@ import { useUIStore } from '../../store/useUIStore';
 import { useGridStore } from '../../store/useGridStore';
 import { Dispatch } from '../../engine/orchestrator';
 import { RotateCw } from 'lucide-react';
+import { useMobile } from '../../hooks/useMobile';
 import type { Effect, Coordinate, Cell } from '../../engine/types';
 
 export interface TargetingContext {
@@ -22,10 +23,10 @@ export interface TargetingStrategy {
 }
 
 export const TargetingRegistry: Record<string, TargetingStrategy> = {
-    'CUT': {
+    'RUN': {
         onClick: (ctx) => {
-            if (ctx.effect.type !== 'CUT') return;
-            Dispatch({ type: 'RESOLVE_CUT', payload: { x: ctx.x, y: ctx.y, pattern: ctx.effect.pattern } });
+            if (ctx.effect.type !== 'RUN') return;
+            Dispatch({ type: 'RESOLVE_RUN', payload: { x: ctx.x, y: ctx.y, pattern: ctx.effect.pattern } });
             ctx.setHoveredCoordinate(null);
         }
     },
@@ -49,6 +50,7 @@ export const TargetingInteractionLayer = () => {
     const { rotation } = useUIStore();
     const setHoveredCoordinate = useTargetingStore(state => state.setHoveredCoordinate);
     const { grid } = useGridStore();
+    const isMobile = useMobile();
 
     if (gameState !== 'EFFECT_RESOLUTION') return null;
 
@@ -56,6 +58,7 @@ export const TargetingInteractionLayer = () => {
     if (!activeEffect) return null;
 
     const handleMouseEnter = (x: number, y: number) => {
+        if (isMobile) return;
         const strategy = TargetingRegistry[activeEffect.type];
         if (strategy?.onHover) {
             strategy.onHover({ x, y, effect: activeEffect, rotation, grid, reprogramTargetSource, setHoveredCoordinate });
@@ -83,7 +86,7 @@ export const TargetingInteractionLayer = () => {
 
     return (
         <div className="absolute inset-0 z-40 pointer-events-none">
-            {activeEffect.type === 'CUT' && (
+            {activeEffect.type === 'RUN' && !isMobile && (
                 <div className="absolute -top-12 left-1/2 -translate-x-1/2 pointer-events-auto">
                     <button
                         onClick={() => Dispatch({ type: 'ROTATE_CARD' })}

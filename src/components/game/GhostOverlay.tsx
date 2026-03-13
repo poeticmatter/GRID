@@ -4,7 +4,7 @@ import { useUIStore } from '../../store/useUIStore';
 import type { SpatialMetrics } from '../../store/useUIStore';
 import { useTargetingStore } from '../../store/useTargetingStore';
 import { checkPatternFit, getAffectedCells, rotatePattern } from '../../engine/grid-logic';
-import type { EffectCut } from '../../engine/types';
+import type { EffectRun } from '../../engine/types';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const getPerimeterPath = (cells: { x: number, y: number }[], metrics: SpatialMetrics) => {
@@ -92,10 +92,10 @@ export const GhostOverlay = () => {
 
     const activeEffect = effectQueue[0]?.effect;
 
-    if (gameState !== 'EFFECT_RESOLUTION' || !activeEffect || activeEffect.type !== 'CUT') return null;
+    if (gameState !== 'EFFECT_RESOLUTION' || !activeEffect || activeEffect.type !== 'RUN') return null;
 
-    const cutEffect = activeEffect as EffectCut;
-    const rotatedPattern = rotatePattern(cutEffect.pattern, rotation);
+    const runEffect = activeEffect as EffectRun;
+    const rotatedPattern = rotatePattern(runEffect.pattern, rotation);
     let affected: { x: number, y: number }[] = [];
     let valid = false;
 

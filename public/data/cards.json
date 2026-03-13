@@ -7,7 +7,7 @@
         "isStartingCard": true,
         "effects": [
             {
-                "type": "CUT",
+                "type": "RUN",
                 "pattern": [
                     {
                         "x": 0,

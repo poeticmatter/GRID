@@ -41,7 +41,7 @@ const renderEffect = (effect: Effect, index: number, rotation: number) => {
           <div className="text-[10px] font-bold">SYSTEM RESET</div>
         </div>
       );
-    case 'CUT':
+    case 'RUN':
       return (
         <motion.div
           key={index}

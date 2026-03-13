@@ -8,8 +8,8 @@ export interface Coordinate {
   y: number;
 }
 
-export interface EffectCut {
-  type: 'CUT';
+export interface EffectRun {
+  type: 'RUN';
   pattern: Coordinate[];
 }
 
@@ -27,7 +27,7 @@ export interface EffectEndTurn {
   tracePenalty?: number;
 }
 
-export type Effect = EffectCut | EffectReprogram | EffectSystemReset | EffectEndTurn;
+export type Effect = EffectRun | EffectReprogram | EffectSystemReset | EffectEndTurn;
 
 export interface CardDefinition {
   name: string;
@@ -71,8 +71,8 @@ export interface Blueprint {
 }
 
 export const EFFECT_METADATA: Record<Effect['type'], Blueprint> = {
-  CUT: {
-    label: 'CUT (Grid Pattern)',
+  RUN: {
+    label: 'RUN (Grid Pattern)',
     fields: {
       pattern: { label: 'Pattern', type: 'coordinate_array', default: [{ x: 0, y: 0 }] }
     }

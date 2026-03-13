@@ -7,8 +7,8 @@ export const CoordinateSchema = z.object({
     y: z.number()
 });
 
-export const EffectCutSchema = z.object({
-    type: z.literal('CUT'),
+export const EffectRunSchema = z.object({
+    type: z.literal('RUN'),
     pattern: z.array(CoordinateSchema)
 });
 
@@ -27,7 +27,7 @@ export const EffectEndTurnSchema = z.object({
 });
 
 export const EffectSchema = z.discriminatedUnion('type', [
-    EffectCutSchema,
+    EffectRunSchema,
     EffectReprogramSchema,
     EffectSystemResetSchema,
     EffectEndTurnSchema

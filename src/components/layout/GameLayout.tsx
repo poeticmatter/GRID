@@ -5,18 +5,21 @@ import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
 import { Hand } from '../game/Hand';
 import { NetworkMap } from '../game/NetworkMap';
-import { ActiveEffectStack } from '../game/ActiveEffectStack';
+import { Console } from '../game/Console';
 import { AudioController } from '../audio/AudioController';
 import { PlaybackController } from '../game/PlaybackController';
 import { gameEventBus } from '../../engine/eventBus';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVisualQueueStore } from '../../store/useVisualQueueStore';
 import { Menu } from 'lucide-react';
+import { useGameInput } from '../../hooks/useGameInput';
 
 export const GameLayout = () => {
     const gameState = useGameStore(state => state.gameState);
     const setGameState = useGameStore(state => state.setGameState);
     const credits = usePlayerStore(state => state.playerStats.credits);
+
+    useGameInput();
 
     const handleStart = () => {
         gameEventBus.emit('AUDIO_INIT');
@@ -77,7 +80,7 @@ export const GameLayout = () => {
                 <Hand />
             </div>
 
-            <ActiveEffectStack />
+            <Console />
 
             {/* Overlays */}
             <AnimatePresence>
