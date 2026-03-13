@@ -93,6 +93,9 @@ import { patchSnapshot } from './orchestrator/deltaHelpers';
 import { evaluateQueue } from './orchestrator/fsm';
 
 export const Dispatch = (action: GameAction) => {
+    // Block dispatches while the visual queue is draining
+    if (useVisualQueueStore.getState().isPlaying) return;
+
     const snapshot = buildSnapshot();
     let deltas: StateDeltas[] = [];
 
