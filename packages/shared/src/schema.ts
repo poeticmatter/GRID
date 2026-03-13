@@ -47,9 +47,9 @@ export const CountermeasurePayloadSchema = z.object({
     value: z.number()
 });
 
-export const CountermeasureDictSchema = z.record(CellColorSchema, CountermeasurePayloadSchema);
+export const CountermeasureDictSchema = z.record(z.string(), CountermeasurePayloadSchema);
 
-export const NodeLayersSchema = z.record(CellColorSchema, z.array(z.number()));
+export const NodeLayersSchema = z.record(z.string(), z.array(z.number()));
 
 export const NodeTypeSchema = z.enum(['SERVER', 'ICE', 'MAINFRAME', 'HOME']);
 
@@ -63,5 +63,5 @@ export const NodeDefinitionSchema = z.object({
     resetTrace: z.number()
 });
 
-export const CardPoolSchema = z.record(CardDefinitionSchema);
-export const NodePoolsSchema = z.record(z.array(NodeDefinitionSchema));
+export const CardPoolSchema = z.record(z.string(), CardDefinitionSchema);
+export const NodePoolsSchema = z.record(z.string(), z.array(NodeDefinitionSchema));

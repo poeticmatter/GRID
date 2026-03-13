@@ -45,19 +45,22 @@ export default function App() {
     }, [cards, nodes]);
 
     const handleExport = () => {
-        const cardsBlob = new Blob([JSON.stringify(cards, null, 4)], { type: 'application/json' });
-        const nodesBlob = new Blob([JSON.stringify(nodes, null, 4)], { type: 'application/json' });
-        
         const download = (blob: Blob, name: string) => {
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
             a.download = name;
             a.click();
+            URL.revokeObjectURL(url);
         };
 
-        download(cardsBlob, 'cards.json');
-        download(nodesBlob, 'nodes.json');
+        if (activeTab === 'CARDS') {
+            const blob = new Blob([JSON.stringify(cards, null, 4)], { type: 'application/json' });
+            download(blob, 'cards.json');
+        } else {
+            const blob = new Blob([JSON.stringify(nodes, null, 4)], { type: 'application/json' });
+            download(blob, 'nodes.json');
+        }
     };
 
     const handleImport = (e: React.ChangeEvent<HTMLInputElement>) => {
