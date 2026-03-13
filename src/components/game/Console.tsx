@@ -19,12 +19,12 @@ export const Console = () => {
     const isResolving = gameState === 'EFFECT_RESOLUTION' && activeEffect?.type === 'RUN';
     const isVisible = (gameState === 'EFFECT_ORDERING' || gameState === 'EFFECT_RESOLUTION') && (pendingEffects.length > 0 || isResolving);
 
-    // Mobile: Auto-collapse list when an effect starts resolution
+    // Auto-open drawer when console becomes active (transition from hidden to visible)
     useEffect(() => {
-        if (isMobile && isResolving) {
-            setIsExpanded(true); // Direct instruction: remain open if it contains spatial controls
+        if (isMobile && isVisible) {
+            setIsExpanded(true);
         }
-    }, [isResolving, isMobile]);
+    }, [isVisible, isMobile]);
 
     // Mobile Virtual Cursor Initialization
     useEffect(() => {
@@ -51,58 +51,115 @@ export const Console = () => {
         }
     };
 
-    const renderDpad = (compressed = false) => (
-        <div className={`flex flex-col items-center ${compressed ? 'gap-1' : 'gap-2'} w-full`}>
-            <div className={`grid grid-cols-3 ${compressed ? 'gap-1' : 'gap-2'}`}>
-                <div />
-                <button 
-                    onPointerDown={() => handleDpadMove(0, -1)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
-                >
-                    <ArrowUp className="w-6 h-6 text-cyan-400" />
-                </button>
-                <div />
-                
-                <button 
-                    onPointerDown={() => handleDpadMove(-1, 0)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
-                >
-                    <ArrowLeft className="w-6 h-6 text-cyan-400" />
-                </button>
-                
-                <button 
-                    onPointerDown={() => Dispatch({ type: 'ROTATE_CARD' })}
-                    className="w-12 h-12 bg-rose-500/20 border border-rose-500/40 rounded-lg flex items-center justify-center active:bg-rose-500/40 transition-colors"
-                >
-                    <RotateCw className="w-6 h-6 text-rose-400" />
-                </button>
-                
-                <button 
-                    onPointerDown={() => handleDpadMove(1, 0)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
-                >
-                    <ArrowRight className="w-6 h-6 text-cyan-400" />
-                </button>
+    const renderDpad = (horizontal = false) => {
+        if (horizontal) {
+            return (
+                <div className="flex flex-row items-stretch gap-3 w-full">
+                    <div className="grid grid-cols-3 gap-1 shrink-0">
+                        <div />
+                        <button 
+                            onPointerDown={() => handleDpadMove(0, -1)}
+                            className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        >
+                            <ArrowUp className="w-5 h-5 text-cyan-400" />
+                        </button>
+                        <div />
+                        
+                        <button 
+                            onPointerDown={() => handleDpadMove(-1, 0)}
+                            className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        >
+                            <ArrowLeft className="w-5 h-5 text-cyan-400" />
+                        </button>
+                        
+                        <button 
+                            onPointerDown={() => Dispatch({ type: 'ROTATE_CARD' })}
+                            className="w-11 h-11 bg-rose-500/20 border border-rose-500/40 rounded-lg flex items-center justify-center active:bg-rose-500/40 transition-colors"
+                        >
+                            <RotateCw className="w-5 h-5 text-rose-400" />
+                        </button>
+                        
+                        <button 
+                            onPointerDown={() => handleDpadMove(1, 0)}
+                            className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        >
+                            <ArrowRight className="w-5 h-5 text-cyan-400" />
+                        </button>
 
-                <div />
+                        <div />
+                        <button 
+                            onPointerDown={() => handleDpadMove(0, 1)}
+                            className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        >
+                            <ArrowDown className="w-5 h-5 text-cyan-400" />
+                        </button>
+                        <div />
+                    </div>
+
+                    <button 
+                        onPointerDown={handleConfirm}
+                        className="flex-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex flex-col items-center justify-center gap-1 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                    >
+                        <Check className="w-6 h-6" />
+                        <span className="text-[10px]">Confirm</span>
+                    </button>
+                </div>
+            );
+        }
+
+        return (
+            <div className="flex flex-col items-center gap-2 w-full">
+                <div className="grid grid-cols-3 gap-2">
+                    <div />
+                    <button 
+                        onPointerDown={() => handleDpadMove(0, -1)}
+                        className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    >
+                        <ArrowUp className="w-6 h-6 text-cyan-400" />
+                    </button>
+                    <div />
+                    
+                    <button 
+                        onPointerDown={() => handleDpadMove(-1, 0)}
+                        className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    >
+                        <ArrowLeft className="w-6 h-6 text-cyan-400" />
+                    </button>
+                    
+                    <button 
+                        onPointerDown={() => Dispatch({ type: 'ROTATE_CARD' })}
+                        className="w-12 h-12 bg-rose-500/20 border border-rose-500/40 rounded-lg flex items-center justify-center active:bg-rose-500/40 transition-colors"
+                    >
+                        <RotateCw className="w-6 h-6 text-rose-400" />
+                    </button>
+                    
+                    <button 
+                        onPointerDown={() => handleDpadMove(1, 0)}
+                        className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    >
+                        <ArrowRight className="w-6 h-6 text-cyan-400" />
+                    </button>
+
+                    <div />
+                    <button 
+                        onPointerDown={() => handleDpadMove(0, 1)}
+                        className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    >
+                        <ArrowDown className="w-6 h-6 text-cyan-400" />
+                    </button>
+                    <div />
+                </div>
+
                 <button 
-                    onPointerDown={() => handleDpadMove(0, 1)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    onPointerDown={handleConfirm}
+                    className="w-full h-12 mt-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex items-center justify-center gap-2 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
                 >
-                    <ArrowDown className="w-6 h-6 text-cyan-400" />
+                    <Check className="w-5 h-5" />
+                    Confirm Run
                 </button>
-                <div />
             </div>
-
-            <button 
-                onPointerDown={handleConfirm}
-                className="w-full h-12 mt-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex items-center justify-center gap-2 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
-            >
-                <Check className="w-5 h-5" />
-                Confirm Run
-            </button>
-        </div>
-    );
+        );
+    };
 
     if (isMobile) {
         return (
@@ -129,13 +186,13 @@ export const Console = () => {
                                 exit={{ height: 0, opacity: 0 }}
                                 className="overflow-hidden"
                             >
-                                <div className="px-4 pb-4 flex flex-col gap-2 max-h-[35vh]">
+                                <div className="px-4 flex flex-col gap-2 max-h-[35vh]">
                                     {isResolving ? (
                                         <div className="py-2 animate-in fade-in zoom-in-95 duration-200">
                                             {renderDpad(true)}
                                         </div>
                                     ) : (
-                                        <div className="flex flex-col gap-2 overflow-y-auto pr-1">
+                                        <div className="flex flex-col gap-2 overflow-y-auto pr-1 pb-4">
                                             {pendingEffects.map((eff, i) => (
                                                 <button
                                                     key={`${eff.type}-${i}`}
