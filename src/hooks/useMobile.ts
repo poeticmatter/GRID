@@ -4,13 +4,14 @@ export const useMobile = () => {
     const [isMobile, setIsMobile] = useState(false);
 
     useEffect(() => {
+        const media = window.matchMedia('(max-width: 768px)');
         const checkMobile = () => {
-            setIsMobile(window.matchMedia('(max-width: 768px)').matches || 'ontouchstart' in window);
+            setIsMobile(media.matches);
         };
         
         checkMobile();
-        window.addEventListener('resize', checkMobile);
-        return () => window.removeEventListener('resize', checkMobile);
+        media.addEventListener('change', checkMobile);
+        return () => media.removeEventListener('change', checkMobile);
     }, []);
 
     return isMobile;

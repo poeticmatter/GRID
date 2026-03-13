@@ -1,0 +1,67 @@
+import type { Effect } from '../../../engine/types';
+
+interface EffectCardProps {
+    effect: Effect;
+    index: number;
+    isActive: boolean;
+    isOrdering: boolean;
+    onClick: () => void;
+    variant: 'mobile' | 'desktop';
+}
+
+export const EffectCard = ({ 
+    effect, 
+    index, 
+    isActive, 
+    isOrdering, 
+    onClick, 
+    variant 
+}: EffectCardProps) => {
+    if (variant === 'mobile') {
+        return (
+            <button
+                onClick={onClick}
+                className={`
+                    relative p-3 text-left rounded-lg border transition-all active:scale-[0.98]
+                    ${isOrdering 
+                        ? 'bg-cyan-950/40 border-cyan-500/30 hover:border-cyan-400' 
+                        : 'bg-slate-800/50 border-slate-700 opacity-50'}
+                `}
+            >
+                <div className="flex justify-between items-center uppercase tracking-wider">
+                    <span className="text-xs font-bold text-cyan-100">{effect.type}</span>
+                    {effect.amount && (
+                        <span className="text-[10px] text-cyan-400 bg-cyan-400/10 px-1.5 rounded font-mono">
+                            x{effect.amount}
+                        </span>
+                    )}
+                </div>
+            </button>
+        );
+    }
+
+    return (
+        <button
+            onClick={onClick}
+            disabled={!isOrdering}
+            className={`
+                group relative p-3 text-left transition-all rounded-lg overflow-hidden border
+                ${isOrdering 
+                    ? 'bg-cyan-950/40 hover:bg-cyan-900/60 border-cyan-500/30 hover:border-cyan-400 cursor-pointer scale-100 hover:scale-[1.02]' 
+                    : 'bg-slate-800/50 border-slate-700 opacity-50 cursor-not-allowed'}
+            `}
+        >
+            <div className="text-[9px] font-mono text-cyan-500/60 mb-1">
+                EFFECT_INSTANCE_{index.toString().padStart(2, '0')}
+            </div>
+            <div className="text-sm font-black text-cyan-50 text-shadow-glow uppercase tracking-wider flex justify-between items-center">
+                {effect.type}
+                {effect.amount && (
+                    <span className="bg-cyan-500/20 px-1.5 rounded text-[10px] text-cyan-300">
+                        x{effect.amount}
+                    </span>
+                )}
+            </div>
+        </button>
+    );
+};

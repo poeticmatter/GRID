@@ -1,10 +1,10 @@
+import React from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { useTargetingStore } from '../../store/useTargetingStore';
 import { useUIStore } from '../../store/useUIStore';
 import { useGridStore } from '../../store/useGridStore';
 import { Dispatch } from '../../engine/orchestrator';
 import { RotateCw } from 'lucide-react';
-import { useMobile } from '../../hooks/useMobile';
 import type { Effect, Coordinate, Cell } from '../../engine/types';
 
 export interface TargetingContext {
@@ -50,15 +50,14 @@ export const TargetingInteractionLayer = () => {
     const { rotation } = useUIStore();
     const setHoveredCoordinate = useTargetingStore(state => state.setHoveredCoordinate);
     const { grid } = useGridStore();
-    const isMobile = useMobile();
 
     if (gameState !== 'EFFECT_RESOLUTION') return null;
 
     const activeEffect = effectQueue[0]?.effect;
     if (!activeEffect) return null;
 
-    const handleMouseEnter = (x: number, y: number) => {
-        if (isMobile) return;
+    const handlePointerEnter = (e: React.PointerEvent, x: number, y: number) => {
+        if (e.pointerType === 'touch') return;
         const strategy = TargetingRegistry[activeEffect.type];
         if (strategy?.onHover) {
             strategy.onHover({ x, y, effect: activeEffect, rotation, grid, reprogramTargetSource, setHoveredCoordinate });
@@ -88,14 +87,14 @@ export const TargetingInteractionLayer = () => {
         <div className="absolute inset-0 z-40 pointer-events-none">
             <div
                 className="absolute inset-2 w-full h-full grid grid-cols-6 grid-rows-6 gap-1 z-40 pointer-events-auto"
-                onMouseLeave={() => setHoveredCoordinate(null)}
+                onPointerLeave={() => setHoveredCoordinate(null)}
             >
                 {grid.map((row, y) => (
                     row.map((_, x) => (
                         <div
                             key={`interact-${x}-${y}`}
                             className="w-full h-full relative cursor-pointer"
-                            onMouseEnter={() => handleMouseEnter(x, y)}
+                            onPointerEnter={(e) => handlePointerEnter(e, x, y)}
                             onClick={() => handleClick(x, y)}
                         />
                     ))
