@@ -4,7 +4,6 @@ import { useTargetingStore } from '../../store/useTargetingStore';
 import { useUIStore } from '../../store/useUIStore';
 import { useGridStore } from '../../store/useGridStore';
 import { Dispatch } from '../../engine/orchestrator';
-import { RotateCw } from 'lucide-react';
 import type { Effect, Coordinate, Cell } from '../../engine/types';
 
 export interface TargetingContext {

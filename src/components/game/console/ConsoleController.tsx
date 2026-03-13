@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { useGameStore } from '../../../store/useGameStore';
 import { useTargetingStore } from '../../../store/useTargetingStore';
 import { useGridStore } from '../../../store/useGridStore';
-import { useMobile } from '../../../hooks/useMobile';
+import { useIsMobile } from '../../../hooks/useMediaQuery';
 import { Dispatch } from '../../../engine/orchestrator';
 import { AnimatePresence } from 'framer-motion';
 import { MobileConsoleView } from './MobileConsoleView';
@@ -13,7 +13,7 @@ export const ConsoleController = () => {
     const { gameState, pendingEffects, effectQueue } = useGameStore();
     const { hoveredCoordinate, setHoveredCoordinate } = useTargetingStore();
     const { grid } = useGridStore();
-    const isMobile = useMobile();
+    const isMobile = useIsMobile();
     const [isExpanded, setIsExpanded] = useState(false);
 
     const activeEffect = effectQueue[0]?.effect;
