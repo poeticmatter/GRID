@@ -16,12 +16,12 @@ export const runMechanic: IEffectMechanic = {
 
         if (!checkPatternFit(activeGrid, rotatedPattern, x, y)) {
             return {
-                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 }],
+                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error' }],
                 effectQueue: snapshot.effectQueue as ActiveEffect[]
             };
         }
 
-        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'run', durationMs: 800 });
+        events.push({ type: 'AUDIO_PLAY_SFX', payload: 'run' });
 
         const affected = getAffectedCells(activeGrid, rotatedPattern, x, y);
 
@@ -40,7 +40,7 @@ export const runMechanic: IEffectMechanic = {
             selectedCardId: null,
             rotation: 0,
             events: events.length > 0 ? events : undefined,
-            durationMs: 400
+            durationMs: 150
         };
     }
 };

@@ -11,7 +11,7 @@ export const resetMechanic: IEffectMechanic = {
         const card = snapshot.hand.find((c: any) => c.id === cardId);
         if (!card) return {};
 
-        const baseEvents = [{ type: 'AUDIO_PLAY_SFX', payload: 'select', durationMs: 200 }];
+        const baseEvents = [{ type: 'AUDIO_PLAY_SFX', payload: 'select' }];
 
         const newHand = [...snapshot.hand.filter((c: any) => c.id !== cardId)] as Card[];
         newHand.push(...snapshot.discardPile as Card[]);

@@ -35,7 +35,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
 
             // Apply countermeasure penalties
             if (result.pushedCountermeasures.length > 0) {
-                newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 });
+                newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error' });
                 for (const cm of result.pushedCountermeasures) {
                     if (cm.type === 'TRACE') {
                         newPlayerStats.trace = Math.min(100, newPlayerStats.trace + cm.value);
@@ -104,7 +104,7 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
         ) {
             newlyHackedNodeIds.push(id);
             newPlayerStats.credits += updated.difficulty * 10;
-            newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack', durationMs: 500 });
+            newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'hack' });
             if (updated.type === 'MAINFRAME') {
                 hasTargetHacked = true;
             }
@@ -223,9 +223,9 @@ export const gameStateSystem: SystemFunction = (snapshot, deltas) => {
     }
 
     if (newGameState === 'GAME_OVER' && snapshot.gameState !== 'GAME_OVER' && deltas.gameState !== 'GAME_OVER') {
-        newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'game_over', durationMs: 1500 });
+        newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'game_over' });
     } else if (newGameState === 'VICTORY' && snapshot.gameState !== 'VICTORY' && deltas.gameState !== 'VICTORY') {
-        newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'victory', durationMs: 2000 });
+        newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'victory' });
     }
 
     return mergeDeltas(deltas, {

@@ -18,7 +18,7 @@ export const reprogramMechanic: IEffectMechanic = {
         ) {
             return {
                 effectQueue: snapshot.effectQueue as ActiveEffect[],
-                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 }]
+                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error' }]
             };
         }
 
@@ -51,7 +51,7 @@ export const reprogramMechanic: IEffectMechanic = {
         if (!validAction) {
             return {
                 effectQueue: snapshot.effectQueue as ActiveEffect[],
-                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error', durationMs: 600 }]
+                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error' }]
             };
         }
 
@@ -72,7 +72,7 @@ export const reprogramMechanic: IEffectMechanic = {
         const deltas: StateDeltas = {
             grid: newGrid as typeof grid,
             reprogramTargetSource: null,
-            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'reprogram', durationMs: 500 }],
+            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'reprogram' }],
             durationMs: 400
         };
 
