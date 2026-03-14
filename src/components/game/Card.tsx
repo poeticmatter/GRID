@@ -97,7 +97,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
       className={clsx(
         'h-[clamp(140px,22vh,192px)] aspect-[2/3] border-2 rounded-lg p-2 flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md',
         COLOR_MAP[visualColor],
-        isSelected ? 'border-white shadow-xl scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
+        isSelected ? 'border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
       )}
       onClick={onClick}
       animate={{
@@ -123,7 +123,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
         {effects.map((effect, idx) => renderEffect(effect, idx, rotation))}
       </div>
 
-      <div className="mt-1 text-[10px] text-white/50 text-center font-mono">
+      <div className="mt-1 text-[10px] text-green-500/50 text-center font-mono animate-pulse">
         EXECUTE
       </div>
     </motion.div>

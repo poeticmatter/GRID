@@ -118,7 +118,7 @@ export const GhostOverlay = () => {
                         exit={{ opacity: 0 }}
                         transition={{ duration: 0.2 }}
                     >
-                        <g className={valid ? "text-emerald-400" : "text-rose-500"}>
+                        <g className={valid ? "text-green-400" : "text-rose-500"}>
                             <defs>
                                 <filter id="glow" x="-20%" y="-20%" width="140%" height="140%">
                                     <feGaussianBlur stdDeviation="3" result="blur" />

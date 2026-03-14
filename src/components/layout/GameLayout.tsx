@@ -44,12 +44,12 @@ export const GameLayout = () => {
     return (
         <div
             onClick={() => { if (gameState === 'EFFECT_ORDERING') Dispatch({ type: 'CANCEL_CARD' }); }}
-            className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-emerald-950 text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans"
+            className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-black text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans"
         >
             <PlaybackController />
             <AudioController />
             {/* Background Ambience & Widescreen Gutters */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-900 via-emerald-950 to-black opacity-80 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800 via-zinc-950 to-black opacity-80 pointer-events-none" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4vw_4vw] pointer-events-none mask-image-[radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" style={{ WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 40%, black 100%)' }} />
 
 
@@ -97,9 +97,9 @@ export const GameLayout = () => {
                         className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
-                        <h1 className="text-6xl font-black text-cyan-400 mb-8 tracking-tighter drop-shadow-[0_0_10px_rgba(34,211,238,0.5)]">CYBER//DECK</h1>
+                        <h1 className="text-6xl font-black text-green-400 mb-8 tracking-tighter drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">CYBER//DECK</h1>
                         <button
-                            className="px-8 py-3 bg-cyan-600 hover:bg-cyan-500 text-white font-bold rounded text-xl shadow-lg shadow-cyan-500/20 transition-all hover:scale-105"
+                            className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xl shadow-lg shadow-green-500/20 transition-all hover:scale-105"
                             onClick={handleStart}
                         >
                             INITIALIZE LINK
@@ -125,13 +125,13 @@ export const GameLayout = () => {
 
                 {gameState === 'VICTORY' && (
                     <motion.div
-                        className="absolute inset-0 z-[100] bg-emerald-950/80 backdrop-blur-md flex flex-col items-center justify-center"
+                        className="absolute inset-0 z-[100] bg-zinc-950/80 backdrop-blur-md flex flex-col items-center justify-center"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
-                        <h1 className="text-6xl font-black text-emerald-400 mb-4 tracking-tighter">ROOT ACCESS GRANTED</h1>
+                        <h1 className="text-6xl font-black text-green-400 mb-4 tracking-tighter">ROOT ACCESS GRANTED</h1>
                         <div className="text-xl text-white/70 mb-8 font-mono">PAYLOAD DELIVERED. CREDITS: {credits}</div>
                         <button
-                            className="px-8 py-3 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded text-xl shadow-lg transition-all hover:scale-105"
+                            className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xl shadow-lg transition-all hover:scale-105"
                             onClick={handleStart}
                         >
                             NEW TARGET

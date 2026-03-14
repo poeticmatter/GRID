@@ -22,7 +22,7 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
                 left: i * 2 + random() * 2,
                 width: 2 + random() * 4,
                 height: 5 + random() * 70,
-                color: random() > 0.5 ? '#022c22' : '#064e3b', // dark emeralds (slate replacement)
+                color: random() > 0.5 ? '#18181b' : '#09090b', // deep zincs
             });
         }
 
@@ -34,8 +34,8 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
                 left: coord.x, // Center x
                 width: 3 + random() * 3,
                 height: 100 - coord.y + (3 + random() * 5), // Extends slightly past node
-                color: '#064e3b', // solid emerald-900
-                border: '1px solid #047857', // solid emerald-700
+                color: '#09090b', // solid zinc-950
+                border: '1px solid #27272a', // zinc-800
             });
 
             // Sub towers around the main node
@@ -44,14 +44,14 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
                 left: coord.x - (1 + random() * 2),
                 width: 1 + random() * 2,
                 height: 100 - coord.y - (5 + random() * 10),
-                color: '#064e3b', // emerald-900
+                color: '#09090b', // zinc-950
             });
             b.push({
                 type: 'sub-tower',
                 left: coord.x + (1 + random() * 2),
                 width: 1 + random() * 2,
                 height: 100 - coord.y - (5 + random() * 10),
-                color: '#064e3b', // emerald-900
+                color: '#09090b', // zinc-950
             });
         });
 
@@ -59,9 +59,9 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
     }, [nodeCoords]);
 
     return (
-        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-emerald-950">
+        <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 bg-neutral-950">
             {/* Background haze */}
-            <div className="absolute inset-0 bg-gradient-to-t from-emerald-900 to-transparent opacity-20" />
+            <div className="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent opacity-20" />
 
             {buildings.map((b, i) => {
                 return (
@@ -80,8 +80,8 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
             })}
 
             {/* Ground line & bottom fade texturing (using solid gradients) */}
-            <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-emerald-950 to-transparent" />
-            <div className="absolute bottom-6 w-full h-[1px] bg-emerald-800" />
+            <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-neutral-950 to-transparent" />
+            <div className="absolute bottom-6 w-full h-[1px] bg-zinc-800" />
         </div>
     );
 };

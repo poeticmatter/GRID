@@ -22,17 +22,17 @@ export const DPad = ({
                     <div />
                     <button 
                         onPointerDown={() => onMove(0, -1)}
-                        className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        className="w-11 h-11 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                     >
-                        <ArrowUp className="w-5 h-5 text-cyan-400" />
+                        <ArrowUp className="w-5 h-5 text-green-400" />
                     </button>
                     <div />
                     
                     <button 
                         onPointerDown={() => onMove(-1, 0)}
-                        className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        className="w-11 h-11 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                     >
-                        <ArrowLeft className="w-5 h-5 text-cyan-400" />
+                        <ArrowLeft className="w-5 h-5 text-green-400" />
                     </button>
                     
                     <button 
@@ -44,24 +44,24 @@ export const DPad = ({
                     
                     <button 
                         onPointerDown={() => onMove(1, 0)}
-                        className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        className="w-11 h-11 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                     >
-                        <ArrowRight className="w-5 h-5 text-cyan-400" />
+                        <ArrowRight className="w-5 h-5 text-green-400" />
                     </button>
 
                     <div />
                     <button 
                         onPointerDown={() => onMove(0, 1)}
-                        className="w-11 h-11 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                        className="w-11 h-11 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                     >
-                        <ArrowDown className="w-5 h-5 text-cyan-400" />
+                        <ArrowDown className="w-5 h-5 text-green-400" />
                     </button>
                     <div />
                 </div>
 
                 <button 
                     onPointerDown={onConfirm}
-                    className="flex-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex flex-col items-center justify-center gap-1 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                    className="flex-1 bg-green-500/20 border border-green-500/40 rounded-lg flex flex-col items-center justify-center gap-1 font-black text-green-400 uppercase tracking-widest active:bg-green-500/40 transition-colors shadow-[0_0_15px_rgba(34,197,94,0.2)]"
                 >
                     <Check className="w-6 h-6" />
                     <span className="text-[10px]">{confirmLabel}</span>
@@ -76,17 +76,17 @@ export const DPad = ({
                 <div />
                 <button 
                     onPointerDown={() => onMove(0, -1)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    className="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                 >
-                    <ArrowUp className="w-6 h-6 text-cyan-400" />
+                    <ArrowUp className="w-6 h-6 text-green-400" />
                 </button>
                 <div />
                 
                 <button 
                     onPointerDown={() => onMove(-1, 0)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    className="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                 >
-                    <ArrowLeft className="w-6 h-6 text-cyan-400" />
+                    <ArrowLeft className="w-6 h-6 text-green-400" />
                 </button>
                 
                 <button 
@@ -98,24 +98,24 @@ export const DPad = ({
                 
                 <button 
                     onPointerDown={() => onMove(1, 0)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    className="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                 >
-                    <ArrowRight className="w-6 h-6 text-cyan-400" />
+                    <ArrowRight className="w-6 h-6 text-green-400" />
                 </button>
 
                 <div />
                 <button 
                     onPointerDown={() => onMove(0, 1)}
-                    className="w-12 h-12 bg-cyan-500/10 border border-cyan-500/30 rounded-lg flex items-center justify-center active:bg-cyan-500/40 transition-colors"
+                    className="w-12 h-12 bg-green-500/10 border border-green-500/30 rounded-lg flex items-center justify-center active:bg-green-500/40 transition-colors"
                 >
-                    <ArrowDown className="w-6 h-6 text-cyan-400" />
+                    <ArrowDown className="w-6 h-6 text-green-400" />
                 </button>
                 <div />
             </div>
 
             <button 
                 onPointerDown={onConfirm}
-                className="w-full h-12 mt-1 bg-emerald-500/20 border border-emerald-500/40 rounded-lg flex items-center justify-center gap-2 font-black text-emerald-400 uppercase tracking-widest active:bg-emerald-500/40 transition-colors shadow-[0_0_15px_rgba(16,185,129,0.2)]"
+                className="w-full h-12 mt-1 bg-green-500/20 border border-green-500/40 rounded-lg flex items-center justify-center gap-2 font-black text-green-400 uppercase tracking-widest active:bg-green-500/40 transition-colors shadow-[0_0_15px_rgba(34,197,94,0.2)]"
             >
                 <Check className="w-5 h-5" />
                 {confirmLabel}
