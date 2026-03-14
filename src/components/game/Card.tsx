@@ -10,11 +10,11 @@ interface CardProps {
 }
 
 const BANNER_COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'bg-lime-600 text-zinc-900',
-  SKY: 'bg-teal-400 text-zinc-900',
-  EMERALD: 'bg-emerald-400 text-zinc-900',
-  LIME: 'bg-green-400 text-zinc-900',
-  FUCHSIA: 'bg-slate-400 text-zinc-900',
+  ORANGE: 'bg-emerald-950 border-b-2 border-orange-500 text-orange-400',
+  SKY: 'bg-emerald-950 border-b-2 border-sky-400 text-sky-400',
+  EMERALD: 'bg-emerald-950 border-b-2 border-emerald-500 text-emerald-400',
+  LIME: 'bg-emerald-950 border-b-2 border-lime-400 text-lime-400',
+  FUCHSIA: 'bg-emerald-950 border-b-2 border-fuchsia-500 text-fuchsia-400',
 };
 
 const BADGE_COLOR_MAP: Record<CellColor, string> = {

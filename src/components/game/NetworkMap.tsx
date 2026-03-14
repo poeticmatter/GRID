@@ -7,11 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
 
 const COLOR_TEXT_MAP: Record<CellColor, string> = {
-    ORANGE: 'text-lime-600',
-    SKY: 'text-teal-300',
-    EMERALD: 'text-emerald-400',
-    LIME: 'text-green-400',
-    FUCHSIA: 'text-slate-400',
+    ORANGE: 'text-orange-500',
+    SKY: 'text-sky-400',
+    EMERALD: 'text-emerald-500',
+    LIME: 'text-lime-400',
+    FUCHSIA: 'text-fuchsia-500',
 };
 
 const ServerCard = ({ server }: { server: NetworkNode }) => {
@@ -41,7 +41,7 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                             {requirements.map((req, idx) => {
                                 const isCleared = progressLane[idx];
                                 const colorClass = COLOR_TEXT_MAP[color];
-                                const bgClass = colorClass.replace('text-', 'bg-') + '/20';
+                                const bgClass = colorClass.replace('text-', 'bg-');
                                 const borderClass = colorClass.replace('text-', 'border-');
 
                                 return (
@@ -52,7 +52,7 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                                             isCleared ? "bg-zinc-950 border-zinc-900 opacity-20 grayscale" : `${bgClass} ${borderClass}`
                                         )}
                                     >
-                                        <div className={clsx("drop-shadow-md font-mono text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold", isCleared ? "text-slate-500" : "text-white")}>
+                                        <div className={clsx("font-mono text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold", isCleared ? "text-slate-500" : "text-zinc-950")}>
                                             {req}
                                         </div>
                                     </div>
@@ -122,7 +122,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
                         if (!requirements || requirements.length === 0) return null;
 
                         const colorBorder = COLOR_TEXT_MAP[color].replace('text-', 'border-');
-                        const colorBg = COLOR_TEXT_MAP[color].replace('text-', 'bg-') + '/20';
+                        const colorBg = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
                         const progressLane = server.progress[color] || [];
 
                         return requirements.map((req, idx) => {
@@ -134,7 +134,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
                                         "px-1 py-0.5 min-w-[12px] h-[14px] flex items-center justify-center rounded-sm text-[8px] font-mono font-bold border shadow-md transition-all duration-300",
                                         isCleared
                                             ? "bg-zinc-950 border-zinc-800 text-zinc-800 opacity-40 grayscale"
-                                            : `${colorBg} ${colorBorder} text-white`
+                                            : `${colorBg} ${colorBorder} text-zinc-950`
                                     )}
                                 >
                                     {req}

@@ -13,17 +13,17 @@ interface CellProps {
 }
 
 const COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'bg-lime-900/80 border-lime-600',
-  SKY: 'bg-teal-600/80 border-teal-300',
-  EMERALD: 'bg-emerald-500 border-emerald-300',
-  LIME: 'bg-green-400/80 border-green-200',
-  FUCHSIA: 'bg-slate-800/90 border-slate-500',
+  ORANGE: 'bg-emerald-950 border-orange-500 text-orange-400',
+  SKY: 'bg-emerald-950 border-sky-400 text-sky-400',
+  EMERALD: 'bg-emerald-950 border-emerald-500 text-emerald-400',
+  LIME: 'bg-emerald-950 border-lime-400 text-lime-400',
+  FUCHSIA: 'bg-emerald-950 border-fuchsia-500 text-fuchsia-400',
 };
 
 const SYMBOL_MAP: Record<CellSymbol, React.ReactNode> = {
-  SHIELD: <Shield className="w-5 h-5 text-white/90 drop-shadow-md" />,
-  EYE: <Eye className="w-5 h-5 text-white/90 drop-shadow-md" />,
-  SKULL: <Skull className="w-5 h-5 text-white/90 drop-shadow-md" />,
+  SHIELD: <Shield className="w-5 h-5 text-current drop-shadow-md" />,
+  EYE: <Eye className="w-5 h-5 text-current drop-shadow-md" />,
+  SKULL: <Skull className="w-5 h-5 text-current drop-shadow-md" />,
   NONE: null,
 };
 
