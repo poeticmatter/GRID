@@ -9,20 +9,20 @@ interface CardProps {
   rotation?: number;
 }
 
-const COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'border-lime-600 shadow-lime-900/40 bg-lime-900/80',
-  SKY: 'border-teal-300 shadow-teal-600/40 bg-teal-600/80',
-  EMERALD: 'border-emerald-300 shadow-emerald-500/40 bg-emerald-500',
-  LIME: 'border-green-200 shadow-green-400/40 bg-green-400/80',
-  FUCHSIA: 'border-slate-500 shadow-slate-800/40 bg-slate-800/90',
+const BANNER_COLOR_MAP: Record<CellColor, string> = {
+  ORANGE: 'bg-lime-600 text-zinc-900',
+  SKY: 'bg-teal-400 text-zinc-900',
+  EMERALD: 'bg-emerald-400 text-zinc-900',
+  LIME: 'bg-green-400 text-zinc-900',
+  FUCHSIA: 'bg-slate-400 text-zinc-900',
 };
 
 const BADGE_COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'border-lime-600 bg-lime-900',
-  SKY: 'border-teal-300 bg-teal-600',
-  EMERALD: 'border-emerald-300 bg-emerald-500',
-  LIME: 'border-green-200 bg-green-400',
-  FUCHSIA: 'border-slate-500 bg-slate-800',
+  ORANGE: 'border-green-400 bg-green-600',
+  SKY: 'border-green-400 bg-green-600',
+  EMERALD: 'border-green-400 bg-green-600',
+  LIME: 'border-green-400 bg-green-600',
+  FUCHSIA: 'border-green-400 bg-green-600',
 };
 
 // Helper to check if a mini-grid cell is part of pattern
@@ -95,8 +95,8 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
     <motion.div
       layoutId={`card-${card.id}`}
       className={clsx(
-        'h-[clamp(140px,22vh,192px)] aspect-[2/3] border-2 rounded-lg p-2 flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md',
-        COLOR_MAP[visualColor],
+        'h-[clamp(140px,22vh,192px)] aspect-[2/3] border-2 rounded-lg flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md overflow-hidden',
+        'bg-zinc-950 border-green-500/50',
         isSelected ? 'border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
       )}
       onClick={onClick}
@@ -115,15 +115,18 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
         {memory}
       </div>
 
-      <div className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center mb-1 border-b border-white/20 pb-1 truncate leading-tight">
+      <div className={clsx(
+        "text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center p-1 truncate leading-tight",
+        BANNER_COLOR_MAP[visualColor]
+      )}>
         {name}
       </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center space-y-2 overflow-hidden py-1">
+      <div className="flex-1 flex flex-col items-center justify-center space-y-2 overflow-hidden py-1 px-2">
         {effects.map((effect, idx) => renderEffect(effect, idx, rotation))}
       </div>
 
-      <div className="mt-1 text-[10px] text-green-500/50 text-center font-mono animate-pulse">
+      <div className="mt-1 pb-2 text-[10px] text-green-500/50 text-center font-mono animate-pulse">
         EXECUTE
       </div>
     </motion.div>
