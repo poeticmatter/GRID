@@ -30,7 +30,7 @@
         "visualColor": "SKY",
         "memory": 1,
         "weight": 10,
-        "isStartingCard": false,
+        "isStartingCard": true,
         "effects": [
             {
                 "type": "RUN",
@@ -56,7 +56,7 @@
         "visualColor": "SKY",
         "memory": 1,
         "weight": 10,
-        "isStartingCard": false,
+        "isStartingCard": true,
         "effects": [
             {
                 "type": "RUN",
@@ -86,7 +86,7 @@
         "visualColor": "SKY",
         "memory": 1,
         "weight": 10,
-        "isStartingCard": false,
+        "isStartingCard": true,
         "effects": [
             {
                 "type": "REPROGRAM",
@@ -99,7 +99,7 @@
         "visualColor": "SKY",
         "memory": 1,
         "weight": 10,
-        "isStartingCard": false,
+        "isStartingCard": true,
         "effects": [
             {
                 "type": "SYSTEM_RESET"
