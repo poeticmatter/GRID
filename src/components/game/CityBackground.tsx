@@ -22,36 +22,39 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
                 left: i * 2 + random() * 2,
                 width: 2 + random() * 4,
                 height: 5 + random() * 70,
-                color: random() > 0.5 ? '#18181b' : '#09090b', // deep zincs
+                color: random() > 0.5 ? '#18181b' : '#27272a', // alternate zincs
+                border: '1px solid #3f3f46', // zinc-700 outline
             });
         }
 
         // Prominent buildings under nodes
         Object.values(nodeCoords).forEach(coord => {
-            // Main tower aligning from the bottom up to the node
-            b.push({
-                type: 'tower',
-                left: coord.x, // Center x
-                width: 3 + random() * 3,
-                height: 100 - coord.y + (3 + random() * 5), // Extends slightly past node
-                color: '#09090b', // solid zinc-950
-                border: '1px solid #27272a', // zinc-800
-            });
-
             // Sub towers around the main node
             b.push({
                 type: 'sub-tower',
                 left: coord.x - (1 + random() * 2),
                 width: 1 + random() * 2,
                 height: 100 - coord.y - (5 + random() * 10),
-                color: '#09090b', // zinc-950
+                color: '#09090b',
+                border: '1px solid #27272a', // muted gray/green
             });
             b.push({
                 type: 'sub-tower',
                 left: coord.x + (1 + random() * 2),
                 width: 1 + random() * 2,
                 height: 100 - coord.y - (5 + random() * 10),
-                color: '#09090b', // zinc-950
+                color: '#09090b',
+                border: '1px solid #27272a', // muted gray/green
+            });
+
+            // Main tower aligning from the bottom up to the node
+            b.push({
+                type: 'tower',
+                left: coord.x, // Center x
+                width: 3 + random() * 3,
+                height: 100 - coord.y + (3 + random() * 5), // Extends slightly past node
+                color: '#09090b', // block out background
+                border: '1px solid #064e3b', // muted dark CRT green
             });
         });
 
@@ -81,7 +84,7 @@ export const CityBackground = ({ nodeCoords }: CityBackgroundProps) => {
 
             {/* Ground line & bottom fade texturing (using solid gradients) */}
             <div className="absolute bottom-0 w-full h-24 bg-gradient-to-t from-neutral-950 to-transparent" />
-            <div className="absolute bottom-6 w-full h-[1px] bg-zinc-800" />
+            <div className="absolute bottom-6 w-full h-[1px] bg-green-500/50 shadow-[0_0_8px_rgba(34,197,94,0.3)]" />
         </div>
     );
 };
