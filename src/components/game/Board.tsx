@@ -5,6 +5,7 @@ import { Cell } from './Cell';
 import { GhostOverlay } from './GhostOverlay';
 import { ReprogramOverlay } from './ReprogramOverlay';
 import { TargetingInteractionLayer } from './TargetingInteractionLayer';
+import { VFXOverlayLayer } from './VFXOverlayLayer';
 
 export const Board = () => {
   const { grid } = useViewModel();
@@ -70,6 +71,7 @@ export const Board = () => {
 
       <GhostOverlay />
       <ReprogramOverlay />
+      <VFXOverlayLayer />
       <TargetingInteractionLayer />
 
       {/* Background Grid Pattern */}

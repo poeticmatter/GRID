@@ -13,7 +13,7 @@ export const reprogramMechanic: IEffectMechanic = {
 
         const dx = Math.abs(dest.x - source.x);
         const dy = Math.abs(dest.y - source.y);
-        const isAdjacent = dx + dy === 1;
+        const isAdjacent = (dx === 1 && dy === 0) || (dx === 0 && dy === 1);
 
         // Boundary validation
         if (
@@ -34,7 +34,7 @@ export const reprogramMechanic: IEffectMechanic = {
             const dCell = draft[dest.y][dest.x];
 
             if (sCell.state !== 'BROKEN' && dCell.state !== 'BROKEN') {
-                // Swap colors and symbols
+                // Swap properties of existing grid cells
                 const tempColor = sCell.color;
                 const tempSymbol = sCell.symbol;
                 sCell.color = dCell.color;
@@ -43,7 +43,7 @@ export const reprogramMechanic: IEffectMechanic = {
                 dCell.symbol = tempSymbol;
                 validAction = true;
             } else if (sCell.state !== 'BROKEN' && dCell.state === 'BROKEN') {
-                // Move source onto broken destination
+                // Move source properties onto broken destination
                 dCell.color = sCell.color;
                 dCell.symbol = sCell.symbol;
                 dCell.state = 'LOCKED';
@@ -74,11 +74,24 @@ export const reprogramMechanic: IEffectMechanic = {
             }
         }
 
+        const sourceState = snapshot.grid[source.y][source.x];
+        const destState = snapshot.grid[dest.y][dest.x];
+
         const deltas: StateDeltas = {
             grid: newGrid as typeof grid,
             reprogramTargetSource: null,
-            events: [{ type: 'AUDIO_PLAY_SFX', payload: 'reprogram' }],
-            durationMs: 400
+            events: [
+                { type: 'AUDIO_PLAY_SFX', payload: 'reprogram' },
+                { 
+                    type: 'VFX_REPROGRAM_SWAP', 
+                    payload: { 
+                        source, 
+                        dest, 
+                        sourceCell: { ...sourceState }, 
+                        destCell: { ...destState } 
+                    } 
+                }
+            ]
         };
 
         if (nextQueue !== undefined) {

@@ -1,9 +1,11 @@
+import { useState, useEffect, useRef } from 'react';
 import type { Cell as CellType, CellColor, CellSymbol } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
 import { Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion } from 'framer-motion';
+import { gameEventBus } from '../../engine/eventBus';
 
 interface CellProps {
   cell: CellType;
@@ -22,6 +24,35 @@ const SYMBOL_MAP: Record<CellSymbol, React.ReactNode> = {
 
 export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: CellProps) => {
   const { color, symbol, state, x, y } = cell;
+
+  const prevData = useRef(`${color}-${symbol}-${state}`);
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [isHiddenVFX, setIsHiddenVFX] = useState(false);
+
+  useEffect(() => {
+    const handleReprogramSwap = (payload: any) => {
+      const { source, dest } = payload;
+      const isPartOfSwap = (source.x === x && source.y === y) || (dest.x === x && dest.y === y);
+      
+      if (isPartOfSwap) {
+        setIsHiddenVFX(true);
+        setTimeout(() => setIsHiddenVFX(false), 800);
+      }
+    };
+
+    gameEventBus.on('VFX_REPROGRAM_SWAP', handleReprogramSwap);
+    return () => gameEventBus.off('VFX_REPROGRAM_SWAP', handleReprogramSwap);
+  }, [x, y]);
+
+  useEffect(() => {
+    const currentData = `${color}-${symbol}-${state}`;
+    if (prevData.current !== currentData && state !== 'BROKEN') {
+      setIsAnimating(true);
+      prevData.current = currentData;
+      const t = setTimeout(() => setIsAnimating(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [color, symbol, state]);
 
   if (state === 'BROKEN') {
     return (
@@ -49,9 +80,13 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
 
   return (
     <motion.div
-      layoutId={cell.id}
       initial={{ scale: 0.8, opacity: 0 }}
-      animate={{ scale: 1, opacity: 1 }}
+      animate={{ 
+        scale: isAnimating ? [1, 1.15, 1] : 1,
+        opacity: isHiddenVFX ? 0 : (isAnimating ? [0.5, 1, 0.8, 1] : 1),
+        filter: isAnimating ? ['brightness(1)', 'brightness(1.5)', 'brightness(1)'] : 'brightness(1)'
+      }}
+      transition={{ duration: 0.3, ease: "easeOut" }}
       className={twMerge(baseClasses, isAffected && 'scale-105 z-10 shadow-lg')}
       onClick={onClick}
       onMouseEnter={onMouseEnter}
