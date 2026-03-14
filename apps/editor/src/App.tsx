@@ -12,7 +12,7 @@ import {
     CellColor
 } from '@grid/shared';
 import { PatternGrid } from './components/PatternGrid';
-import { Download, Upload, Plus, Trash2, Database, Layout, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Download, Upload, Plus, Trash2, Database, Layout, AlertCircle, ChevronUp, ChevronDown, Shield, Eye, Skull, X } from 'lucide-react';
 import clsx from 'clsx';
 
 type Tab = 'CARDS' | 'NODES';
@@ -351,32 +351,71 @@ function LayerArrayInput({ value, onChange }: { value: number[], onChange: (val:
     );
 }
 
-// Specialized sub-component for decoupled symbol array input
+// Specialized sub-component for visual symbol array input
 function SymbolArrayInput({ value, options, onChange }: { value: string[], options: string[], onChange: (val: string[]) => void }) {
-    const [localValue, setLocalValue] = useState(value.join(', '));
+    const SymbolIcon: Record<string, any> = { SHIELD: Shield, EYE: Eye, SKULL: Skull };
 
-    useEffect(() => {
-        const joined = value.join(', ');
-        const currentParsed = localValue.split(',').map(v => v.trim()).filter(v => v.length > 0);
-        if (JSON.stringify(currentParsed) !== JSON.stringify(value)) {
-            setLocalValue(joined);
-        }
-    }, [value]);
+    const addSymbol = (sym: string) => {
+        onChange([...value, sym]);
+    };
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const str = e.target.value;
-        setLocalValue(str);
-        const parsed = str.split(',').map(v => v.trim().toUpperCase()).filter(v => options.includes(v));
-        onChange(parsed);
+    const removeSymbol = (index: number) => {
+        const next = [...value];
+        next.splice(index, 1);
+        onChange(next);
     };
 
     return (
-        <input 
-            className="w-full bg-slate-900/80 border border-slate-800 p-3 rounded-lg focus:border-cyan-500/50 outline-none text-xs font-mono text-amber-400 placeholder:text-slate-700 transition-all focus:ring-1 focus:ring-cyan-500/20" 
-            placeholder="e.g. SKULL, SKULL, EYE" 
-            value={localValue}
-            onChange={handleChange}
-        />
+        <div className="space-y-4 bg-slate-900/50 p-4 rounded-xl border border-slate-800">
+            {/* Palette */}
+            <div className="flex flex-col gap-2">
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Add Symbol</span>
+                <div className="flex gap-2">
+                    {options.map(opt => {
+                        const Icon = SymbolIcon[opt];
+                        return (
+                            <button
+                                key={opt}
+                                onClick={() => addSymbol(opt)}
+                                className="flex-1 bg-slate-800 hover:bg-slate-700 border border-slate-700 p-2 rounded-lg flex flex-col items-center gap-1 transition-all group"
+                                title={`Add ${opt}`}
+                            >
+                                {Icon && <Icon className="w-5 h-5 text-amber-400 group-hover:scale-110 transition-transform" />}
+                                <span className="text-[8px] font-bold text-slate-400 uppercase">{opt}</span>
+                            </button>
+                        );
+                    })}
+                </div>
+            </div>
+
+            {/* Active Selection */}
+            <div className="space-y-2">
+                <span className="text-[9px] font-black text-slate-600 uppercase tracking-widest">Active Requirements ({value.length})</span>
+                <div className="flex flex-wrap gap-2 min-h-[44px] p-2 bg-black/20 rounded-lg border border-slate-800/50">
+                    {value.map((sym, idx) => {
+                        const Icon = SymbolIcon[sym];
+                        return (
+                            <button
+                                key={idx}
+                                onClick={() => removeSymbol(idx)}
+                                className="relative bg-slate-800 hover:bg-red-900/40 border border-slate-700 hover:border-red-500/50 p-2 rounded flex items-center justify-center transition-all group"
+                                title="Click to remove"
+                            >
+                                {Icon && <Icon className="w-5 h-5 text-amber-400" />}
+                                <div className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 bg-red-500 rounded-full p-0.5 shadow-lg transition-opacity">
+                                    <X className="w-2 h-2 text-white" />
+                                </div>
+                            </button>
+                        );
+                    })}
+                    {value.length === 0 && (
+                        <div className="flex items-center justify-center w-full text-[10px] italic text-slate-700 uppercase tracking-widest font-bold">
+                            No requirements
+                        </div>
+                    )}
+                </div>
+            </div>
+        </div>
     );
 }
 
