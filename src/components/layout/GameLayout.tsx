@@ -1,4 +1,3 @@
-import { useEffect } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { usePlayerStore } from '../../store/usePlayerStore';
 import { Dispatch } from '../../engine/orchestrator';
@@ -15,11 +14,13 @@ import { useVisualQueueStore } from '../../store/useVisualQueueStore';
 import { Menu } from 'lucide-react';
 import { useGameInput } from '../../hooks/useGameInput';
 import { useViewModelManager } from '../../hooks/useViewModel';
+import { useUIStore } from '../../store/useUIStore';
 
 export const GameLayout = () => {
     const gameState = useGameStore(state => state.gameState);
-    const setGameState = useGameStore(state => state.setGameState);
     const credits = usePlayerStore(state => state.playerStats.credits);
+    const isMenuOpen = useUIStore(state => state.isMenuOpen);
+    const setIsMenuOpen = useUIStore(state => state.setIsMenuOpen);
 
     useGameInput();
     useViewModelManager();
@@ -27,19 +28,13 @@ export const GameLayout = () => {
     const handleStart = () => {
         gameEventBus.emit('AUDIO_INIT');
         Dispatch({ type: 'INITIALIZE_GAME' });
+        setIsMenuOpen(false);
     };
 
     const handleMenu = () => {
         useVisualQueueStore.setState({ queue: [], isPlaying: false });
-        setGameState('MENU');
+        setIsMenuOpen(true);
     };
-
-    useEffect(() => {
-        // Only initialize if in MENU or just mounted?
-        // Actually, initializeGame sets state to PLAYING.
-        // If we want a start screen, we should wait for user input.
-        // But for MVP, let's just show menu overlay.
-    }, []);
 
     return (
         <div
@@ -55,7 +50,7 @@ export const GameLayout = () => {
 
 
             {/* Floating Menu Button */}
-            {gameState !== 'MENU' && (
+            {!isMenuOpen && (
                 <div className="absolute top-2 left-2 z-[120] scale-75 origin-top-left sm:scale-100 sm:top-4 sm:left-4">
                     <button
                         onClick={handleMenu}
@@ -92,18 +87,28 @@ export const GameLayout = () => {
 
             {/* Overlays */}
             <AnimatePresence>
-                {gameState === 'MENU' && (
+                {isMenuOpen && (
                     <motion.div
                         className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center"
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
-                        <h1 className="text-6xl font-black text-green-400 mb-8 tracking-tighter drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">CYBER//DECK</h1>
-                        <button
-                            className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xl shadow-lg shadow-green-500/20 transition-all hover:scale-105"
-                            onClick={handleStart}
-                        >
-                            INITIALIZE LINK
-                        </button>
+                        <h1 className="text-6xl font-black text-green-400 mb-8 tracking-tighter drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">G.R.I.D</h1>
+                        <div className="flex flex-col gap-4">
+                            <button
+                                className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xl shadow-lg shadow-green-500/20 transition-all hover:scale-105"
+                                onClick={handleStart}
+                            >
+                                NEW RUN
+                            </button>
+                            {gameState !== 'MENU' && (
+                                <button
+                                    className="px-8 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded text-xl shadow-lg transition-all hover:scale-105 border border-white/10"
+                                    onClick={() => setIsMenuOpen(false)}
+                                >
+                                    CONTINUE
+                                </button>
+                            )}
+                        </div>
                     </motion.div>
                 )}
 
