@@ -7,6 +7,14 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
   hacked: boolean,
   pushedCountermeasures: CountermeasurePayload[]
 } => {
+  // Initialize Tallies & Flags
+  const harvestedSymbols = {} as Record<CellSymbol, number>;
+  cutCells.forEach(cell => {
+    if (cell.symbol !== 'NONE') {
+      harvestedSymbols[cell.symbol] = (harvestedSymbols[cell.symbol] || 0) + 1;
+    }
+  });
+
   const codeColors = {} as Record<CellColor, number>;
   cutCells.forEach(cell => {
     codeColors[cell.color] = (codeColors[cell.color] || 0) + 1;
@@ -17,7 +25,7 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
   let didAlterNode = false;
 
   const updatedServer = produce(server, (draft) => {
-    // Iterate over only the Layer lanes matching the node's definition
+    // 1. Evaluate Layer Progress
     for (const [colorStr, requirements] of Object.entries(draft.layers)) {
       const color = colorStr as CellColor;
       if (!requirements || requirements.length === 0) continue;
@@ -31,14 +39,13 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
         if (harvested > 0) {
           let harvested_accumulator = harvested;
 
-          // Sequential progression
           for (let i = firstActiveIndex; i < requirements.length; i++) {
             if (!progressLane[i]) {
               const requirement = requirements[i];
               if (harvested_accumulator >= requirement) {
                 progressLane[i] = true;
                 harvested_accumulator -= requirement;
-                didAlterNode = true;
+                didAlterNode = true; // Flag identifying the node was altered
               } else {
                 break;
               }
@@ -47,7 +54,7 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
         }
       }
 
-      // Re-check hacked status for this lane
+      // Re-verify if this specific lane is fully completed
       if (progressLane.some(p => !p) || progressLane.length < requirements.length) {
         hacked = false;
       }
@@ -58,40 +65,38 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
     if (hacked) {
       draft.status = 'HACKED';
     }
-  });
 
-  // Evaluate countermeasures: only if the run altered node progress
-  if (didAlterNode) {
-    // Tally all CellSymbols harvested from the run
-    const symbolTally = {} as Record<CellSymbol, number>;
-    for (const cell of cutCells) {
-      if (cell.symbol !== 'NONE') {
-        symbolTally[cell.symbol] = (symbolTally[cell.symbol] || 0) + 1;
-      }
-    }
+    // 2. Evaluate Countermeasures
+    if (didAlterNode && draft.countermeasures) {
+      for (const cm of draft.countermeasures) {
+        let activated = false;
 
-    for (const cm of server.countermeasures) {
-      // Tally required symbols for this countermeasure
-      const requiredTally = {} as Record<CellSymbol, number>;
-      for (const sym of cm.requiredSymbols) {
-        requiredTally[sym] = (requiredTally[sym] || 0) + 1;
-      }
+        const requiredTally = {} as Record<CellSymbol, number>;
+        for (const sym of cm.requiredSymbols) {
+          if (sym !== 'NONE') {
+            requiredTally[sym] = (requiredTally[sym] || 0) + 1;
+          }
+        }
 
-      // Check if the run's harvest satisfies ALL required symbols
-      let satisfied = true;
-      for (const [sym, needed] of Object.entries(requiredTally)) {
-        if ((symbolTally[sym as CellSymbol] || 0) < needed) {
-          satisfied = false;
-          break;
+        // Activation check: Trigger if harvested count is strictly less than required count
+        // If requiredSymbols is empty, activated remains false.
+        for (const symStr of Object.keys(requiredTally)) {
+          const sym = symStr as CellSymbol;
+          const needed = requiredTally[sym];
+          const harvested = harvestedSymbols[sym] || 0;
+
+          if (harvested < needed) {
+            activated = true;
+            break;
+          }
+        }
+
+        if (activated) {
+          pushedCountermeasures.push({ type: cm.type, value: cm.value });
         }
       }
-
-      // If NOT satisfied → countermeasure activates
-      if (!satisfied) {
-        pushedCountermeasures.push({ type: cm.type, value: cm.value });
-      }
     }
-  }
+  });
 
   return {
     updatedServer: updatedServer as NetworkNode,

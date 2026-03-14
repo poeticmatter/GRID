@@ -38,7 +38,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                 newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error' });
                 for (const cm of result.pushedCountermeasures) {
                     if (cm.type === 'TRACE') {
-                        newPlayerStats.trace = Math.min(newPlayerStats.maxTrace, newPlayerStats.trace + cm.value);
+                        newPlayerStats.trace = Math.min(newPlayerStats.maxTrace ?? 15, newPlayerStats.trace + cm.value);
                     } else if (cm.type === 'HARDWARE_DAMAGE') {
                         newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - cm.value);
                     } else if (cm.type === 'NET_DAMAGE') {

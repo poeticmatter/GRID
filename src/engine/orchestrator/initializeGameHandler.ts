@@ -34,6 +34,7 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
             hardwareHealth: 3,
             maxHardwareHealth: 3,
             trace: 0,
+            maxTrace: 15,
             credits: 0,
         },
         gameState: 'PLAYING',
