@@ -1,15 +1,94 @@
 {
-    "Main": [
+    "Core": [
         {
-            "type": "SERVER",
-            "name": "Test",
+            "type": "ICE",
+            "name": "Slasher",
             "baseDifficulty": 1,
             "weight": 10,
             "layers": {
                 "ORANGE": [
                     1,
+                    2,
+                    3
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "SHIELD"
+                    ],
+                    "type": "NET_DAMAGE",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "ICE",
+            "name": "Sentinel",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
+                "SKY": [
+                    3
+                ],
+                "EMERALD": [
+                    3
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "SKULL"
+                    ],
+                    "type": "TRACE",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "ICE",
+            "name": "Data Mine",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
+                "FUCHSIA": [
+                    1
+                ],
+                "LIME": [
+                    1
+                ],
+                "EMERALD": [
+                    1
+                ],
+                "SKY": [
+                    1
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "EYE"
+                    ],
+                    "type": "TRACE",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "MAINFRAME",
+            "name": "Target",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
+                "ORANGE": [
+                    4
+                ],
+                "SKY": [
                     3,
-                    2
+                    3
                 ]
             },
             "countermeasures": [],
@@ -17,32 +96,27 @@
         },
         {
             "type": "SERVER",
-            "name": "New Node",
+            "name": "Cybertech",
             "baseDifficulty": 1,
             "weight": 10,
             "layers": {
-                "ORANGE": [
-                    1,
-                    3,
+                "FUCHSIA": [
+                    2,
+                    2,
                     2
+                ],
+                "LIME": [
+                    3
                 ]
             },
             "countermeasures": [
                 {
                     "requiredSymbols": [
-                        "SHIELD",
-                        "SHIELD"
+                        "SKULL",
+                        "SKULL"
                     ],
-                    "type": "TRACE",
-                    "value": 10
-                },
-                {
-                    "requiredSymbols": [
-                        "SHIELD",
-                        "EYE"
-                    ],
-                    "type": "TRACE",
-                    "value": 10
+                    "type": "HARDWARE_DAMAGE",
+                    "value": 1
                 }
             ],
             "resetTrace": 1
