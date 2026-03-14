@@ -1,18 +1,14 @@
 import { useState, useMemo } from 'react';
 import { useViewModel } from '../../hooks/useViewModel';
 import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
+import { LAYER_THEME } from '../../presentation/theme';
+
 import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle, Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
 
-const COLOR_TEXT_MAP: Record<CellColor, string> = {
-    ORANGE: 'text-orange-500',
-    SKY: 'text-sky-400',
-    EMERALD: 'text-emerald-500',
-    LIME: 'text-lime-400',
-    FUCHSIA: 'text-fuchsia-500',
-};
+
 
 const ServerCard = ({ server }: { server: NetworkNode }) => {
     return (
@@ -40,16 +36,12 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                         <div key={color} className="flex flex-col gap-[clamp(2px,0.5vh,4px)]">
                             {requirements.map((req, idx) => {
                                 const isCleared = progressLane[idx];
-                                const colorClass = COLOR_TEXT_MAP[color];
-                                const bgClass = colorClass.replace('text-', 'bg-');
-                                const borderClass = colorClass.replace('text-', 'border-');
-
                                 return (
                                     <div
                                         key={idx}
                                         className={clsx(
                                             "w-[clamp(1rem,2.5vh,1.25rem)] h-[clamp(1rem,2.5vh,1.25rem)] flex items-center justify-center rounded border transition-all duration-300",
-                                            isCleared ? "bg-zinc-950 border-zinc-900 opacity-20 grayscale" : `${bgClass} ${borderClass}`
+                                            isCleared ? "bg-zinc-950 border-zinc-900 opacity-20 grayscale" : `${LAYER_THEME[color].bg} ${LAYER_THEME[color].border}`
                                         )}
                                     >
                                         <div className={clsx("font-mono text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold", isCleared ? "text-slate-500" : "text-zinc-950")}>
@@ -121,8 +113,6 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
                         const color = colorStr as CellColor;
                         if (!requirements || requirements.length === 0) return null;
 
-                        const colorBorder = COLOR_TEXT_MAP[color].replace('text-', 'border-');
-                        const colorBg = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
                         const progressLane = server.progress[color] || [];
 
                         return requirements.map((req, idx) => {
@@ -134,7 +124,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
                                         "px-1 py-0.5 min-w-[12px] h-[14px] flex items-center justify-center rounded-sm text-[8px] font-mono font-bold border shadow-md transition-all duration-300",
                                         isCleared
                                             ? "bg-zinc-950 border-zinc-800 text-zinc-800 opacity-40 grayscale"
-                                            : `${colorBg} ${colorBorder} text-zinc-950`
+                                            : `${LAYER_THEME[color].bg} ${LAYER_THEME[color].border} text-zinc-950`
                                     )}
                                 >
                                     {req}

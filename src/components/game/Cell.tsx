@@ -1,4 +1,5 @@
 import type { Cell as CellType, CellColor, CellSymbol } from '../../engine/types';
+import { LAYER_THEME } from '../../presentation/theme';
 import { Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -11,14 +12,6 @@ interface CellProps {
   onClick: () => void;
   onMouseEnter: () => void;
 }
-
-const COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'bg-emerald-950 border-orange-500 text-orange-400',
-  SKY: 'bg-emerald-950 border-sky-400 text-sky-400',
-  EMERALD: 'bg-emerald-950 border-emerald-500 text-emerald-400',
-  LIME: 'bg-emerald-950 border-lime-400 text-lime-400',
-  FUCHSIA: 'bg-emerald-950 border-fuchsia-500 text-fuchsia-400',
-};
 
 const SYMBOL_MAP: Record<CellSymbol, React.ReactNode> = {
   SHIELD: <Shield className="w-5 h-5 text-current drop-shadow-md" />,
@@ -42,7 +35,9 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
 
   const baseClasses = clsx(
     'w-full h-full flex items-center justify-center rounded-sm border-2 transition-all duration-100',
-    COLOR_MAP[color],
+    LAYER_THEME[color].surface,
+    LAYER_THEME[color].border,
+    LAYER_THEME[color].text,
     'relative overflow-hidden cursor-pointer'
   );
 

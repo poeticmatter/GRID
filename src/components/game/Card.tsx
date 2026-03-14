@@ -1,4 +1,6 @@
 import type { Card as CardType, CellColor, Coordinate, Effect } from '../../engine/types';
+import { LAYER_THEME } from '../../presentation/theme';
+
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
 
@@ -9,21 +11,7 @@ interface CardProps {
   rotation?: number;
 }
 
-const BANNER_COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'bg-emerald-950 border-b-2 border-orange-500 text-orange-400',
-  SKY: 'bg-emerald-950 border-b-2 border-sky-400 text-sky-400',
-  EMERALD: 'bg-emerald-950 border-b-2 border-emerald-500 text-emerald-400',
-  LIME: 'bg-emerald-950 border-b-2 border-lime-400 text-lime-400',
-  FUCHSIA: 'bg-emerald-950 border-b-2 border-fuchsia-500 text-fuchsia-400',
-};
 
-const BADGE_COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'border-green-400 bg-green-600',
-  SKY: 'border-green-400 bg-green-600',
-  EMERALD: 'border-green-400 bg-green-600',
-  LIME: 'border-green-400 bg-green-600',
-  FUCHSIA: 'border-green-400 bg-green-600',
-};
 
 // Helper to check if a mini-grid cell is part of pattern
 const isPatternCell = (x: number, y: number, pattern: Coordinate[]) => {
@@ -96,8 +84,8 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
       layoutId={`card-${card.id}`}
       className={clsx(
         'h-[clamp(140px,22vh,192px)] aspect-[2/3] border-2 rounded-lg flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md overflow-hidden',
-        'bg-zinc-950 border-green-500/50',
-        isSelected ? 'border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
+        LAYER_THEME[visualColor].surface,
+        isSelected ? 'border-green-400 shadow-[0_0_20px_rgba(34,197,94,0.5)] scale-110 z-30' : 'border-green-500/50 opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
       )}
       onClick={onClick}
       animate={{
@@ -108,7 +96,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
       <div
         className={clsx(
           "absolute -top-2 -left-2 w-[clamp(1.5rem,3vh,2rem)] h-[clamp(1.5rem,3vh,2rem)] border-2 rounded-full flex items-center justify-center text-[clamp(0.6rem,1.2vh,0.875rem)] font-bold text-white shadow-lg z-10",
-          BADGE_COLOR_MAP[visualColor]
+          LAYER_THEME[visualColor].badge
         )}
         title="Memory Cost"
       >
@@ -117,7 +105,7 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
 
       <div className={clsx(
         "text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center p-1 truncate leading-tight",
-        BANNER_COLOR_MAP[visualColor]
+        LAYER_THEME[visualColor].banner
       )}>
         {name}
       </div>
