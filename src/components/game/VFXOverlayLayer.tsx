@@ -33,6 +33,14 @@ const DummyCell = ({ cell, startX, startY, endX, endY }: { cell: CellType, start
 
     const { cellSize } = useUIStore.getState().spatialMetrics;
 
+    // Calculate a perpendicular offset for the arc (e.g., 30 pixels)
+    const isHorizontal = startY === endY;
+    // Reverse the arc direction for the opposing cell so they don't collide
+    const arcOffset = startX < endX || startY < endY ? -30 : 30; 
+
+    const midX = isHorizontal ? (startX + endX) / 2 : startX + arcOffset;
+    const midY = isHorizontal ? startY + arcOffset : (startY + endY) / 2;
+
     return (
         <motion.div
             className={baseClasses}
@@ -46,9 +54,9 @@ const DummyCell = ({ cell, startX, startY, endX, endY }: { cell: CellType, start
             initial={{ scale: 1, left: startX, top: startY }}
             animate={{ 
                 scale: [1, 0.5, 0.5, 1.2, 1],
-                left: [startX, startX, endX, endX],
-                top: [startY, startY, endY, endY],
-                filter: ['brightness(1)', 'brightness(1)', 'brightness(2)', 'brightness(1)']
+                left: [startX, startX, midX, endX, endX],
+                top: [startY, startY, midY, endY, endY],
+                filter: ['brightness(1)', 'brightness(1)', 'brightness(1.5)', 'brightness(2)', 'brightness(1)']
             }}
             transition={{ 
                 duration: 0.8,
