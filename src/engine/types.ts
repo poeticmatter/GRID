@@ -46,6 +46,7 @@ export interface PlayerStats {
   trace: number;
   credits: number;
   maxHardwareHealth: number;
+  maxTrace: number;
 }
 
 export interface ActiveEffect {

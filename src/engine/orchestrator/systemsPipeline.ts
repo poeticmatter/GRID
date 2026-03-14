@@ -38,7 +38,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                 newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error' });
                 for (const cm of result.pushedCountermeasures) {
                     if (cm.type === 'TRACE') {
-                        newPlayerStats.trace = Math.min(100, newPlayerStats.trace + cm.value);
+                        newPlayerStats.trace = Math.min(newPlayerStats.maxTrace, newPlayerStats.trace + cm.value);
                     } else if (cm.type === 'HARDWARE_DAMAGE') {
                         newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - cm.value);
                     } else if (cm.type === 'NET_DAMAGE') {
@@ -216,7 +216,7 @@ export const gameStateSystem: SystemFunction = (snapshot, deltas) => {
     let newGameState = deltas.gameState || snapshot.gameState;
     const newEvents: Array<{ type: string; payload?: any; durationMs?: number }> = [];
 
-    if (stats.hardwareHealth <= 0 || stats.trace >= 100 || (hand.length === 0 && deck.length === 0)) {
+    if (stats.hardwareHealth <= 0 || stats.trace >= stats.maxTrace || (hand.length === 0 && deck.length === 0)) {
         newGameState = 'GAME_OVER';
     } else if (targetHacked) {
         newGameState = 'VICTORY';

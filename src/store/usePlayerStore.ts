@@ -11,6 +11,7 @@ export const usePlayerStore = create<PlayerState>((set) => ({
         hardwareHealth: 3,
         maxHardwareHealth: 3,
         trace: 0,
+        maxTrace: 15,
         credits: 0,
     },
     setPlayerStats: (playerStats) => set({ playerStats }),

@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/useGameStore';
 import { usePlayerStore } from '../../store/usePlayerStore';
 import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
+import { TraceBar } from '../game/TraceBar';
 import { Hand } from '../game/Hand';
 import { NetworkMap } from '../game/NetworkMap';
 import { Console } from '../game/Console';
@@ -72,8 +73,11 @@ export const GameLayout = () => {
 
             {/* Center Play Area */}
             <div className="relative w-full h-full min-w-0 z-10 grid place-items-center overflow-hidden min-h-0 pointer-events-none py-4">
-                <div className="h-full max-h-[45vh] sm:max-h-full max-w-full aspect-square pointer-events-auto">
-                    <Board />
+                <div className="flex flex-row items-center justify-center gap-2 sm:gap-4 h-full max-h-[45vh] sm:max-h-full max-w-full pointer-events-auto">
+                    <TraceBar />
+                    <div className="h-full aspect-square">
+                        <Board />
+                    </div>
                 </div>
             </div>
 
