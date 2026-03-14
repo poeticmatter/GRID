@@ -1,10 +1,7 @@
 {
     "card_1773404065295": {
-        "name": "New Card",
+        "name": "Fidget",
         "visualColor": "SKY",
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true,
         "effects": [
             {
                 "type": "RUN",
@@ -18,14 +15,98 @@
                         "y": -1
                     },
                     {
-                        "x": -1,
-                        "y": -1
+                        "x": 1,
+                        "y": 0
                     }
                 ]
-            },
+            }
+        ],
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": true
+    },
+    "card_1773504527625": {
+        "name": "Creeper",
+        "visualColor": "SKY",
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": false,
+        "effects": [
+            {
+                "type": "RUN",
+                "pattern": [
+                    {
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "x": 0,
+                        "y": -1
+                    },
+                    {
+                        "x": 0,
+                        "y": 1
+                    }
+                ]
+            }
+        ]
+    },
+    "card_1773504541091": {
+        "name": "Buster",
+        "visualColor": "SKY",
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": false,
+        "effects": [
+            {
+                "type": "RUN",
+                "pattern": [
+                    {
+                        "x": 0,
+                        "y": 0
+                    },
+                    {
+                        "x": -1,
+                        "y": 0
+                    },
+                    {
+                        "x": 0,
+                        "y": -1
+                    },
+                    {
+                        "x": 1,
+                        "y": 0
+                    }
+                ]
+            }
+        ]
+    },
+    "card_1773504553037": {
+        "name": "Data Miner",
+        "visualColor": "SKY",
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": false,
+        "effects": [
             {
                 "type": "REPROGRAM",
-                "amount": 1
+                "amount": 3
+            }
+        ]
+    },
+    "card_1773504601715": {
+        "name": "System Reset",
+        "visualColor": "SKY",
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": false,
+        "effects": [
+            {
+                "type": "SYSTEM_RESET"
+            },
+            {
+                "type": "END_TURN",
+                "tracePenalty": 2
             }
         ]
     }
