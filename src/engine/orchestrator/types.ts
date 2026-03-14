@@ -97,12 +97,11 @@ export type GameAction =
     | { type: 'SELECT_CARD'; payload: { cardId: string | null } }
     | { type: 'ROTATE_CARD' }
     | { type: 'RESOLVE_RUN'; payload: { x: number; y: number; pattern: any[] } }
-    | { type: 'END_TURN' }
+    | { type: 'SYSTEM_RESET' }
     | { type: 'PLAY_CARD'; payload: { cardId: string; effects: Effect[] } }
     | { type: 'QUEUE_EFFECT'; payload: { effect: Effect } }
     | { type: 'CONFIRM_EFFECT_ORDER' }
     | { type: 'SET_REPROGRAM_SOURCE'; payload: { source: Coordinate | null } }
-    | { type: 'RESOLVE_SYSTEM_RESET' }
     | { type: 'RESOLVE_REPROGRAM'; payload: { source: Coordinate; dest: Coordinate } }
     | { type: 'FINISH_CARD_RESOLUTION' }
     | { type: 'CANCEL_CARD' };

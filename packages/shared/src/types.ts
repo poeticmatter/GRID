@@ -22,12 +22,8 @@ export interface EffectSystemReset {
   type: 'SYSTEM_RESET';
 }
 
-export interface EffectEndTurn {
-  type: 'END_TURN';
-  tracePenalty?: number;
-}
 
-export type Effect = EffectRun | EffectReprogram | EffectSystemReset | EffectEndTurn;
+export type Effect = EffectRun | EffectReprogram | EffectSystemReset;
 
 export interface CardDefinition {
   name: string;
@@ -91,12 +87,6 @@ export const EFFECT_METADATA: Record<Effect['type'], Blueprint> = {
   SYSTEM_RESET: {
     label: 'SYSTEM RESET (Total Cleanup)',
     fields: {}
-  },
-  END_TURN: {
-    label: 'END TURN (Forced)',
-    fields: {
-      tracePenalty: { label: 'Trace Penalty', type: 'number', default: 2 }
-    }
   }
 };
 

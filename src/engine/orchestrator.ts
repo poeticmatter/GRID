@@ -194,9 +194,9 @@ export const Dispatch = (action: GameAction) => {
             deltaHistory = [handleRotateCard(snapshot)];
             break;
 
-        case 'END_TURN': {
+        case 'SYSTEM_RESET': {
             const initDeltas: StateDeltas = {
-                effectQueue: [{ cardId: 'SYSTEM', effect: { type: 'END_TURN', tracePenalty: 2 } }] as any
+                effectQueue: [{ cardId: 'SYSTEM', effect: { type: 'SYSTEM_RESET' } }] as any
             };
             deltaHistory = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
             break;
@@ -273,10 +273,6 @@ export const Dispatch = (action: GameAction) => {
             break;
         }
 
-        case 'RESOLVE_SYSTEM_RESET': {
-            deltaHistory = evaluateQueue(snapshot);
-            break;
-        }
 
         case 'FINISH_CARD_RESOLUTION': {
             deltaHistory = evaluateQueue(snapshot);

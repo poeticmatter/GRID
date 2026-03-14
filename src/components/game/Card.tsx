@@ -65,12 +65,7 @@ const renderEffect = (effect: Effect, index: number, rotation: number) => {
           </div>
         </div>
       );
-    case 'END_TURN':
-      return (
-        <div key={index} className="text-[9px] text-gray-400 mt-1 text-center">
-          END TURN
-        </div>
-      );
+
     default:
       return null;
   }

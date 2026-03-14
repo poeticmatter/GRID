@@ -103,10 +103,6 @@
         "effects": [
             {
                 "type": "SYSTEM_RESET"
-            },
-            {
-                "type": "END_TURN",
-                "tracePenalty": 2
             }
         ]
     }

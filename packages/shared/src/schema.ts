@@ -21,16 +21,11 @@ export const EffectSystemResetSchema = z.object({
     type: z.literal('SYSTEM_RESET')
 });
 
-export const EffectEndTurnSchema = z.object({
-    type: z.literal('END_TURN'),
-    tracePenalty: z.number().optional()
-});
 
 export const EffectSchema = z.discriminatedUnion('type', [
     EffectRunSchema,
     EffectReprogramSchema,
-    EffectSystemResetSchema,
-    EffectEndTurnSchema
+    EffectSystemResetSchema
 ]);
 
 export const CardDefinitionSchema = z.object({
