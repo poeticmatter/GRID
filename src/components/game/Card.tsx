@@ -10,19 +10,19 @@ interface CardProps {
 }
 
 const COLOR_MAP: Record<CellColor, string> = {
-  RED: 'border-rose-500 shadow-rose-500/20 bg-rose-950/40',
-  BLUE: 'border-cyan-500 shadow-cyan-500/20 bg-cyan-950/40',
-  GREEN: 'border-emerald-500 shadow-emerald-500/20 bg-emerald-950/40',
-  YELLOW: 'border-amber-500 shadow-amber-500/20 bg-amber-950/40',
-  PURPLE: 'border-fuchsia-500 shadow-fuchsia-500/20 bg-fuchsia-950/40',
+  ORANGE: 'border-orange-500 shadow-orange-500/20 bg-orange-900/80',
+  SKY: 'border-sky-300 shadow-sky-600/20 bg-sky-600/80',
+  EMERALD: 'border-emerald-300 shadow-emerald-300/20 bg-emerald-500',
+  LIME: 'border-lime-200 shadow-lime-200/20 bg-lime-400/80',
+  FUCHSIA: 'border-fuchsia-500 shadow-fuchsia-900/20 bg-fuchsia-900/80',
 };
 
 const BADGE_COLOR_MAP: Record<CellColor, string> = {
-  RED: 'border-rose-500 shadow-rose-500/20 bg-rose-950',
-  BLUE: 'border-cyan-500 shadow-cyan-500/20 bg-cyan-950',
-  GREEN: 'border-emerald-500 shadow-emerald-500/20 bg-emerald-950',
-  YELLOW: 'border-amber-500 shadow-amber-500/20 bg-amber-950',
-  PURPLE: 'border-fuchsia-500 shadow-fuchsia-500/20 bg-fuchsia-950',
+  ORANGE: 'border-orange-500 bg-orange-900',
+  SKY: 'border-sky-300 bg-sky-600',
+  EMERALD: 'border-emerald-300 bg-emerald-500',
+  LIME: 'border-lime-200 bg-lime-400',
+  FUCHSIA: 'border-fuchsia-500 bg-fuchsia-900',
 };
 
 // Helper to check if a mini-grid cell is part of pattern

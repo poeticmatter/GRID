@@ -1,6 +1,6 @@
 import { z } from 'zod';
 
-export const CellColorSchema = z.enum(['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE']);
+export const CellColorSchema = z.enum(['ORANGE', 'SKY', 'EMERALD', 'LIME', 'FUCHSIA']);
 
 export const CoordinateSchema = z.object({
     x: z.number(),

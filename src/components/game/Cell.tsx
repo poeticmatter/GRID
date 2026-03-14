@@ -13,11 +13,11 @@ interface CellProps {
 }
 
 const COLOR_MAP: Record<CellColor, string> = {
-  RED: 'bg-rose-600 border-rose-400',
-  BLUE: 'bg-cyan-600 border-cyan-400',
-  GREEN: 'bg-emerald-600 border-emerald-400',
-  YELLOW: 'bg-amber-500 border-amber-300',
-  PURPLE: 'bg-fuchsia-600 border-fuchsia-400',
+  ORANGE: 'bg-orange-900/80 border-orange-500',
+  SKY: 'bg-sky-600/80 border-sky-300',
+  EMERALD: 'bg-emerald-500 border-emerald-300',
+  LIME: 'bg-lime-400/80 border-lime-200',
+  FUCHSIA: 'bg-fuchsia-900/80 border-fuchsia-500',
 };
 
 const SYMBOL_MAP: Record<CellSymbol, React.ReactNode> = {

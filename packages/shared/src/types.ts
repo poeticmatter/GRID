@@ -1,6 +1,6 @@
 // Core types for the game engine - Shared between Game and Editor
 
-export type CellColor = 'RED' | 'BLUE' | 'GREEN' | 'YELLOW' | 'PURPLE';
+export type CellColor = 'ORANGE' | 'SKY' | 'EMERALD' | 'LIME' | 'FUCHSIA';
 export type CellSymbol = 'SHIELD' | 'EYE' | 'SKULL' | 'NONE';
 
 export interface Coordinate {

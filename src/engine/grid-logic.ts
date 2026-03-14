@@ -1,6 +1,6 @@
 import type { Grid, Cell, CellColor, CellSymbol, Coordinate } from './types';
 
-const COLORS: CellColor[] = ['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'];
+const COLORS: CellColor[] = ['ORANGE', 'SKY', 'EMERALD', 'LIME', 'FUCHSIA'];
 const SYMBOLS: CellSymbol[] = ['SHIELD', 'EYE', 'SKULL', 'NONE']; // 'NONE' is common
 
 export const createGrid = (rows: number, cols: number): Grid => {

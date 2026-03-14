@@ -38,7 +38,7 @@ export class NodeRegistry {
                 name: 'Fallback Node',
                 baseDifficulty: 1,
                 weight: 1,
-                layers: { RED: [1] },
+                layers: { ORANGE: [1] },
                 countermeasures: [{ requiredSymbols: [], type: 'TRACE', value: 5 }],
                 resetTrace: 1
             });

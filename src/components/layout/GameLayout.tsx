@@ -44,13 +44,16 @@ export const GameLayout = () => {
     return (
         <div
             onClick={() => { if (gameState === 'EFFECT_ORDERING') Dispatch({ type: 'CANCEL_CARD' }); }}
-            className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-slate-900 text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans"
+            className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-emerald-950 text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans"
         >
             <PlaybackController />
             <AudioController />
             {/* Background Ambience & Widescreen Gutters */}
-            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black opacity-80 pointer-events-none" />
+            <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-900 via-emerald-950 to-black opacity-80 pointer-events-none" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4vw_4vw] pointer-events-none mask-image-[radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" style={{ WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 40%, black 100%)' }} />
+
+            {/* Green CRT Wash Overlay */}
+            <div className="absolute inset-0 z-[150] bg-emerald-950/30 mix-blend-color pointer-events-none" />
 
             {/* Floating Menu Button */}
             {gameState !== 'MENU' && (

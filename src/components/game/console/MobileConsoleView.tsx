@@ -38,19 +38,19 @@ export const MobileConsoleView = ({
             <div 
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={(e) => e.stopPropagation()}
-                className="w-full max-w-md pointer-events-auto bg-slate-900/95 backdrop-blur-2xl border-t border-cyan-500/30 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] pb-[max(1rem,env(safe-area-inset-bottom))]"
+                className="w-full max-w-md pointer-events-auto bg-emerald-950/95 backdrop-blur-2xl border-t border-emerald-500/30 shadow-[0_-10px_40px_rgba(0,0,0,0.8)] pb-[max(1rem,env(safe-area-inset-bottom))]"
             >
                 <button 
                     onClick={() => setIsExpanded(!isExpanded)}
                     className="w-full p-3 flex items-center justify-between group"
                 >
                     <div className="flex items-center gap-2 ml-2">
-                        <Layers className="w-4 h-4 text-cyan-400" />
-                        <span className="text-[10px] font-black text-cyan-400 uppercase tracking-widest">
+                        <Layers className="w-4 h-4 text-emerald-400" />
+                        <span className="text-[10px] font-black text-emerald-400 uppercase tracking-widest">
                             {isResolving ? 'SPATIAL OVERRIDE ACTIVE' : `${pendingEffects.length} Effects Stacked`}
                         </span>
                     </div>
-                    {isExpanded ? <ChevronDown className="w-4 h-4 text-cyan-500" /> : <ChevronUp className="w-4 h-4 text-cyan-500" />}
+                    {isExpanded ? <ChevronDown className="w-4 h-4 text-emerald-500" /> : <ChevronUp className="w-4 h-4 text-emerald-500" />}
                 </button>
 
                 <AnimatePresence initial={false}>

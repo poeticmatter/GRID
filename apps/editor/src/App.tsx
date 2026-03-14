@@ -99,7 +99,7 @@ export default function App() {
             ...prev,
             [id]: {
                 name: 'New Card',
-                visualColor: 'BLUE',
+                visualColor: 'SKY',
                 memory: 1,
                 weight: 10,
                 isStartingCard: false,
@@ -135,7 +135,7 @@ export default function App() {
             <div className="w-80 border-r border-slate-800 bg-slate-900/50 flex flex-col">
                 <div className="p-4 border-b border-slate-800 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <Database className="text-cyan-500 w-6 h-6" />
+                        <Database className="text-emerald-500 w-6 h-6" />
                         <h1 className="font-bold text-xl tracking-tight uppercase">Grid.dev</h1>
                     </div>
                 </div>
@@ -150,13 +150,13 @@ export default function App() {
                 <div className="flex p-2 gap-2 bg-black/20">
                     <button 
                         onClick={() => setActiveTab('CARDS')}
-                        className={clsx("flex-1 py-2 rounded text-sm font-bold transition-all", activeTab === 'CARDS' ? "bg-cyan-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "hover:bg-slate-800 text-slate-400")}
+                        className={clsx("flex-1 py-2 rounded text-sm font-bold transition-all", activeTab === 'CARDS' ? "bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "hover:bg-slate-800 text-slate-400")}
                     >
                         Cards
                     </button>
                     <button 
                         onClick={() => setActiveTab('NODES')}
-                        className={clsx("flex-1 py-2 rounded text-sm font-bold transition-all", activeTab === 'NODES' ? "bg-cyan-600 text-white shadow-[0_0_15px_rgba(6,182,212,0.3)]" : "hover:bg-slate-800 text-slate-400")}
+                        className={clsx("flex-1 py-2 rounded text-sm font-bold transition-all", activeTab === 'NODES' ? "bg-emerald-600 text-white shadow-[0_0_15px_rgba(16,185,129,0.3)]" : "hover:bg-slate-800 text-slate-400")}
                     >
                         Nodes
                     </button>
@@ -170,7 +170,7 @@ export default function App() {
                                     key={id}
                                     onClick={() => setSelectedId(id)}
                                     className={clsx("w-full text-left p-3 rounded-lg border transition-all group relative", 
-                                        selectedId === id ? "bg-cyan-500/10 border-cyan-500 shadow-[inset_0_0_10px_rgba(6,182,212,0.1)]" : "bg-slate-800/50 border-slate-700 hover:border-slate-500")}
+                                        selectedId === id ? "bg-emerald-500/10 border-emerald-500 shadow-[inset_0_0_10px_rgba(16,185,129,0.1)]" : "bg-slate-800/50 border-slate-700 hover:border-slate-500")}
                                 >
                                     <div className="font-bold truncate pr-6">{card.name}</div>
                                     <div className="text-[10px] text-slate-500 font-mono italic">{id}</div>
@@ -182,7 +182,7 @@ export default function App() {
                                     </button>
                                 </button>
                             ))}
-                            <button onClick={addCard} className="w-full py-4 rounded-lg border border-dashed border-slate-700 hover:border-cyan-500 hover:bg-cyan-500/5 flex items-center justify-center gap-2 text-slate-400 font-bold transition-all">
+                            <button onClick={addCard} className="w-full py-4 rounded-lg border border-dashed border-slate-700 hover:border-emerald-500 hover:bg-emerald-500/5 flex items-center justify-center gap-2 text-slate-400 font-bold transition-all">
                                 <Plus className="w-4 h-4" /> New Card
                             </button>
                         </>
@@ -199,7 +199,7 @@ export default function App() {
                                             key={`${pool}-${idx}`}
                                             onClick={() => { setSelectedNodePool(pool); setSelectedNodeIndex(idx); }}
                                             className={clsx("w-full text-left p-2 rounded-lg border transition-all text-sm group relative", 
-                                                selectedNodePool === pool && selectedNodeIndex === idx ? "bg-cyan-500/10 border-cyan-500" : "bg-slate-800/30 border-slate-800 hover:border-slate-600")}
+                                            selectedNodePool === pool && selectedNodeIndex === idx ? "bg-emerald-500/10 border-emerald-500" : "bg-slate-800/30 border-slate-800 hover:border-slate-600")}
                                         >
                                             <div className="truncate pr-6">{node.name}</div>
                                             <button 
@@ -235,7 +235,7 @@ export default function App() {
                     <button onClick={() => fileInputRef.current?.click()} className="bg-slate-800 hover:bg-slate-700 py-3 rounded-lg flex items-center justify-center gap-2 text-[10px] font-black tracking-widest">
                         <Upload className="w-3 h-3" /> IMPORT
                     </button>
-                    <button onClick={handleExport} className="bg-cyan-600 hover:bg-cyan-500 py-3 rounded-lg flex items-center justify-center gap-2 text-[10px] font-black tracking-widest shadow-[0_0_20px_rgba(8,145,178,0.2)]">
+                    <button onClick={handleExport} className="bg-emerald-600 hover:bg-emerald-500 py-3 rounded-lg flex items-center justify-center gap-2 text-[10px] font-black tracking-widest shadow-[0_0_20px_rgba(16,185,129,0.2)]">
                         <Download className="w-3 h-3" /> EXPORT
                     </button>
                 </div>
@@ -278,7 +278,7 @@ function BlueprintRenderer({ field, value, onChange }: { field: BlueprintField, 
                         type="number" 
                         value={value ?? field.default} 
                         onChange={e => onChange(parseInt(e.target.value))}
-                        className="w-full bg-slate-900/80 border border-slate-800 p-3 rounded-lg focus:border-cyan-500/50 outline-none font-mono text-cyan-400 transition-all focus:ring-1 focus:ring-cyan-500/20" 
+                        className="w-full bg-slate-900/80 border border-slate-800 p-3 rounded-lg focus:border-emerald-500/50 outline-none font-mono text-emerald-400 transition-all focus:ring-1 focus:ring-emerald-500/20" 
                     />
                 </div>
             );
@@ -289,7 +289,7 @@ function BlueprintRenderer({ field, value, onChange }: { field: BlueprintField, 
                     <select 
                         value={value ?? field.default} 
                         onChange={e => onChange(e.target.value)}
-                        className="w-full bg-slate-900/80 border border-slate-800 p-3 rounded-lg focus:border-cyan-500/50 outline-none font-bold text-slate-300 transition-all"
+                        className="w-full bg-slate-900/80 border border-slate-800 p-3 rounded-lg focus:border-emerald-500/50 outline-none font-bold text-slate-300 transition-all"
                     >
                         {field.options?.map(opt => <option key={opt} value={opt}>{opt}</option>)}
                     </select>
@@ -343,7 +343,7 @@ function LayerArrayInput({ value, onChange }: { value: number[], onChange: (val:
 
     return (
         <input 
-            className="bg-transparent border-none focus:outline-none text-xs font-mono text-cyan-400 placeholder:text-slate-700 w-full" 
+            className="bg-transparent border-none focus:outline-none text-xs font-mono text-emerald-400 placeholder:text-slate-700 w-full" 
             placeholder="Lane Capacities (e.g. 2, 4, 1)" 
             value={localValue}
             onChange={handleChange}
@@ -456,7 +456,7 @@ function CardEditor({ card, update }: { card: CardDefinition, update: (c: CardDe
         <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
             <header className="space-y-4">
                 <input 
-                    className="bg-transparent text-5xl font-black border-b-2 border-slate-900 hover:border-slate-800 focus:border-cyan-500 focus:outline-none w-full py-2 transition-all tracking-tighter"
+                    className="bg-transparent text-5xl font-black border-b-2 border-slate-900 hover:border-slate-800 focus:border-emerald-500 focus:outline-none w-full py-2 transition-all tracking-tighter"
                     value={card.name}
                     onChange={e => update({ ...card, name: e.target.value })}
                 />
@@ -473,11 +473,11 @@ function CardEditor({ card, update }: { card: CardDefinition, update: (c: CardDe
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Memory Allocation</label>
-                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-cyan-500 outline-none font-mono text-cyan-500" value={card.memory} onChange={e => update({ ...card, memory: parseInt(e.target.value) })} />
+                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-emerald-500 outline-none font-mono text-emerald-500" value={card.memory} onChange={e => update({ ...card, memory: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Spawn Probability</label>
-                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-cyan-500 outline-none font-mono text-cyan-500" value={card.weight} onChange={e => update({ ...card, weight: parseInt(e.target.value) })} />
+                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-emerald-500 outline-none font-mono text-emerald-500" value={card.weight} onChange={e => update({ ...card, weight: parseInt(e.target.value) })} />
                         </div>
                     </div>
 
@@ -488,7 +488,7 @@ function CardEditor({ card, update }: { card: CardDefinition, update: (c: CardDe
                         </div>
                         <button 
                             onClick={() => update({ ...card, isStartingCard: !card.isStartingCard })}
-                            className={clsx("w-12 h-6 rounded-full transition-all relative", card.isStartingCard ? "bg-cyan-600" : "bg-slate-800")}
+                            className={clsx("w-12 h-6 rounded-full transition-all relative", card.isStartingCard ? "bg-emerald-600" : "bg-slate-800")}
                         >
                             <div className={clsx("absolute top-1 w-4 h-4 rounded-full bg-white transition-all", card.isStartingCard ? "left-7" : "left-1")} />
                         </button>
@@ -500,7 +500,7 @@ function CardEditor({ card, update }: { card: CardDefinition, update: (c: CardDe
                         <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em]">Effect Pipeline</h3>
                         <select 
                             onChange={(e) => { if(e.target.value) addEffect(e.target.value as any); e.target.value = ''; }}
-                            className="bg-cyan-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest cursor-pointer hover:bg-cyan-500 transition-colors outline-none"
+                            className="bg-emerald-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest cursor-pointer hover:bg-emerald-500 transition-colors outline-none"
                         >
                             <option value="">+ ADD_EFFECT</option>
                             {Object.keys(EFFECT_METADATA).map(type => (
@@ -516,14 +516,14 @@ function CardEditor({ card, update }: { card: CardDefinition, update: (c: CardDe
                                 <div key={idx} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 relative group animate-in zoom-in-95 duration-300">
                                     <div className="flex items-center justify-between mb-6">
                                         <div className="flex items-center gap-3">
-                                            <div className="w-6 h-6 rounded-full bg-cyan-500/10 flex items-center justify-center text-[10px] font-bold text-cyan-500 border border-cyan-500/20">
+                                            <div className="w-6 h-6 rounded-full bg-emerald-500/10 flex items-center justify-center text-[10px] font-bold text-emerald-500 border border-emerald-500/20">
                                                 {idx + 1}
                                             </div>
                                             <span className="font-black text-xs uppercase tracking-widest text-slate-300">{metadata.label}</span>
                                         </div>
                                         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => moveEffect(idx, 'up')} className="p-1 hover:text-cyan-400 transition-colors"><ChevronUp className="w-4 h-4" /></button>
-                                            <button onClick={() => moveEffect(idx, 'down')} className="p-1 hover:text-cyan-400 transition-colors"><ChevronDown className="w-4 h-4" /></button>
+                                            <button onClick={() => moveEffect(idx, 'up')} className="p-1 hover:text-emerald-400 transition-colors"><ChevronUp className="w-4 h-4" /></button>
+                                            <button onClick={() => moveEffect(idx, 'down')} className="p-1 hover:text-emerald-400 transition-colors"><ChevronDown className="w-4 h-4" /></button>
                                             <button onClick={() => removeEffect(idx)} className="p-1 hover:text-red-500 transition-colors"><Trash2 className="w-4 h-4" /></button>
                                         </div>
                                     </div>
@@ -585,7 +585,7 @@ function NodeEditor({ node, update }: { node: NodeDefinition, update: (n: NodeDe
                 />
                 <div className="flex gap-4">
                     <select 
-                        className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-xs font-black text-cyan-500 uppercase tracking-widest outline-none focus:border-cyan-500"
+                        className="bg-slate-900 border border-slate-800 px-4 py-2 rounded-xl text-xs font-black text-emerald-500 uppercase tracking-widest outline-none focus:border-emerald-500"
                         value={node.type} 
                         onChange={e => update({ ...node, type: e.target.value as any })}
                     >
@@ -603,25 +603,25 @@ function NodeEditor({ node, update }: { node: NodeDefinition, update: (n: NodeDe
                     <div className="grid grid-cols-2 gap-6">
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Base Tier/Difficulty</label>
-                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-cyan-500 outline-none font-mono text-cyan-500" value={node.baseDifficulty} onChange={e => update({ ...node, baseDifficulty: parseInt(e.target.value) })} />
+                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-emerald-500 outline-none font-mono text-emerald-500" value={node.baseDifficulty} onChange={e => update({ ...node, baseDifficulty: parseInt(e.target.value) })} />
                         </div>
                         <div className="space-y-1">
                             <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Procedural Weight</label>
-                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-cyan-500 outline-none font-mono text-cyan-500" value={node.weight} onChange={e => update({ ...node, weight: parseInt(e.target.value) })} />
+                            <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-emerald-500 outline-none font-mono text-emerald-500" value={node.weight} onChange={e => update({ ...node, weight: parseInt(e.target.value) })} />
                         </div>
                     </div>
 
                     <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em] border-b border-slate-900 pb-2 mt-8">Defense Layers</h3>
                     <div className="space-y-3">
-                        {['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'].map(color => (
+                        {['ORANGE', 'SKY', 'EMERALD', 'LIME', 'FUCHSIA'].map(color => (
                             <div key={color} className="bg-slate-900/30 border border-slate-800 rounded-2xl overflow-hidden animate-in fade-in duration-300">
                                 <div className="p-4 flex items-center gap-4 bg-black/20">
                                     <div className={clsx("w-4 h-4 rounded-full shadow-[0_0_10px]", {
-                                        'bg-red-500 shadow-red-500/50': color === 'RED',
-                                        'bg-blue-500 shadow-blue-500/50': color === 'BLUE',
-                                        'bg-green-500 shadow-green-500/50': color === 'GREEN',
-                                        'bg-yellow-500 shadow-yellow-500/50': color === 'YELLOW',
-                                        'bg-purple-500 shadow-purple-500/50': color === 'PURPLE',
+                                        'bg-orange-500 shadow-orange-500/50': color === 'ORANGE',
+                                        'bg-sky-500 shadow-sky-500/50': color === 'SKY',
+                                        'bg-emerald-500 shadow-emerald-500/50': color === 'EMERALD',
+                                        'bg-lime-500 shadow-lime-500/50': color === 'LIME',
+                                        'bg-fuchsia-500 shadow-fuchsia-500/50': color === 'FUCHSIA',
                                     })} />
                                     <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex-1">{color} LAYERS</span>
                                     <LayerArrayInput 
@@ -639,7 +639,7 @@ function NodeEditor({ node, update }: { node: NodeDefinition, update: (n: NodeDe
                         <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em]">Countermeasures</h3>
                         <button
                             onClick={addCountermeasure}
-                            className="bg-cyan-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest cursor-pointer hover:bg-cyan-500 transition-colors"
+                            className="bg-emerald-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest cursor-pointer hover:bg-emerald-500 transition-colors"
                         >
                             + ADD_COUNTERMEASURE
                         </button>
