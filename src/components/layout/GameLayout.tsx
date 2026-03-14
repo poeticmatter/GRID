@@ -52,8 +52,7 @@ export const GameLayout = () => {
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-900 via-emerald-950 to-black opacity-80 pointer-events-none" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4vw_4vw] pointer-events-none mask-image-[radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" style={{ WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 40%, black 100%)' }} />
 
-            {/* Green CRT Wash Overlay */}
-            <div className="absolute inset-0 z-[150] bg-emerald-950/30 mix-blend-color pointer-events-none" />
+
 
             {/* Floating Menu Button */}
             {gameState !== 'MENU' && (

@@ -7,11 +7,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
 
 const COLOR_TEXT_MAP: Record<CellColor, string> = {
-    ORANGE: 'text-orange-500',
-    SKY: 'text-sky-400',
-    EMERALD: 'text-emerald-300',
-    LIME: 'text-lime-200',
-    FUCHSIA: 'text-fuchsia-500',
+    ORANGE: 'text-lime-600',
+    SKY: 'text-teal-300',
+    EMERALD: 'text-emerald-400',
+    LIME: 'text-green-400',
+    FUCHSIA: 'text-slate-400',
 };
 
 const ServerCard = ({ server }: { server: NetworkNode }) => {

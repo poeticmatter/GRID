@@ -10,19 +10,19 @@ interface CardProps {
 }
 
 const COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'border-orange-500 shadow-orange-500/20 bg-orange-900/80',
-  SKY: 'border-sky-300 shadow-sky-600/20 bg-sky-600/80',
-  EMERALD: 'border-emerald-300 shadow-emerald-300/20 bg-emerald-500',
-  LIME: 'border-lime-200 shadow-lime-200/20 bg-lime-400/80',
-  FUCHSIA: 'border-fuchsia-500 shadow-fuchsia-900/20 bg-fuchsia-900/80',
+  ORANGE: 'border-lime-600 shadow-lime-900/40 bg-lime-900/80',
+  SKY: 'border-teal-300 shadow-teal-600/40 bg-teal-600/80',
+  EMERALD: 'border-emerald-300 shadow-emerald-500/40 bg-emerald-500',
+  LIME: 'border-green-200 shadow-green-400/40 bg-green-400/80',
+  FUCHSIA: 'border-slate-500 shadow-slate-800/40 bg-slate-800/90',
 };
 
 const BADGE_COLOR_MAP: Record<CellColor, string> = {
-  ORANGE: 'border-orange-500 bg-orange-900',
-  SKY: 'border-sky-300 bg-sky-600',
+  ORANGE: 'border-lime-600 bg-lime-900',
+  SKY: 'border-teal-300 bg-teal-600',
   EMERALD: 'border-emerald-300 bg-emerald-500',
-  LIME: 'border-lime-200 bg-lime-400',
-  FUCHSIA: 'border-fuchsia-500 bg-fuchsia-900',
+  LIME: 'border-green-200 bg-green-400',
+  FUCHSIA: 'border-slate-500 bg-slate-800',
 };
 
 // Helper to check if a mini-grid cell is part of pattern
