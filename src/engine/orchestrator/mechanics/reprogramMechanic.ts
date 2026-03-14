@@ -13,7 +13,7 @@ export const reprogramMechanic: IEffectMechanic = {
 
         const dx = Math.abs(dest.x - source.x);
         const dy = Math.abs(dest.y - source.y);
-        const isAdjacent = dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
+        const isAdjacent = dx + dy === 1;
 
         // Boundary validation
         if (

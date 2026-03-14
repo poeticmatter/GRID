@@ -22,7 +22,7 @@ export const ReprogramOverlay = () => {
                     const isHovered = hoveredCoordinate?.x === x && hoveredCoordinate?.y === y;
                     const dx = reprogramTargetSource ? Math.abs(x - reprogramTargetSource.x) : 0;
                     const dy = reprogramTargetSource ? Math.abs(y - reprogramTargetSource.y) : 0;
-                    const isAdjacent = dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
+                    const isAdjacent = dx + dy === 1;
 
                     return (
                         <div
