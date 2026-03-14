@@ -1,7 +1,6 @@
-import type { CellColor, Effect, NodeType, NodeLayers, CountermeasureDict } from '@grid/shared';
+import type { CellColor, CellSymbol, Effect, NodeType, NodeLayers, Countermeasure } from '@grid/shared';
 export * from '@grid/shared';
 
-export type CellSymbol = 'SHIELD' | 'EYE' | 'SKULL' | 'NONE';
 export type CellState = 'LOCKED' | 'BROKEN' | 'CORRUPTED';
 
 export interface Cell {
@@ -30,7 +29,7 @@ export interface NetworkNode {
   difficulty: number;
   layers: NodeLayers;
   progress: Partial<Record<CellColor, boolean[]>>;
-  countermeasures: CountermeasureDict;
+  countermeasures: Countermeasure[];
   resetTrace: number;
   status: 'ACTIVE' | 'HACKED' | 'LOCKED' | 'BYPASSED';
   visibility: 'REVEALED' | 'HIDDEN';

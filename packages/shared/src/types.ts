@@ -41,7 +41,12 @@ export interface CardDefinition {
 export type NodeLayers = Partial<Record<CellColor, number[]>>;
 
 export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
-export type CountermeasureDict = Partial<Record<CellColor, CountermeasurePayload>>;
+
+export interface Countermeasure {
+  requiredSymbols: CellSymbol[];
+  type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE';
+  value: number;
+}
 
 export type NodeType = 'SERVER' | 'ICE' | 'MAINFRAME' | 'HOME';
 
@@ -51,12 +56,12 @@ export interface NodeDefinition {
   baseDifficulty: number;
   weight: number;
   layers: NodeLayers;
-  countermeasures: CountermeasureDict;
+  countermeasures: Countermeasure[];
   resetTrace: number;
 }
 
 // Runtime Metadata Blueprints for Schema-Driven UI
-export type FieldType = 'number' | 'string' | 'boolean' | 'coordinate_array' | 'select' | 'color';
+export type FieldType = 'number' | 'string' | 'boolean' | 'coordinate_array' | 'select' | 'color' | 'symbol_array';
 
 export interface BlueprintField {
   label: string;
@@ -98,6 +103,12 @@ export const EFFECT_METADATA: Record<Effect['type'], Blueprint> = {
 export const COUNTERMEASURE_METADATA: Blueprint = {
   label: 'Node Countermeasure',
   fields: {
+    requiredSymbols: {
+      label: 'Required Symbols',
+      type: 'symbol_array',
+      default: [],
+      options: ['SHIELD', 'EYE', 'SKULL']
+    },
     type: { 
       label: 'Penalty Type', 
       type: 'select', 

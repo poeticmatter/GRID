@@ -27,7 +27,7 @@ export const generateGraph = (): NetworkNode[] => {
                 difficulty: 0,
                 layers: {},
                 progress: {},
-                countermeasures: {},
+                countermeasures: [],
                 resetTrace: 0,
                 status: 'ACTIVE',
                 visibility: 'REVEALED',

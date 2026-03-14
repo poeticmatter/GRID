@@ -2,16 +2,17 @@ import { useState, useEffect, useRef } from 'react';
 import { 
     CardDefinition, 
     NodeDefinition, 
+    Countermeasure,
     CardPoolSchema, 
     NodePoolsSchema, 
     EFFECT_METADATA, 
     COUNTERMEASURE_METADATA,
     Effect,
-    Blueprint,
-    BlueprintField
+    BlueprintField,
+    CellColor
 } from '@grid/shared';
 import { PatternGrid } from './components/PatternGrid';
-import { Save, Download, Upload, Plus, Trash2, Database, Layout, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
+import { Download, Upload, Plus, Trash2, Database, Layout, AlertCircle, ChevronUp, ChevronDown } from 'lucide-react';
 import clsx from 'clsx';
 
 type Tab = 'CARDS' | 'NODES';
@@ -115,7 +116,7 @@ export default function App() {
             baseDifficulty: 1,
             weight: 10,
             layers: {},
-            countermeasures: {},
+            countermeasures: [],
             resetTrace: 1
         };
         setNodes(prev => ({
@@ -301,6 +302,17 @@ function BlueprintRenderer({ field, value, onChange }: { field: BlueprintField, 
                     <PatternGrid pattern={value ?? field.default} onChange={onChange} />
                 </div>
             );
+        case 'symbol_array':
+            return (
+                <div className="space-y-1">
+                    <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{field.label}</label>
+                    <SymbolArrayInput 
+                        value={value ?? field.default}
+                        options={field.options || []}
+                        onChange={onChange}
+                    />
+                </div>
+            );
         default:
             return null;
     }
@@ -333,6 +345,35 @@ function LayerArrayInput({ value, onChange }: { value: number[], onChange: (val:
         <input 
             className="bg-transparent border-none focus:outline-none text-xs font-mono text-cyan-400 placeholder:text-slate-700 w-full" 
             placeholder="Lane Capacities (e.g. 2, 4, 1)" 
+            value={localValue}
+            onChange={handleChange}
+        />
+    );
+}
+
+// Specialized sub-component for decoupled symbol array input
+function SymbolArrayInput({ value, options, onChange }: { value: string[], options: string[], onChange: (val: string[]) => void }) {
+    const [localValue, setLocalValue] = useState(value.join(', '));
+
+    useEffect(() => {
+        const joined = value.join(', ');
+        const currentParsed = localValue.split(',').map(v => v.trim()).filter(v => v.length > 0);
+        if (JSON.stringify(currentParsed) !== JSON.stringify(value)) {
+            setLocalValue(joined);
+        }
+    }, [value]);
+
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const str = e.target.value;
+        setLocalValue(str);
+        const parsed = str.split(',').map(v => v.trim().toUpperCase()).filter(v => options.includes(v));
+        onChange(parsed);
+    };
+
+    return (
+        <input 
+            className="w-full bg-slate-900/80 border border-slate-800 p-3 rounded-lg focus:border-cyan-500/50 outline-none text-xs font-mono text-amber-400 placeholder:text-slate-700 transition-all focus:ring-1 focus:ring-cyan-500/20" 
+            placeholder="e.g. SKULL, SKULL, EYE" 
             value={localValue}
             onChange={handleChange}
         />
@@ -474,24 +515,25 @@ function CardEditor({ card, update }: { card: CardDefinition, update: (c: CardDe
 }
 
 function NodeEditor({ node, update }: { node: NodeDefinition, update: (n: NodeDefinition) => void }) {
-    const updateCountermeasure = (color: string, field: string, value: any) => {
-        const next = structuredClone(node);
-        if (!next.countermeasures[color as any]) {
-            // Robust Initialization from Metadata Blueprints
-            const initialCM: any = {};
-            Object.entries(COUNTERMEASURE_METADATA.fields).forEach(([key, fieldCfg]) => {
-                initialCM[key] = structuredClone(fieldCfg.default);
-            });
-            next.countermeasures[color as any] = initialCM;
-        }
-        (next.countermeasures[color as any] as any)[field] = value;
-        update(next);
+    const addCountermeasure = () => {
+        const newCM: Countermeasure = { requiredSymbols: [], type: 'TRACE', value: 10 };
+        // Initialize from blueprint defaults
+        Object.entries(COUNTERMEASURE_METADATA.fields).forEach(([key, fieldCfg]) => {
+            (newCM as any)[key] = structuredClone(fieldCfg.default);
+        });
+        update({ ...node, countermeasures: [...node.countermeasures, newCM] });
     };
 
-    const removeCountermeasure = (color: string) => {
-        const next = structuredClone(node);
-        delete next.countermeasures[color as any];
-        update(next);
+    const updateCMField = (index: number, field: string, value: any) => {
+        const next = structuredClone(node.countermeasures);
+        (next[index] as any)[field] = value;
+        update({ ...node, countermeasures: next });
+    };
+
+    const removeCountermeasure = (index: number) => {
+        const next = [...node.countermeasures];
+        next.splice(index, 1);
+        update({ ...node, countermeasures: next });
     };
 
     return (
@@ -529,62 +571,75 @@ function NodeEditor({ node, update }: { node: NodeDefinition, update: (n: NodeDe
                             <input type="number" className="w-full bg-slate-900 border border-slate-800 p-3 rounded-xl focus:border-cyan-500 outline-none font-mono text-cyan-500" value={node.weight} onChange={e => update({ ...node, weight: parseInt(e.target.value) })} />
                         </div>
                     </div>
+
+                    <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em] border-b border-slate-900 pb-2 mt-8">Defense Layers</h3>
+                    <div className="space-y-3">
+                        {['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'].map(color => (
+                            <div key={color} className="bg-slate-900/30 border border-slate-800 rounded-2xl overflow-hidden animate-in fade-in duration-300">
+                                <div className="p-4 flex items-center gap-4 bg-black/20">
+                                    <div className={clsx("w-4 h-4 rounded-full shadow-[0_0_10px]", {
+                                        'bg-red-500 shadow-red-500/50': color === 'RED',
+                                        'bg-blue-500 shadow-blue-500/50': color === 'BLUE',
+                                        'bg-green-500 shadow-green-500/50': color === 'GREEN',
+                                        'bg-yellow-500 shadow-yellow-500/50': color === 'YELLOW',
+                                        'bg-purple-500 shadow-purple-500/50': color === 'PURPLE',
+                                    })} />
+                                    <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex-1">{color} LAYERS</span>
+                                    <LayerArrayInput 
+                                        value={node.layers[color as CellColor] || []}
+                                        onChange={(val) => update({ ...node, layers: { ...node.layers, [color as CellColor]: val } })}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                 </div>
 
-                <div className="space-y-8">
-                    <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em] border-b border-slate-900 pb-2">Defense Layers</h3>
-                    <div className="space-y-3">
-                        {['RED', 'BLUE', 'GREEN', 'YELLOW', 'PURPLE'].map(color => {
-                            const hasCounter = !!node.countermeasures[color as any];
-                            return (
-                                <div key={color} className="bg-slate-900/30 border border-slate-800 rounded-2xl overflow-hidden animate-in fade-in duration-300">
-                                    <div className="p-4 flex items-center gap-4 bg-black/20 border-b border-slate-800">
-                                        <div className={clsx("w-4 h-4 rounded-full shadow-[0_0_10px]", {
-                                            'bg-red-500 shadow-red-500/50': color === 'RED',
-                                            'bg-blue-500 shadow-blue-500/50': color === 'BLUE',
-                                            'bg-green-500 shadow-green-500/50': color === 'GREEN',
-                                            'bg-yellow-500 shadow-yellow-500/50': color === 'YELLOW',
-                                            'bg-purple-500 shadow-purple-500/50': color === 'PURPLE',
-                                        })} />
-                                        <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest flex-1">{color} LAYERS</span>
-                                        <LayerArrayInput 
-                                            value={node.layers[color as any] || []}
-                                            onChange={(val) => update({ ...node, layers: { ...node.layers, [color]: val } })}
-                                        />
+                <div className="space-y-6">
+                    <div className="flex items-center justify-between border-b border-slate-900 pb-2">
+                        <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em]">Countermeasures</h3>
+                        <button
+                            onClick={addCountermeasure}
+                            className="bg-cyan-600 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest cursor-pointer hover:bg-cyan-500 transition-colors"
+                        >
+                            + ADD_COUNTERMEASURE
+                        </button>
+                    </div>
+
+                    <div className="space-y-4">
+                        {(node.countermeasures || []).map((cm, idx) => (
+                            <div key={idx} className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6 relative group animate-in zoom-in-95 duration-300">
+                                <div className="flex items-center justify-between mb-6">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-[10px] font-bold text-amber-500 border border-amber-500/20">
+                                            {idx + 1}
+                                        </div>
+                                        <span className="font-black text-xs uppercase tracking-widest text-slate-300">{COUNTERMEASURE_METADATA.label}</span>
                                     </div>
-                                    
-                                    <div className="p-4 group">
-                                        {!hasCounter ? (
-                                            <button 
-                                                onClick={() => updateCountermeasure(color, 'type', 'TRACE')}
-                                                className="w-full py-2 border border-dashed border-slate-800 text-[10px] font-black text-slate-700 hover:text-cyan-500 hover:border-cyan-500/30 transition-all uppercase tracking-widest"
-                                            >
-                                                + INSTALL_COUNTERMEASURE
-                                            </button>
-                                        ) : (
-                                            <div className="space-y-4 relative">
-                                                <button 
-                                                    onClick={() => removeCountermeasure(color)}
-                                                    className="absolute -top-1 -right-1 opacity-0 group-hover:opacity-100 p-1 text-slate-600 hover:text-red-500 transition-all"
-                                                >
-                                                    <Trash2 className="w-3 h-3" />
-                                                </button>
-                                                <div className="grid grid-cols-2 gap-4">
-                                                    {Object.entries(COUNTERMEASURE_METADATA.fields).map(([fieldName, field]) => (
-                                                        <BlueprintRenderer 
-                                                            key={fieldName}
-                                                            field={field}
-                                                            value={(node.countermeasures[color as any] as any)[fieldName]}
-                                                            onChange={(val) => updateCountermeasure(color, fieldName, val)}
-                                                        />
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
+                                    <button 
+                                        onClick={() => removeCountermeasure(idx)}
+                                        className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                    >
+                                        <Trash2 className="w-4 h-4" />
+                                    </button>
                                 </div>
-                            );
-                        })}
+                                <div className="space-y-4">
+                                    {Object.entries(COUNTERMEASURE_METADATA.fields).map(([fieldName, field]) => (
+                                        <BlueprintRenderer 
+                                            key={fieldName}
+                                            field={field}
+                                            value={(cm as any)[fieldName]}
+                                            onChange={(val) => updateCMField(idx, fieldName, val)}
+                                        />
+                                    ))}
+                                </div>
+                            </div>
+                        ))}
+                        {(node.countermeasures || []).length === 0 && (
+                            <div className="text-center py-12 border-2 border-dashed border-slate-900 rounded-3xl text-slate-800 text-xs font-bold uppercase tracking-widest">
+                                NO_COUNTERMEASURES
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

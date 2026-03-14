@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react';
 import { useViewModel } from '../../hooks/useViewModel';
-import type { NetworkNode, CellColor } from '../../engine/types';
-import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle } from 'lucide-react';
+import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
+import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle, Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
@@ -64,15 +64,18 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
             </div>
 
             <div className="mt-auto flex flex-col gap-1 border-t border-white/5 pt-[clamp(0.25rem,1vh,0.5rem)]">
-                {Object.entries(server.countermeasures || {}).map(([colorStr, effect]) => {
-                    if (!effect) return null;
-                    const color = colorStr as CellColor;
-                    const colorClass = COLOR_TEXT_MAP[color].replace('text-', 'bg-');
+                {(server.countermeasures || []).map((cm, idx) => {
+                    const SymbolIcon: Record<string, typeof Shield> = { SHIELD: Shield, EYE: Eye, SKULL: Skull };
                     return (
-                        <div key={color} className="text-[clamp(0.5rem,1.2vh,0.625rem)] flex items-center gap-1.5 text-white/50">
-                            <div className={clsx("w-2 h-2 rounded-sm shadow-sm", colorClass)} />
+                        <div key={idx} className="text-[clamp(0.5rem,1.2vh,0.625rem)] flex items-center gap-1.5 text-white/50">
+                            <div className="flex items-center gap-0.5">
+                                {cm.requiredSymbols.length > 0 ? cm.requiredSymbols.map((sym: CellSymbol, sIdx: number) => {
+                                    const Icon = SymbolIcon[sym];
+                                    return Icon ? <Icon key={sIdx} className="w-3 h-3 text-amber-400" /> : null;
+                                }) : <span className="text-red-400 text-[9px] font-bold">!</span>}
+                            </div>
                             <span className="font-mono">
-                                {effect.value} {effect.type.replace('_', ' ')}
+                                {cm.value} {cm.type.replace('_', ' ')}
                             </span>
                         </div>
                     );

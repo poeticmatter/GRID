@@ -42,12 +42,18 @@ export const CardDefinitionSchema = z.object({
     isStartingCard: z.boolean()
 });
 
+export const CellSymbolSchema = z.enum(['SHIELD', 'EYE', 'SKULL', 'NONE']);
+
 export const CountermeasurePayloadSchema = z.object({
     type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE']),
     value: z.number()
 });
 
-export const CountermeasureDictSchema = z.record(z.string(), CountermeasurePayloadSchema);
+export const CountermeasureSchema = z.object({
+    requiredSymbols: z.array(CellSymbolSchema),
+    type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE']),
+    value: z.number()
+});
 
 export const NodeLayersSchema = z.record(z.string(), z.array(z.number()));
 
@@ -59,7 +65,7 @@ export const NodeDefinitionSchema = z.object({
     baseDifficulty: z.number(),
     weight: z.number(),
     layers: NodeLayersSchema,
-    countermeasures: CountermeasureDictSchema,
+    countermeasures: z.array(CountermeasureSchema),
     resetTrace: z.number()
 });
 
