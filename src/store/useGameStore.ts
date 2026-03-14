@@ -26,18 +26,7 @@ interface GameState {
     setEffectQueue: (effectQueue: ActiveEffect[]) => void;
     setActiveCardId: (activeCardId: string | null) => void;
 
-    playCard: (cardId: string, effects: Effect[]) => void;
-    queueEffect: (effect: Effect) => void;
-    confirmEffectOrder: () => void;
-    popEffect: () => ActiveEffect | undefined;
-    unshiftEffect: (effect: ActiveEffect) => void;
     setReprogramSource: (source: Coordinate | null) => void;
-    clearEffectState: () => void;
-
-    processQueue?: () => void;
-    executeCut?: (x: number, y: number) => void;
-    executeSystemReset?: () => void;
-    executeReprogram?: (dest: Coordinate) => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -56,15 +45,5 @@ export const useGameStore = create<GameState>((set) => ({
     setEffectQueue: (effectQueue: ActiveEffect[]) => set({ effectQueue }),
     setActiveCardId: (activeCardId: string | null) => set({ activeCardId }),
 
-    playCard: (_cardId, _effects) => { },
-    queueEffect: (_effect) => { },
-    confirmEffectOrder: () => { },
-    popEffect: () => undefined,
-    unshiftEffect: (_effect) => { },
     setReprogramSource: (source: Coordinate | null) => set({ reprogramTargetSource: source }),
-    clearEffectState: () => { },
-
-    // We keep optional stubs for types or just remove them from interface entirely. 
-    // They are no longer heavily used via store dispatch directly.
-    processQueue() { },
 }));

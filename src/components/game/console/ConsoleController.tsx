@@ -53,10 +53,6 @@ export const ConsoleController = () => {
             if (!reprogramTargetSource) {
                 // Phase 1: Select Source
                 const nodeAtCoord = grid[hoveredCoordinate.y]?.[hoveredCoordinate.x];
-                // We use type narrowing or just check state if it's available on ViewModel node objects
-                // Based on types.ts, Cell has 'state'. Nodes are in the graph.
-                // However, 'grid' from useViewModel() seems to be a Grid (Cell[][]).
-                // Let's verify what 'grid' item represents.
                 if (nodeAtCoord?.state !== 'BROKEN') {
                     Dispatch({ type: 'SET_REPROGRAM_SOURCE', payload: { source: hoveredCoordinate } });
                 }

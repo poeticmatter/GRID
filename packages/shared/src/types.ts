@@ -115,6 +115,6 @@ export const COUNTERMEASURE_METADATA: Blueprint = {
       default: 'TRACE',
       options: ['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE'] 
     },
-    value: { label: 'Penalty Value', type: 'number', default: 10 }
+    value: { label: 'Penalty Value', type: 'number', default: 1 }
   }
 };
