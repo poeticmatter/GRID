@@ -10,14 +10,16 @@ export const calculateServerProgress = (server: NetworkNode, cutCells: Cell[]): 
   // Initialize Tallies & Flags
   const harvestedSymbols = {} as Record<CellSymbol, number>;
   cutCells.forEach(cell => {
-    if (cell.symbol !== 'NONE') {
+    if (cell.state !== 'BROKEN' && cell.symbol !== 'NONE') {
       harvestedSymbols[cell.symbol] = (harvestedSymbols[cell.symbol] || 0) + 1;
     }
   });
 
   const codeColors = {} as Record<CellColor, number>;
   cutCells.forEach(cell => {
-    codeColors[cell.color] = (codeColors[cell.color] || 0) + 1;
+    if (cell.state !== 'BROKEN') {
+      codeColors[cell.color] = (codeColors[cell.color] || 0) + 1;
+    }
   });
 
   const pushedCountermeasures: CountermeasurePayload[] = [];

@@ -20,6 +20,9 @@ export const ReprogramOverlay = () => {
                 row.map((cell, x) => {
                     const isSource = reprogramTargetSource?.x === x && reprogramTargetSource?.y === y;
                     const isHovered = hoveredCoordinate?.x === x && hoveredCoordinate?.y === y;
+                    const dx = reprogramTargetSource ? Math.abs(x - reprogramTargetSource.x) : 0;
+                    const dy = reprogramTargetSource ? Math.abs(y - reprogramTargetSource.y) : 0;
+                    const isAdjacent = dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
 
                     return (
                         <div
@@ -34,7 +37,7 @@ export const ReprogramOverlay = () => {
                                 <div className={`absolute inset-0 rounded-sm transition-colors ${isHovered ? 'bg-yellow-400/40' : 'bg-yellow-400/20'}`} />
                             )}
 
-                            {reprogramTargetSource && !isSource && (
+                            {reprogramTargetSource && !isSource && isAdjacent && (
                                 <div className={`absolute inset-0 rounded-sm transition-colors ${isHovered ? 'bg-blue-400/50' : 'bg-blue-400/20'}`} />
                             )}
                         </div>

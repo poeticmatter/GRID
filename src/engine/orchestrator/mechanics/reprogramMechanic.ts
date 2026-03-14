@@ -11,10 +11,15 @@ export const reprogramMechanic: IEffectMechanic = {
         const rows = grid.length;
         const cols = grid[0]?.length ?? 0;
 
+        const dx = Math.abs(dest.x - source.x);
+        const dy = Math.abs(dest.y - source.y);
+        const isAdjacent = dx <= 1 && dy <= 1 && !(dx === 0 && dy === 0);
+
         // Boundary validation
         if (
             !(dest.x >= 0 && dest.x < cols && dest.y >= 0 && dest.y < rows &&
-              source.x >= 0 && source.x < cols && source.y >= 0 && source.y < rows)
+              source.x >= 0 && source.x < cols && source.y >= 0 && source.y < rows) ||
+            !isAdjacent
         ) {
             return {
                 effectQueue: snapshot.effectQueue as ActiveEffect[],

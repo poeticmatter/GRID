@@ -41,17 +41,12 @@ export const isValidCoordinate = (grid: Grid, x: number, y: number): boolean => 
 };
 
 export const checkPatternFit = (grid: Grid, pattern: Coordinate[], centerX: number, centerY: number): boolean => {
-  // Check if all relative coordinates land on valid grid cells that are NOT BROKEN
+  // Check if all relative coordinates land on valid grid cells
   return pattern.every(({ x: dx, y: dy }) => {
     const targetX = centerX + dx;
     const targetY = centerY + dy;
 
-    if (!isValidCoordinate(grid, targetX, targetY)) {
-      return false; // Out of bounds
-    }
-
-    const cell = grid[targetY][targetX];
-    return cell.state !== 'BROKEN'; // Can't cut empty space
+    return isValidCoordinate(grid, targetX, targetY);
   });
 };
 
