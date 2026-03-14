@@ -42,16 +42,8 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                     } else if (cm.type === 'HARDWARE_DAMAGE') {
                         newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - cm.value);
                     } else if (cm.type === 'NET_DAMAGE') {
-                        for (let p = 0; p < cm.value; p++) {
-                            if (newHand.length > 0) {
-                                const idx = Math.floor(Math.random() * newHand.length);
-                                const trashed = newHand.splice(idx, 1)[0] as Card;
-                                newTrashPile.push(trashed);
-                            } else if (newDeck.length > 0) {
-                                const trashed = newDeck.pop() as Card;
-                                newTrashPile.push(trashed);
-                            }
-                        }
+                        const tally = (deltas.pendingNetDamage || snapshot.pendingNetDamage || 0) + cm.value;
+                        deltas.pendingNetDamage = tally;
                     }
                 }
             }
@@ -61,12 +53,17 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
         }
     });
 
+    const isResolvingNetDamage = (deltas.pendingNetDamage || 0) > 0;
+
     return mergeDeltas(deltas, {
         nodes: newNodes,
         playerStats: newPlayerStats,
         hand: newHand as Card[],
         deck: newDeck as Card[],
         trashPile: newTrashPile as Card[],
+        gameState: isResolvingNetDamage ? 'RESOLVING_NET_DAMAGE' : undefined,
+        effectQueue: isResolvingNetDamage ? [] : undefined,
+        activeCardId: isResolvingNetDamage ? null : undefined,
         events: newEvents.length > 0 ? newEvents : undefined
     });
 };

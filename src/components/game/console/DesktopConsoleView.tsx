@@ -9,6 +9,7 @@ interface DesktopConsoleViewProps {
     gameState: string;
     onQueueEffect: (effect: Effect) => void;
     onRotate: () => void;
+    onResolveSystemReset: () => void;
     activeEffectType?: string;
 }
 
@@ -18,6 +19,7 @@ export const DesktopConsoleView = ({
     gameState,
     onQueueEffect,
     onRotate,
+    onResolveSystemReset,
     activeEffectType
 }: DesktopConsoleViewProps) => {
     return (
@@ -73,6 +75,20 @@ export const DesktopConsoleView = ({
                         </button>
                         <div className="mt-3 text-[9px] font-mono text-green-700/60 text-center uppercase tracking-widest opacity-60">
                             Manual Spatial Override Active
+                        </div>
+                    </div>
+                )}
+
+                {isResolving && activeEffectType === 'SYSTEM_RESET' && (
+                    <div className="mt-6 pt-6 border-t border-green-500/20 animate-in fade-in slide-in-from-bottom-2">
+                        <button
+                            onClick={onResolveSystemReset}
+                            className="w-full flex items-center justify-center gap-2 bg-red-900/40 hover:bg-red-800/60 text-white p-3 rounded-lg font-bold transition-all border border-red-800/50 hover:border-red-400 hover:text-red-400 shadow-xl group uppercase tracking-widest text-xs"
+                        >
+                            Confirm System Reset
+                        </button>
+                        <div className="mt-3 text-[9px] font-mono text-red-500/60 text-center uppercase tracking-widest opacity-60">
+                            Warning: Grid Wipe Imminent
                         </div>
                     </div>
                 )}

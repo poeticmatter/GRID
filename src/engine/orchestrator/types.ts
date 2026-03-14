@@ -1,6 +1,6 @@
 import type { Grid, Card, NetworkNode, NodeRecord, PlayerStats, Effect, Coordinate, ActiveEffect, Cell } from '../types';
 
-export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'GAME_OVER' | 'VICTORY';
+export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'RESOLVING_NET_DAMAGE' | 'GAME_OVER' | 'VICTORY';
 
 type Builtin = Function | Date | Error | RegExp | string | number | boolean | null | undefined;
 
@@ -35,6 +35,7 @@ export interface GameSnapshot {
     effectQueue: ActiveEffect[];
     activeCardId: string | null;
     reprogramTargetSource: Coordinate | null;
+    pendingNetDamage: number;
 }
 
 // ----- Visual Playback Event -----
@@ -79,6 +80,7 @@ export interface StateDeltas {
     effectQueue?: ActiveEffect[];
     activeCardId?: string | null;
     reprogramTargetSource?: Coordinate | null;
+    pendingNetDamage?: number;
     durationMs?: number;
     harvestedCells?: Cell[];
     targetHacked?: boolean;
@@ -103,5 +105,7 @@ export type GameAction =
     | { type: 'CONFIRM_EFFECT_ORDER' }
     | { type: 'SET_REPROGRAM_SOURCE'; payload: { source: Coordinate | null } }
     | { type: 'RESOLVE_REPROGRAM'; payload: { source: Coordinate; dest: Coordinate } }
+    | { type: 'RESOLVE_SYSTEM_RESET' }
+    | { type: 'DISCARD_FOR_NET_DAMAGE'; payload: { cardId: string } }
     | { type: 'FINISH_CARD_RESOLUTION' }
     | { type: 'CANCEL_CARD' };

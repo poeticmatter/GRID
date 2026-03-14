@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import type { Effect, Coordinate } from '../engine/types';
 // Empty line to preserve imports spacing.
 
-export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'GAME_OVER' | 'VICTORY';
+export type GamePhase = 'MENU' | 'PLAYING' | 'EFFECT_ORDERING' | 'EFFECT_RESOLUTION' | 'RESOLVING_NET_DAMAGE' | 'GAME_OVER' | 'VICTORY';
 
 export interface ActiveEffect {
     cardId: string;
@@ -19,6 +19,7 @@ interface GameState {
     activeCardId: string | null;
 
     reprogramTargetSource: Coordinate | null;
+    pendingNetDamage: number;
 
     setGameState: (state: GamePhase) => void;
     setTurn: (turn: number) => void;
@@ -27,6 +28,7 @@ interface GameState {
     setActiveCardId: (activeCardId: string | null) => void;
 
     setReprogramSource: (source: Coordinate | null) => void;
+    setPendingNetDamage: (pendingNetDamage: number) => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -37,6 +39,7 @@ export const useGameStore = create<GameState>((set) => ({
     effectQueue: [],
     activeCardId: null,
     reprogramTargetSource: null,
+    pendingNetDamage: 0,
 
     setGameState: (gameState) => set({ gameState }),
     setTurn: (turn) => set({ turn }),
@@ -46,4 +49,5 @@ export const useGameStore = create<GameState>((set) => ({
     setActiveCardId: (activeCardId: string | null) => set({ activeCardId }),
 
     setReprogramSource: (source: Coordinate | null) => set({ reprogramTargetSource: source }),
+    setPendingNetDamage: (pendingNetDamage: number) => set({ pendingNetDamage }),
 }));

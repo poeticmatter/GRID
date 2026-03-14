@@ -9,7 +9,7 @@ import { RotateCw, Play } from 'lucide-react';
 export const Hand = () => {
     const { hand } = useDeckStore();
     const { selectedCardId, rotation } = useUIStore();
-    const { gameState } = useGameStore();
+    const { gameState, pendingNetDamage } = useGameStore();
 
     const handleRotate = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -54,6 +54,8 @@ export const Hand = () => {
                                         Dispatch({ type: 'PLAY_CARD', payload: { cardId: card.id, effects: card.effects } });
                                     } else if (gameState === 'EFFECT_ORDERING' && selectedCardId === card.id) {
                                         Dispatch({ type: 'CANCEL_CARD' });
+                                    } else if (gameState === 'RESOLVING_NET_DAMAGE') {
+                                        Dispatch({ type: 'DISCARD_FOR_NET_DAMAGE', payload: { cardId: card.id } });
                                     }
                                 }}
                                 rotation={selectedCardId === card.id ? rotation : 0}
@@ -62,6 +64,26 @@ export const Hand = () => {
                     ))}
                 </AnimatePresence>
             </div>
+
+            {gameState === 'RESOLVING_NET_DAMAGE' && (
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="absolute -top-16 bg-red-950/90 border border-red-500/50 px-6 py-2 rounded-full shadow-[0_0_30px_rgba(239,68,68,0.3)] backdrop-blur-md z-[60] flex flex-col items-center gap-1"
+                >
+                    <div className="flex items-center gap-3">
+                        <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                        <span className="text-red-400 font-black tracking-[0.2em] text-xs uppercase">Net Damage Detected</span>
+                        <span className="w-2 h-2 bg-red-500 rounded-full animate-ping" />
+                    </div>
+                    <span className="text-white font-mono text-[10px] uppercase opacity-80">
+                        Discard <span className="text-red-400 font-bold text-sm mx-1">{pendingNetDamage}</span> cards to stabilize
+                    </span>
+                    <div className="text-[9px] text-red-500/60 font-mono mt-1 animate-pulse">
+                        Warning: Trashing Core Systems will cause fatal crash
+                    </div>
+                </motion.div>
+            )}
         </div>
     );
 };

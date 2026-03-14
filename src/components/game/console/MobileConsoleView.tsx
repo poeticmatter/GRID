@@ -14,6 +14,8 @@ interface MobileConsoleViewProps {
     onDpadMove: (dx: number, dy: number) => void;
     onRotate: () => void;
     onConfirm: () => void;
+    onResolveSystemReset: () => void;
+    activeEffectType?: string;
 }
 
 export const MobileConsoleView = ({
@@ -25,7 +27,9 @@ export const MobileConsoleView = ({
     onQueueEffect,
     onDpadMove,
     onRotate,
-    onConfirm
+    onConfirm,
+    onResolveSystemReset,
+    activeEffectType
 }: MobileConsoleViewProps) => {
     return (
         <motion.div 
@@ -64,13 +68,27 @@ export const MobileConsoleView = ({
                             <div className="px-4 flex flex-col gap-2 max-h-[35vh]">
                                 {isResolving ? (
                                     <div className="py-2 animate-in fade-in zoom-in-95 duration-200">
-                                        <DPad 
-                                            layout="horizontal" 
-                                            onMove={onDpadMove} 
-                                            onRotate={onRotate} 
-                                            onConfirm={onConfirm}
-                                            confirmLabel="Confirm"
-                                        />
+                                        {activeEffectType === 'SYSTEM_RESET' ? (
+                                            <div className="py-6 pt-2 animate-in fade-in zoom-in-95 duration-200">
+                                                <button
+                                                    onClick={onResolveSystemReset}
+                                                    className="w-full flex items-center justify-center gap-2 bg-red-900/40 hover:bg-red-800/60 text-white p-4 rounded-xl font-bold transition-all border border-red-800/50 hover:border-red-400 active:scale-95 shadow-xl uppercase tracking-[0.2em] text-sm"
+                                                >
+                                                    Confirm System Reset
+                                                </button>
+                                                <div className="mt-4 text-[10px] font-mono text-red-500/60 text-center uppercase tracking-widest opacity-60">
+                                                    CRITICAL: Terminal Reboot Required
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <DPad 
+                                                layout="horizontal" 
+                                                onMove={onDpadMove} 
+                                                onRotate={onRotate} 
+                                                onConfirm={onConfirm}
+                                                confirmLabel="Confirm"
+                                            />
+                                        )}
                                     </div>
                                 ) : (
                                     <div className="flex flex-col gap-2 overflow-y-auto pr-1 pb-4">

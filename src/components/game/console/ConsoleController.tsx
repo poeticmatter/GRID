@@ -17,7 +17,7 @@ export const ConsoleController = () => {
     const [isExpanded, setIsExpanded] = useState(false);
 
     const activeEffect = effectQueue[0]?.effect;
-    const isResolving = gameState === 'EFFECT_RESOLUTION' && (activeEffect?.type === 'RUN' || activeEffect?.type === 'REPROGRAM');
+    const isResolving = gameState === 'EFFECT_RESOLUTION' && (activeEffect?.type === 'RUN' || activeEffect?.type === 'REPROGRAM' || activeEffect?.type === 'SYSTEM_RESET');
     const isVisible = (gameState === 'EFFECT_ORDERING' || gameState === 'EFFECT_RESOLUTION') && (pendingEffects.length > 0 || isResolving);
 
     // Auto-open drawer when console becomes active on mobile
@@ -74,6 +74,10 @@ export const ConsoleController = () => {
         Dispatch({ type: 'ROTATE_CARD' });
     }, []);
 
+    const handleResolveSystemReset = useCallback(() => {
+        Dispatch({ type: 'RESOLVE_SYSTEM_RESET' });
+    }, []);
+
     return (
         <AnimatePresence mode="wait">
             {isVisible && (
@@ -89,6 +93,8 @@ export const ConsoleController = () => {
                         onDpadMove={handleDpadMove}
                         onRotate={handleRotate}
                         onConfirm={handleConfirm}
+                        onResolveSystemReset={handleResolveSystemReset}
+                        activeEffectType={activeEffect?.type}
                     />
                 ) : (
                     <DesktopConsoleView
@@ -98,6 +104,7 @@ export const ConsoleController = () => {
                         gameState={gameState}
                         onQueueEffect={handleQueueEffect}
                         onRotate={handleRotate}
+                        onResolveSystemReset={handleResolveSystemReset}
                         activeEffectType={activeEffect?.type}
                     />
                 )
