@@ -89,3 +89,17 @@ When adding a new `Effect` type or `Countermeasure` type, **all of these must be
 2. **`packages/shared/src/schema.ts`** — Add the new Zod schema variant (`EffectXxxSchema`) and include it in the discriminated union (`EffectSchema`) or enum
 3. **`src/engine/orchestrator/countermeasureExecutor.ts`** — Handle the new countermeasure in `applyCountermeasure()`; or register a new mechanic in `orchestrator/mechanicsInit.ts` for new effects
 4. **`public/data/cards.json` / `nodes.json`** — Add data using the editor app
+
+## Engineering Standards
+
+### Architecture Rules
+- **Decoupling**: UI must never read from or write to game state directly. UI components react to store values only; all mutations go through `Dispatch()` in `orchestrator.ts`.
+- **Single Responsibility**: Each class/module does one thing. Do not add unrelated logic to existing handlers or mechanics.
+- **Composition over Inheritance**: Prefer component-based patterns. Flag deep inheritance hierarchies rather than extending them.
+- **Predictability**: State changes must be deterministic and centralized. All game logic flows through the orchestrator pipeline — do not introduce side-effect state mutations outside it.
+
+### Change Discipline
+- Maintain existing patterns unless explicitly instructed to refactor.
+- If a requested change requires touching more than 3 files, state which files will be affected before proceeding.
+- Do not modify `packages/shared/src/types.ts` or `schema.ts` without explicit instruction — changes there cascade across the monorepo.
+- When adding a new Effect or Countermeasure, always update all four locations listed in the "Adding New Effects" section above. Never partially implement.
