@@ -6,10 +6,14 @@ import { GhostOverlay } from './GhostOverlay';
 import { ReprogramOverlay } from './ReprogramOverlay';
 import { TargetingInteractionLayer } from './TargetingInteractionLayer';
 import { VFXOverlayLayer } from './VFXOverlayLayer';
+import { Biohazard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export const Board = () => {
   const { grid } = useViewModel();
   const gridRef = useRef<HTMLDivElement>(null);
+
+  const virusCount = grid?.flat().filter(c => c?.hasVirus).length ?? 0;
 
   useEffect(() => {
     if (!gridRef.current) return;
@@ -76,6 +80,30 @@ export const Board = () => {
 
       {/* Background Grid Pattern */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+
+      {/* Virus Tracker */}
+      <AnimatePresence>
+        {virusCount > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 20 }}
+            className="absolute -right-20 top-4 flex flex-col items-center gap-2 bg-slate-900/90 border border-red-500/50 p-3 rounded-lg backdrop-blur-md shadow-2xl z-50 overflow-hidden"
+          >
+            <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none" />
+            <motion.div
+              animate={{ rotate: [0, 10, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+            >
+              <Biohazard className="w-8 h-8 text-red-500 drop-shadow-[0_0_8px_#ef4444]" />
+            </motion.div>
+            <div className="flex flex-col items-center">
+              <span className="text-red-500 font-mono text-2xl font-black leading-none">{virusCount}</span>
+              <span className="text-[10px] text-red-400/70 font-bold uppercase tracking-tighter">Viruses</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };

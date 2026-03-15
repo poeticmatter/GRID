@@ -40,13 +40,13 @@ export const CardDefinitionSchema = z.object({
 export const CellSymbolSchema = z.enum(['SHIELD', 'EYE', 'SKULL', 'NONE']);
 
 export const CountermeasurePayloadSchema = z.object({
-    type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE']),
+    type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE', 'SCRAMBLE', 'NOISE', 'VIRUS']),
     value: z.number()
 });
 
 export const CountermeasureSchema = z.object({
     requiredSymbols: z.array(CellSymbolSchema),
-    type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE']),
+    type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE', 'SCRAMBLE', 'NOISE', 'VIRUS']),
     value: z.number()
 });
 

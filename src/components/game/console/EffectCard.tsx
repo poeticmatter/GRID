@@ -12,7 +12,7 @@ interface EffectCardProps {
 export const EffectCard = ({ 
     effect, 
     index, 
-    isActive, 
+    isActive: _isActive, 
     isOrdering, 
     onClick, 
     variant 
@@ -30,9 +30,9 @@ export const EffectCard = ({
             >
                 <div className="flex justify-between items-center uppercase tracking-wider">
                     <span className="text-xs font-bold text-green-100">{effect.type}</span>
-                    {effect.amount && (
+                    {(effect as any).amount && (
                         <span className="text-[10px] text-green-400 bg-green-400/10 px-1.5 rounded font-mono">
-                            x{effect.amount}
+                            x{(effect as any).amount}
                         </span>
                     )}
                 </div>
@@ -56,9 +56,9 @@ export const EffectCard = ({
             </div>
             <div className="text-sm font-black text-green-50 uppercase tracking-wider flex justify-between items-center">
                 {effect.type}
-                {effect.amount && (
+                {(effect as any).amount && (
                     <span className="bg-green-500/20 px-1.5 rounded text-[10px] text-green-300">
-                        x{effect.amount}
+                        x{(effect as any).amount}
                     </span>
                 )}
             </div>

@@ -29,7 +29,7 @@ export const createRandomCell = (x: number, y: number): Cell => {
     y,
     color,
     symbol: symbol as CellSymbol,
-    state: 'LOCKED',
+    state: 'DEFAULT',
   };
 };
 
@@ -41,12 +41,15 @@ export const isValidCoordinate = (grid: Grid, x: number, y: number): boolean => 
 };
 
 export const checkPatternFit = (grid: Grid, pattern: Coordinate[], centerX: number, centerY: number): boolean => {
-  // Check if all relative coordinates land on valid grid cells
+  // Check if all relative coordinates land on valid grid cells and are not broken/corrupted
   return pattern.every(({ x: dx, y: dy }) => {
     const targetX = centerX + dx;
     const targetY = centerY + dy;
 
-    return isValidCoordinate(grid, targetX, targetY);
+    if (!isValidCoordinate(grid, targetX, targetY)) return false;
+    
+    const cell = grid[targetY][targetX];
+    return cell.state !== 'BROKEN' && cell.state !== 'CORRUPTED';
   });
 };
 

@@ -24,15 +24,29 @@ export const runMechanic: IEffectMechanic = {
         events.push({ type: 'AUDIO_PLAY_SFX', payload: 'run' });
 
         const affected = getAffectedCells(activeGrid, rotatedPattern, x, y);
+        const virusDetected = affected.some(c => c.hasVirus);
 
         // Use immer to mutate grid cells — no unsafe casts needed.
         const newGrid = produce(activeGrid, draft => {
             for (const cell of affected) {
                 if (cell.y < draft.length && cell.x < draft[0].length) {
                     draft[cell.y][cell.x].state = 'BROKEN';
+                    // Virus is consumed/cleared when the cell is broken? 
+                    // The system reset clears them all, but if a virus is cleared by a run, it should probably be set to false.
+                    draft[cell.y][cell.x].hasVirus = false;
                 }
             }
         });
+
+        if (virusDetected) {
+            return {
+                grid: newGrid,
+                selectedCardId: null,
+                rotation: 0,
+                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'error' }],
+                durationMs: 150
+            };
+        }
 
         return {
             grid: newGrid,

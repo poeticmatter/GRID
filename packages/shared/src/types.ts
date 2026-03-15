@@ -36,11 +36,13 @@ export interface CardDefinition {
 
 export type NodeLayers = Partial<Record<CellColor, number[]>>;
 
-export type CountermeasurePayload = { type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE'; value: number };
+export type CountermeasureType = 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE' | 'SCRAMBLE' | 'NOISE' | 'VIRUS';
+
+export type CountermeasurePayload = { type: CountermeasureType; value: number };
 
 export interface Countermeasure {
   requiredSymbols: CellSymbol[];
-  type: 'TRACE' | 'HARDWARE_DAMAGE' | 'NET_DAMAGE';
+  type: CountermeasureType;
   value: number;
 }
 
@@ -103,7 +105,7 @@ export const COUNTERMEASURE_METADATA: Blueprint = {
       label: 'Penalty Type', 
       type: 'select', 
       default: 'TRACE',
-      options: ['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE'] 
+      options: ['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE', 'SCRAMBLE', 'NOISE', 'VIRUS'] 
     },
     value: { label: 'Penalty Value', type: 'number', default: 1 }
   }

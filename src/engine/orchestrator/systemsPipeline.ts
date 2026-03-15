@@ -1,6 +1,6 @@
 import { produce } from 'immer';
 import { calculateServerProgress } from '../game-logic';
-import type { NetworkNode, NodeRecord, Card } from '../types';
+import type { NetworkNode, NodeRecord, Card, Grid, CellColor } from '../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
 import { mergeDeltas } from './deltaHelpers';
 
@@ -22,41 +22,96 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
     const newDeck = deltas.deck ? [...deltas.deck] : [...snapshot.deck];
     const newTrashPile = deltas.trashPile ? [...deltas.trashPile] : [...snapshot.trashPile];
 
-    // Work on the authoritative nodes dict
-    const baseNodes: NodeRecord = deltas.nodes ?? (snapshot.nodes as NodeRecord);
-    const activeServerIds: string[] = deltas.activeServerIds ?? (snapshot.activeServerIds as string[]);
+    const baseGrid = (deltas.grid ?? snapshot.grid) as Grid;
+    let gridModified = false;
 
-    const newNodes = produce(baseNodes, (draft) => {
-        for (const id of activeServerIds) {
-            const node = draft[id];
-            if (!node) continue;
+    // We draft the grid first so we can modify it during countermeasure resolution
+    const newGrid = produce(baseGrid, (gridDraft: any) => {
+        const baseNodes: NodeRecord = deltas.nodes ?? (snapshot.nodes as NodeRecord);
+        const activeServerIds: string[] = deltas.activeServerIds ?? (snapshot.activeServerIds as string[]);
 
-            const result = calculateServerProgress(node as NetworkNode, deltas.harvestedCells!);
+        const newNodes = produce(baseNodes, (nodeDraft: any) => {
+            for (const id of activeServerIds) {
+                const node = nodeDraft[id];
+                if (!node) continue;
 
-            // Apply countermeasure penalties
-            if (result.pushedCountermeasures.length > 0) {
-                newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error' });
-                for (const cm of result.pushedCountermeasures) {
-                    if (cm.type === 'TRACE') {
-                        newPlayerStats.trace = Math.min(newPlayerStats.maxTrace ?? 15, newPlayerStats.trace + cm.value);
-                    } else if (cm.type === 'HARDWARE_DAMAGE') {
-                        newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - cm.value);
-                    } else if (cm.type === 'NET_DAMAGE') {
-                        const tally = (deltas.pendingNetDamage || snapshot.pendingNetDamage || 0) + cm.value;
-                        deltas.pendingNetDamage = tally;
+                const result = calculateServerProgress(node as NetworkNode, deltas.harvestedCells!);
+
+                // Apply countermeasure penalties
+                if (result.pushedCountermeasures.length > 0) {
+                    newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'error' });
+                    for (const cm of result.pushedCountermeasures) {
+                        if (cm.type === 'TRACE') {
+                            newPlayerStats.trace = Math.min(newPlayerStats.maxTrace ?? 15, newPlayerStats.trace + cm.value);
+                        } else if (cm.type === 'HARDWARE_DAMAGE') {
+                            newPlayerStats.hardwareHealth = Math.max(0, newPlayerStats.hardwareHealth - cm.value);
+                        } else if (cm.type === 'NET_DAMAGE') {
+                            const tally = (deltas.pendingNetDamage || snapshot.pendingNetDamage || 0) + cm.value;
+                            deltas.pendingNetDamage = tally;
+                        } else if (cm.type === 'SCRAMBLE') {
+                            gridModified = true;
+                            const defaultCells: Array<{x: number, y: number}> = [];
+                            gridDraft.forEach((row: any, y: number) => row.forEach((cell: any, x: number) => {
+                                if (cell.state === 'DEFAULT') defaultCells.push({ x, y });
+                            }));
+                            for (let i = 0; i < cm.value && defaultCells.length > 0; i++) {
+                                const idx = Math.floor(Math.random() * defaultCells.length);
+                                const { x, y } = defaultCells.splice(idx, 1)[0];
+                                const cell = gridDraft[y][x];
+                                cell.state = 'CORRUPTED';
+                                cell.symbol = 'NONE';
+                                cell.hasVirus = false;
+                                // color is left as is, but hidden by the CORRUPTED state visual.
+                            }
+                        } else if (cm.type === 'NOISE') {
+                            const otherActiveIds = activeServerIds.filter(sid => sid !== id);
+                            const targetId = otherActiveIds.length > 0 
+                                ? otherActiveIds[Math.floor(Math.random() * otherActiveIds.length)]
+                                : id;
+                            
+                            const targetNode = nodeDraft[targetId];
+                            if (targetNode) {
+                                const colors = Object.keys(targetNode.layers) as CellColor[];
+                                if (colors.length > 0) {
+                                    const randomColor = colors[Math.floor(Math.random() * colors.length)];
+                                    const reqs = targetNode.layers[randomColor];
+                                    if (reqs) {
+                                        reqs.push(cm.value);
+                                        if (targetNode.progress[randomColor]) {
+                                            targetNode.progress[randomColor]!.push(false);
+                                        }
+                                    }
+                                }
+                            }
+                        } else if (cm.type === 'VIRUS') {
+                            gridModified = true;
+                            const candidates: Array<{x: number, y: number}> = [];
+                            gridDraft.forEach((row: any, y: number) => row.forEach((cell: any, x: number) => {
+                                if (cell.state === 'DEFAULT' && !cell.hasVirus) candidates.push({ x, y });
+                            }));
+                            for (let i = 0; i < cm.value && candidates.length > 0; i++) {
+                                const idx = Math.floor(Math.random() * candidates.length);
+                                const { x, y } = candidates.splice(idx, 1)[0];
+                                gridDraft[y][x].hasVirus = true;
+                            }
+                        }
                     }
                 }
-            }
 
-            // Commit the updated server back into the SSOT
-            Object.assign(node, result.updatedServer);
-        }
+                // Commit the updated server back into the SSOT
+                Object.assign(node, result.updatedServer);
+            }
+        });
+
+        // Store the intermediate nodes result back to deltas so we can use it in mergeDeltas later
+        (deltas as any)._intermediateNodes = newNodes;
     });
 
     const isResolvingNetDamage = (deltas.pendingNetDamage || 0) > 0;
 
     return mergeDeltas(deltas, {
-        nodes: newNodes,
+        nodes: (deltas as any)._intermediateNodes,
+        grid: gridModified ? newGrid : undefined,
         playerStats: newPlayerStats,
         hand: newHand as Card[],
         deck: newDeck as Card[],

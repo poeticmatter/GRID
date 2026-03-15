@@ -17,7 +17,7 @@
                     "requiredSymbols": [
                         "SHIELD"
                     ],
-                    "type": "NET_DAMAGE",
+                    "type": "VIRUS",
                     "value": 1
                 }
             ],
@@ -41,7 +41,7 @@
                     "requiredSymbols": [
                         "SKULL"
                     ],
-                    "type": "TRACE",
+                    "type": "NOISE",
                     "value": 1
                 }
             ],
@@ -71,7 +71,7 @@
                     "requiredSymbols": [
                         "EYE"
                     ],
-                    "type": "TRACE",
+                    "type": "VIRUS",
                     "value": 1
                 }
             ],

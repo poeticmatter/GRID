@@ -1,6 +1,7 @@
-import { createGrid } from '../grid-logic';
-import type { Card, NetworkNode } from '../types';
+import { refillGrid } from '../grid-logic';
+import type { Card, NetworkNode, Grid } from '../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
+import { produce } from 'immer';
 
 export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): StateDeltas {
     // 1. Move active card and all discard pile cards back to hand
@@ -47,7 +48,13 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
     }
 
     // 3. Grid Wipe
-    const newGrid = createGrid(snapshot.grid.length, snapshot.grid[0].length);
+    const intermediateGrid = produce(snapshot.grid as Grid, (draft) => {
+        draft.forEach(row => row.forEach(cell => {
+            cell.state = 'BROKEN';
+            cell.hasVirus = false;
+        }));
+    });
+    const newGrid = refillGrid(intermediateGrid, intermediateGrid.length * intermediateGrid[0].length);
 
     // 4. Countermeasures
     let playerStats = { ...snapshot.playerStats };
@@ -75,9 +82,9 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
 
     return {
         grid: newGrid,
-        hand: currentHand,
-        deck: currentDeck,
-        discardPile: currentDiscard,
+        hand: currentHand as Card[],
+        deck: currentDeck as Card[],
+        discardPile: currentDiscard as Card[],
         playerStats,
         turn: snapshot.turn + 1,
         pendingNetDamage: netDamageTally,

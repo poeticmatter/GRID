@@ -64,6 +64,32 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
     );
   }
 
+  if (state === 'CORRUPTED') {
+    return (
+      <div
+        className="w-full h-full bg-slate-950 border border-slate-800 rounded-sm relative overflow-hidden flex items-center justify-center transition-all duration-300 animate-pulse"
+        data-x={x}
+        data-y={y}
+      >
+        <div 
+          className="absolute inset-0 opacity-40 mix-blend-screen" 
+          style={{ 
+            backgroundImage: 'repeating-conic-gradient(#000 0% 25%, #222 0% 50%)', 
+            backgroundSize: '2px 2px',
+            animation: 'noise-move 0.2s infinite steps(2)'
+          }} 
+        />
+        <style>{`
+          @keyframes noise-move {
+            0% { transform: translate(0, 0); }
+            50% { transform: translate(1px, 1px); }
+            100% { transform: translate(-1px, 0); }
+          }
+        `}</style>
+      </div>
+    );
+  }
+
   const baseClasses = clsx(
     'w-full h-full flex items-center justify-center rounded-sm border-2 transition-all duration-100',
     LAYER_THEME[color].surface,
@@ -94,6 +120,18 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
       data-y={y}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+
+      {/* Virus Indicator */}
+      {cell.hasVirus && (
+        <div className="absolute top-0.5 right-0.5 z-20">
+          <motion.div
+            animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
+            transition={{ duration: 1, repeat: Infinity }}
+          >
+            <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]" />
+          </motion.div>
+        </div>
+      )}
 
       {/* Symbol */}
       <div className="relative z-10">
