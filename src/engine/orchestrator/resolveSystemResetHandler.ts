@@ -1,17 +1,26 @@
-import { refillGrid } from '../grid-logic';
-import type { Card, NetworkNode, Grid } from '../types';
-import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
-import { produce } from 'immer';
+import { createGrid } from '../grid-logic';
+import type { Card, NetworkNode, NodeRecord } from '../types';
+import type { ReadonlyDeep, GameSnapshot, StateDeltas, GamePhase } from './types';
+import { applyCountermeasure } from './countermeasureExecutor';
+import type { CountermeasureContext } from './countermeasureExecutor';
 
 export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): StateDeltas {
-    // 1. Move active card and all discard pile cards back to hand
+    // Phase 1: Grid & State Wipe
+    // Generate the newGrid via createGrid(). This clears grid from all code, viruses, and corruption first.
+    // Note: If node-specific virus-clearing logic is required in the future, it occurs here.
+    const rows = snapshot.grid.length;
+    const cols = snapshot.grid[0]?.length ?? 0;
+    const newGrid = createGrid(rows, cols);
+
+    // Phase 2: Card Management
+    // Move active card and discard pile back to hand, and draw from deck up to maxHandSize.
     const activeCardId = snapshot.activeCardId;
     let currentHand = [...snapshot.hand];
     
     // Return discard pile to hand
     snapshot.discardPile.forEach(card => {
         if (!currentHand.find(c => c.id === card.id)) {
-            currentHand.push(card);
+            currentHand.push(card as Card);
         }
     });
 
@@ -19,13 +28,12 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
     if (activeCardId) {
         const activeCard = [...snapshot.deck, ...snapshot.hand, ...snapshot.discardPile].find(c => c.id === activeCardId);
         if (activeCard && !currentHand.find(c => c.id === activeCard.id)) {
-            currentHand.push(activeCard);
+            currentHand.push(activeCard as Card);
         }
     }
 
-    // 2. Empty discard pile and filter deck (prevent duplicate references)
     let currentDiscard: Card[] = [];
-    let currentDeck = snapshot.deck.filter(c => c.id !== activeCardId && !currentHand.find(h => h.id === c.id));
+    let currentDeck = snapshot.deck.filter(c => c.id !== activeCardId && !currentHand.find(h => h.id === c.id)) as Card[];
 
     const shuffle = (array: Card[]) => {
         const shuffled = [...array];
@@ -36,6 +44,7 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
         return shuffled;
     };
 
+    // Draw up to maxHandSize
     while (currentHand.length < snapshot.maxHandSize) {
         if (currentDeck.length === 0) {
             if (currentDiscard.length === 0) break;
@@ -47,52 +56,61 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
         else break;
     }
 
-    // 3. Grid Wipe
-    const intermediateGrid = produce(snapshot.grid as Grid, (draft) => {
-        draft.forEach(row => row.forEach(cell => {
-            cell.state = 'BROKEN';
-            cell.hasVirus = false;
-        }));
-    });
-    const newGrid = refillGrid(intermediateGrid, intermediateGrid.length * intermediateGrid[0].length);
-
-    // 4. Countermeasures
+    // Phase 3: Countermeasure Activation
+    // Iterate through the active servers and apply their countermeasures via the centralized executor.
     let playerStats = { ...snapshot.playerStats };
+    let newNodes = { ...snapshot.nodes } as NodeRecord;
     let netDamageTally = 0;
 
     for (const nodeId of snapshot.activeServerIds) {
         const node = snapshot.nodes[nodeId] as NetworkNode;
         if (!node) continue;
+
         for (const cm of node.countermeasures) {
-            if (cm.type === 'TRACE') {
-                playerStats.trace = Math.min(playerStats.maxTrace ?? 15, playerStats.trace + cm.value);
-            }
-            if (cm.type === 'HARDWARE_DAMAGE') {
-                playerStats.hardwareHealth = Math.max(0, playerStats.hardwareHealth - cm.value);
-            }
-            if (cm.type === 'NET_DAMAGE') {
-                netDamageTally += cm.value;
-            }
+            const context: CountermeasureContext = {
+                grid: newGrid,
+                playerStats,
+                nodes: newNodes,
+                activeServerIds: [...snapshot.activeServerIds],
+                pendingNetDamage: netDamageTally
+            };
+
+            applyCountermeasure(cm, context, nodeId);
+
+            // Sync mutable values back
+            netDamageTally = context.pendingNetDamage;
         }
     }
 
-    // Cap net damage to prevent soft-locks
-    netDamageTally = Math.min(netDamageTally, currentHand.length);
-    const isResolvingNetDamage = netDamageTally > 0;
+    // Determine final game state in priority order
+    const isGameOver = playerStats.hardwareHealth <= 0 || playerStats.trace >= (playerStats.maxTrace ?? 15);
+    const isResolvingNetDamage = !isGameOver && netDamageTally > 0;
+    // Cap net damage to prevent soft-locks (only relevant when entering that state)
+    if (isResolvingNetDamage) {
+        netDamageTally = Math.min(netDamageTally, currentHand.length);
+    }
+
+    let gameState: GamePhase = 'PLAYING';
+    if (isGameOver) gameState = 'GAME_OVER';
+    else if (isResolvingNetDamage) gameState = 'RESOLVING_NET_DAMAGE';
+
+    const sfx = isGameOver ? 'game_over' : isResolvingNetDamage ? 'error' : 'hack';
 
     return {
         grid: newGrid,
+        nodes: newNodes,
         hand: currentHand as Card[],
         deck: currentDeck as Card[],
         discardPile: currentDiscard as Card[],
         playerStats,
         turn: snapshot.turn + 1,
         pendingNetDamage: netDamageTally,
-        gameState: isResolvingNetDamage ? 'RESOLVING_NET_DAMAGE' : 'PLAYING',
+        gameState,
         effectQueue: [],
         activeCardId: null,
         selectedCardId: null,
-        events: [{ type: 'AUDIO_PLAY_SFX', payload: isResolvingNetDamage ? 'error' : 'hack' }],
+        events: [{ type: 'AUDIO_PLAY_SFX', payload: sfx }],
         durationMs: 800
     };
 }
+

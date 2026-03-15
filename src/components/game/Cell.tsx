@@ -121,18 +121,6 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
     >
       <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
 
-      {/* Virus Indicator */}
-      {cell.hasVirus && (
-        <div className="absolute top-0.5 right-0.5 z-20">
-          <motion.div
-            animate={{ scale: [1, 1.2, 1], opacity: [0.7, 1, 0.7] }}
-            transition={{ duration: 1, repeat: Infinity }}
-          >
-            <div className="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_5px_#ef4444]" />
-          </motion.div>
-        </div>
-      )}
-
       {/* Symbol */}
       <div className="relative z-10">
         {SYMBOL_MAP[symbol]}

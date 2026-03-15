@@ -7,9 +7,15 @@ export const finishCardResolution: IEffectMechanic = {
     type: 'IMMEDIATE',
     execute: (snapshot: ReadonlyDeep<GameSnapshot>): StateDeltas => {
         const cardId = snapshot.activeCardId;
+        const currentGameState = snapshot.gameState;
+        // Only transition to 'PLAYING' if we are not in a modal or terminal state
+        const targetGameState = (['GAME_OVER', 'VICTORY', 'RESOLVING_NET_DAMAGE'] as any[]).includes(currentGameState) 
+            ? currentGameState 
+            : 'PLAYING';
+
         if (!cardId) {
             return {
-                gameState: 'PLAYING',
+                gameState: targetGameState,
                 pendingEffects: [],
                 effectQueue: [],
                 activeCardId: null,
@@ -37,7 +43,7 @@ export const finishCardResolution: IEffectMechanic = {
         return {
             hand: newHand,
             discardPile: newDiscard,
-            gameState: 'PLAYING',
+            gameState: targetGameState,
             pendingEffects: [],
             effectQueue: [],
             activeCardId: null,
