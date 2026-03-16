@@ -21,6 +21,7 @@ GRID is a cyberpunk deck-building hacking game (React 19 + TypeScript + Zustand 
 
 - `src/` — Main React app
 - `apps/editor/` — Visual editor for creating cards and nodes (dev server on port 5174: `cd apps/editor && npm run dev`)
+- `apps/graphic-assets/` — Generative SVG asset studio: favicons + animated title screens (dev server on port 5175: `cd apps/graphic-assets && ../../node_modules/.bin/vite`)
 - `packages/shared/src/` — Shared types (`CellColor`, `CellSymbol`, `Effect`, `Countermeasure`) imported as `@grid/shared`
 - `public/data/` — JSON data files edited via the editor app (`cards.json`, `nodes.json`)
 
