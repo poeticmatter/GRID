@@ -17,6 +17,7 @@ import { handleDiscardForNetDamage } from './orchestrator/discardForNetDamageHan
 import { initializeMechanics } from './orchestrator/mechanicsInit';
 import { patchSnapshot, mergeDeltas } from './orchestrator/deltaHelpers';
 import { evaluateQueue } from './orchestrator/fsm';
+import { applySystemsPipeline } from './orchestrator/systemsPipeline';
 
 initializeMechanics();
 
@@ -307,7 +308,8 @@ export const Dispatch = (action: GameAction) => {
         }
 
         case 'DISCARD_FOR_NET_DAMAGE': {
-            deltaHistory = [handleDiscardForNetDamage(snapshot, action.payload.cardId)];
+            const resultDeltas = handleDiscardForNetDamage(snapshot, action.payload.cardId);
+            deltaHistory = [applySystemsPipeline(snapshot, resultDeltas)];
             break;
         }
 

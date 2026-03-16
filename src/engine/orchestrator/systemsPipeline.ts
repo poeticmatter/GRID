@@ -230,15 +230,27 @@ export const gameStateSystem: SystemFunction = (snapshot, deltas) => {
     const stats = deltas.playerStats || snapshot.playerStats;
     const hand = deltas.hand || snapshot.hand;
     const deck = deltas.deck || snapshot.deck;
+    const trashPile = deltas.trashPile || snapshot.trashPile;
     const targetHacked = deltas.targetHacked;
+    const pendingNetDamage = deltas.pendingNetDamage ?? snapshot.pendingNetDamage ?? 0;
 
     let newGameState = deltas.gameState || snapshot.gameState;
     const newEvents: Array<{ type: string; payload?: any; durationMs?: number }> = [];
 
-    if (stats.hardwareHealth <= 0 || stats.trace >= stats.maxTrace || (hand.length === 0 && deck.length === 0)) {
+    const isFatalCrash = trashPile.some(c => c.effects.some(e => e.type === 'SYSTEM_RESET'));
+
+    if (
+        stats.hardwareHealth <= 0 ||
+        stats.trace >= stats.maxTrace ||
+        (hand.length === 0 && deck.length === 0) ||
+        isFatalCrash
+    ) {
         newGameState = 'GAME_OVER';
     } else if (targetHacked) {
         newGameState = 'VICTORY';
+    } else if (newGameState === 'RESOLVING_NET_DAMAGE' && pendingNetDamage === 0) {
+        // Exit damage resolution once tally is cleared
+        newGameState = 'PLAYING';
     }
 
     if (newGameState === 'GAME_OVER' && snapshot.gameState !== 'GAME_OVER' && deltas.gameState !== 'GAME_OVER') {
@@ -246,6 +258,7 @@ export const gameStateSystem: SystemFunction = (snapshot, deltas) => {
     } else if (newGameState === 'VICTORY' && snapshot.gameState !== 'VICTORY' && deltas.gameState !== 'VICTORY') {
         newEvents.push({ type: 'AUDIO_PLAY_SFX', payload: 'victory' });
     }
+
 
     return mergeDeltas(deltas, {
         gameState: newGameState,

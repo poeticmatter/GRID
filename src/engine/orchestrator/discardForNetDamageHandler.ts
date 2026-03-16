@@ -9,15 +9,14 @@ export function handleDiscardForNetDamage(snapshot: ReadonlyDeep<GameSnapshot>, 
     const newHand = [...snapshot.hand];
     newHand.splice(cardIndex, 1);
 
-    const newDiscard = [...snapshot.discardPile, card];
-    const isGameOver = card.effects.some(e => e.type === 'SYSTEM_RESET');
+    const newTrash = [...snapshot.trashPile, card];
     const newPendingNetDamage = snapshot.pendingNetDamage - 1;
 
     return {
         hand: newHand,
-        discardPile: newDiscard,
-        gameState: isGameOver ? 'GAME_OVER' : (newPendingNetDamage <= 0 ? 'PLAYING' : 'RESOLVING_NET_DAMAGE'),
+        trashPile: newTrash,
         pendingNetDamage: newPendingNetDamage,
-        events: [{ type: 'AUDIO_PLAY_SFX', payload: isGameOver ? 'game_over' : 'select' }]
+        events: [{ type: 'AUDIO_PLAY_SFX', payload: 'select' }]
     };
 }
+
