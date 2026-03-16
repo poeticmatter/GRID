@@ -59,9 +59,14 @@ const renderEffect = (effect: Effect, index: number, rotation: number) => {
       return (
         <div key={index} className="flex flex-col items-center text-phosphor mt-1 flex-shrink-0 bg-phosphor/5 border border-phosphor/30 px-2 py-0.5 rounded">
           <div className="flex items-center space-x-1">
-            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
+            <span style={{
+              display: 'inline-block', width: 24, height: 24,
+              backgroundColor: 'currentColor',
+              maskImage: 'url(/icons/symbols/program-exe.svg)',
+              maskSize: 'contain', maskRepeat: 'no-repeat', maskPosition: 'center',
+              WebkitMaskImage: 'url(/icons/symbols/program-exe.svg)',
+              WebkitMaskSize: 'contain', WebkitMaskRepeat: 'no-repeat', WebkitMaskPosition: 'center',
+            }} />
             <span className="text-[10px] font-bold">+{effect.amount} REPROG</span>
           </div>
         </div>

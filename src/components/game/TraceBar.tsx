@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayerStore } from '../../store/usePlayerStore';
-import { Shield } from 'lucide-react';
+import { SvgMaskIcon } from './CellSymbols';
 import { twMerge } from 'tailwind-merge';
 import { gameEventBus } from '../../engine/eventBus';
 
@@ -42,7 +42,9 @@ export const TraceBar: React.FC = () => {
                 ))}
             </div>
             <div className="flex flex-col items-center gap-1 opacity-80 mt-1">
-                <Shield className={twMerge("w-3 h-3", isFlashing ? "text-phosphor" : "text-rose-400")} />
+                <span className={twMerge(isFlashing ? "text-phosphor" : "text-rose-400")}>
+                    <SvgMaskIcon file="radar-sweep.svg" size={24} />
+                </span>
                 <span className={twMerge(
                     "text-[10px] font-bold tracking-[0.2em] uppercase [writing-mode:vertical-lr] rotate-180",
                     isFlashing ? "text-phosphor" : "text-rose-400"

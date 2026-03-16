@@ -2,22 +2,21 @@
     "Core": [
         {
             "type": "ICE",
-            "name": "Slasher",
+            "name": "Test1",
             "baseDifficulty": 1,
             "weight": 10,
             "layers": {
                 "ORANGE": [
                     1,
-                    2,
-                    3
+                    2
                 ]
             },
             "countermeasures": [
                 {
                     "requiredSymbols": [
-                        "SHIELD"
+                        "CUBE"
                     ],
-                    "type": "VIRUS",
+                    "type": "TRACE",
                     "value": 1
                 }
             ],
@@ -25,21 +24,90 @@
         },
         {
             "type": "ICE",
-            "name": "Sentinel",
+            "name": "Test2",
             "baseDifficulty": 1,
             "weight": 10,
             "layers": {
                 "SKY": [
-                    3
-                ],
+                    3,
+                    1
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "TRIANGLE"
+                    ],
+                    "type": "HARDWARE_DAMAGE",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "ICE",
+            "name": "Test3",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
                 "EMERALD": [
+                    2,
+                    2
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "NESTED"
+                    ],
+                    "type": "NET_DAMAGE",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "ICE",
+            "name": "Test4",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
+                "EMERALD": [
+                    1
+                ],
+                "LIME": [
+                    1
+                ],
+                "FUCHSIA": [
+                    1
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "STAR"
+                    ],
+                    "type": "CORRUPT",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "ICE",
+            "name": "Test5",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
+                "LIME": [
+                    2,
                     3
                 ]
             },
             "countermeasures": [
                 {
                     "requiredSymbols": [
-                        "SKULL"
+                        "ORBIT"
                     ],
                     "type": "NOISE",
                     "value": 1
@@ -49,29 +117,48 @@
         },
         {
             "type": "ICE",
-            "name": "Data Mine",
+            "name": "Test6",
             "baseDifficulty": 1,
             "weight": 10,
             "layers": {
-                "FUCHSIA": [
-                    1
-                ],
                 "LIME": [
-                    1
-                ],
-                "EMERALD": [
-                    1
-                ],
-                "SKY": [
+                    1,
+                    1,
+                    1,
+                    1,
                     1
                 ]
             },
             "countermeasures": [
                 {
                     "requiredSymbols": [
-                        "EYE"
+                        "ORBIT"
                     ],
-                    "type": "CORRUPT",
+                    "type": "VIRUS",
+                    "value": 1
+                }
+            ],
+            "resetTrace": 1
+        },
+        {
+            "type": "SERVER",
+            "name": "Server",
+            "baseDifficulty": 1,
+            "weight": 10,
+            "layers": {
+                "ORANGE": [
+                    2
+                ],
+                "SKY": [
+                    2
+                ]
+            },
+            "countermeasures": [
+                {
+                    "requiredSymbols": [
+                        "NESTED"
+                    ],
+                    "type": "TRACE",
                     "value": 1
                 }
             ],
@@ -79,43 +166,27 @@
         },
         {
             "type": "MAINFRAME",
-            "name": "Target",
+            "name": "Mainframe",
             "baseDifficulty": 1,
             "weight": 10,
             "layers": {
                 "ORANGE": [
-                    4
+                    1
                 ],
                 "SKY": [
-                    3,
-                    3
-                ]
-            },
-            "countermeasures": [],
-            "resetTrace": 1
-        },
-        {
-            "type": "SERVER",
-            "name": "Cybertech",
-            "baseDifficulty": 1,
-            "weight": 10,
-            "layers": {
-                "FUCHSIA": [
-                    2,
-                    2,
-                    2
+                    1
                 ],
-                "LIME": [
-                    3
+                "EMERALD": [
+                    2
                 ]
             },
             "countermeasures": [
                 {
                     "requiredSymbols": [
-                        "SKULL",
-                        "SKULL"
+                        "NESTED",
+                        "NESTED"
                     ],
-                    "type": "HARDWARE_DAMAGE",
+                    "type": "VIRUS",
                     "value": 1
                 }
             ],

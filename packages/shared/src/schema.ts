@@ -37,7 +37,7 @@ export const CardDefinitionSchema = z.object({
     isStartingCard: z.boolean()
 });
 
-export const CellSymbolSchema = z.enum(['SHIELD', 'EYE', 'SKULL', 'NONE']);
+export const CellSymbolSchema = z.enum(['CUBE', 'TRIANGLE', 'NESTED', 'STAR', 'ORBIT', 'NONE']);
 
 export const CountermeasurePayloadSchema = z.object({
     type: z.enum(['TRACE', 'HARDWARE_DAMAGE', 'NET_DAMAGE', 'CORRUPT', 'NOISE', 'VIRUS']),

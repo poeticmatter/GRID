@@ -4,7 +4,8 @@ import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
 import { gameEventBus } from '../../engine/eventBus';
 
-import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle, Shield, Eye, Skull } from 'lucide-react';
+import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle } from 'lucide-react';
+import { SymbolIcon } from './CellSymbols';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
@@ -123,14 +124,12 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
 
             <div className="mt-auto flex flex-col gap-1 border-t border-white/5 pt-[clamp(0.25rem,1vh,0.5rem)]">
                 {(server.countermeasures || []).map((cm, idx) => {
-                    const SymbolIcon: Record<string, typeof Shield> = { SHIELD: Shield, EYE: Eye, SKULL: Skull };
                     return (
                         <div key={idx} className="flex items-center gap-1.5">
-                            <div className="flex items-center gap-0.5">
-                                {cm.requiredSymbols.length > 0 ? cm.requiredSymbols.map((sym: CellSymbol, sIdx: number) => {
-                                    const Icon = SymbolIcon[sym];
-                                    return Icon ? <Icon key={sIdx} className="w-3 h-3 text-phosphor" /> : null;
-                                }) : <span className="text-red-400 text-[9px] font-bold">!</span>}
+                            <div className="flex items-center gap-0.5 text-phosphor">
+                                {cm.requiredSymbols.length > 0 ? cm.requiredSymbols.map((sym: CellSymbol, sIdx: number) => (
+                                    <SymbolIcon key={sIdx} symbol={sym} size={24} />
+                                )) : <span className="text-red-400 text-[9px] font-bold">!</span>}
                             </div>
                             <span className="font-mono text-phosphor">
                                 {cm.value} {cm.type.replace('_', ' ')}

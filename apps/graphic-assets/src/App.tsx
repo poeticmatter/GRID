@@ -1,12 +1,14 @@
 import { useState } from 'react';
 import { FaviconTab } from './tabs/FaviconTab';
 import { TitleTab } from './tabs/TitleTab';
+import { IconsTab } from './tabs/IconsTab';
 
-type Tab = 'favicons' | 'titles';
+type Tab = 'favicons' | 'titles' | 'icons';
 
 const TABS: { id: Tab; label: string; sub: string }[] = [
-    { id: 'favicons', label: 'FAVICONS',       sub: '3 variants · 32×32 SVG' },
-    { id: 'titles',   label: 'TITLE SCREENS',  sub: '3 variants · 640×200 animated SVG' },
+    { id: 'favicons', label: 'FAVICONS',       sub: '6 variants · 32×32 SVG' },
+    { id: 'titles',   label: 'TITLE SCREENS',  sub: '4 variants · 640×200 animated SVG' },
+    { id: 'icons',    label: 'ICONS',          sub: '19 icons · 24×24 SVG' },
 ];
 
 export default function App() {
@@ -105,6 +107,7 @@ export default function App() {
             <main style={{ flex: 1, padding: '32px', maxWidth: '1100px', width: '100%', margin: '0 auto' }}>
                 {activeTab === 'favicons' && <FaviconTab />}
                 {activeTab === 'titles'   && <TitleTab />}
+                {activeTab === 'icons'    && <IconsTab />}
             </main>
 
             {/* Footer */}

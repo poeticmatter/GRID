@@ -1,7 +1,7 @@
 // Core types for the game engine - Shared between Game and Editor
 
 export type CellColor = 'ORANGE' | 'SKY' | 'EMERALD' | 'LIME' | 'FUCHSIA';
-export type CellSymbol = 'SHIELD' | 'EYE' | 'SKULL' | 'NONE';
+export type CellSymbol = 'CUBE' | 'TRIANGLE' | 'NESTED' | 'STAR' | 'ORBIT' | 'NONE';
 
 export interface Coordinate {
   x: number;
@@ -99,7 +99,7 @@ export const COUNTERMEASURE_METADATA: Blueprint = {
       label: 'Required Symbols',
       type: 'symbol_array',
       default: [],
-      options: ['SHIELD', 'EYE', 'SKULL']
+      options: ['CUBE', 'TRIANGLE', 'NESTED', 'STAR', 'ORBIT']
     },
     type: { 
       label: 'Penalty Type', 

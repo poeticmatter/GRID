@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import type { Cell as CellType, CellColor, CellSymbol } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
-import { Shield, Eye, Skull } from 'lucide-react';
+import { SymbolIcon } from './CellSymbols';
 import { clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 import { motion } from 'framer-motion';
@@ -15,12 +15,6 @@ interface CellProps {
   onMouseEnter: () => void;
 }
 
-const SYMBOL_MAP: Record<CellSymbol, React.ReactNode> = {
-  SHIELD: <Shield className="w-5 h-5 text-current drop-shadow-md" />,
-  EYE: <Eye className="w-5 h-5 text-current drop-shadow-md" />,
-  SKULL: <Skull className="w-5 h-5 text-current drop-shadow-md" />,
-  NONE: null,
-};
 
 export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: CellProps) => {
   const { color, symbol, state, x, y } = cell;
@@ -126,7 +120,7 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
 
       {/* Symbol */}
       <div className="relative z-10">
-        {SYMBOL_MAP[symbol]}
+        <SymbolIcon symbol={symbol} />
       </div>
 
       {/* Ghost Overlay */}

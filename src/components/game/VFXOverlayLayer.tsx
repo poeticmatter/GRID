@@ -3,16 +3,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { gameEventBus } from '../../engine/eventBus';
 import { useUIStore } from '../../store/useUIStore';
 import { LAYER_THEME } from '../../presentation/theme';
-import { Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
 import type { CellColor, CellSymbol, Coordinate, Cell as CellType } from '../../engine/types';
-
-const SYMBOL_MAP: Record<CellSymbol, React.ReactNode> = {
-    SHIELD: <Shield className="w-5 h-5 text-current drop-shadow-md" />,
-    EYE: <Eye className="w-5 h-5 text-current drop-shadow-md" />,
-    SKULL: <Skull className="w-5 h-5 text-current drop-shadow-md" />,
-    NONE: null,
-};
+import { SymbolIcon } from './CellSymbols';
 
 interface SwapEvent {
     source: Coordinate;
@@ -66,7 +59,7 @@ const DummyCell = ({ cell, startX, startY, endX, endY }: { cell: CellType, start
         >
              <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
              <div className="relative z-10">
-                {SYMBOL_MAP[symbol]}
+                <SymbolIcon symbol={symbol} />
             </div>
         </motion.div>
     );
