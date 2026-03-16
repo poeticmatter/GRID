@@ -17,7 +17,7 @@ interface CellProps {
 
 
 export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: CellProps) => {
-  const { color, symbol, state, x, y } = cell;
+  const { color, symbol, state, x, y, hasVirus } = cell;
 
   const prevData = useRef(`${color}-${symbol}-${state}`);
   const [isAnimating, setIsAnimating] = useState(false);
@@ -125,6 +125,14 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
 
       {/* Ghost Overlay */}
       <div className={overlayClasses} />
+
+      {/* Virus indicator */}
+      {hasVirus && (
+        <div className="absolute inset-0 pointer-events-none z-20">
+          <div className="absolute inset-0 border-2 border-rose-500/80 rounded-sm animate-pulse" />
+          <div className="absolute bottom-0.5 right-0.5 w-2 h-2 bg-rose-500 rounded-full shadow-[0_0_4px_rgba(244,63,94,0.9)]" />
+        </div>
+      )}
     </motion.div>
   );
 };
