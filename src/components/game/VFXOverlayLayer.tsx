@@ -24,7 +24,7 @@ const DummyCell = ({ cell, startX, startY, endX, endY }: { cell: CellType, start
         LAYER_THEME[color].text
     );
 
-    const { cellSize } = useUIStore.getState().spatialMetrics;
+    const cellSize = useUIStore(state => state.spatialMetrics.cellSize);
 
     // Calculate a perpendicular offset for the arc (e.g., 30 pixels)
     const isHorizontal = startY === endY;
@@ -67,7 +67,8 @@ const DummyCell = ({ cell, startX, startY, endX, endY }: { cell: CellType, start
 
 export const VFXOverlayLayer = () => {
     const [activeSwap, setActiveSwap] = useState<SwapEvent | null>(null);
-    const spatialMetrics = useUIStore(state => state.spatialMetrics);
+    const cellSize = useUIStore(state => state.spatialMetrics.cellSize);
+    const gapSize = useUIStore(state => state.spatialMetrics.gapSize);
 
     useEffect(() => {
         const handleSwap = (payload: SwapEvent) => {
@@ -81,7 +82,6 @@ export const VFXOverlayLayer = () => {
 
     // Helper to calculate pixel position
     const getPos = (coord: Coordinate) => {
-        const { cellSize, gapSize } = spatialMetrics;
         return {
             x: coord.x * (cellSize + gapSize),
             y: coord.y * (cellSize + gapSize)
