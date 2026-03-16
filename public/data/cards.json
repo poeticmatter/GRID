@@ -28,9 +28,6 @@
     "card_1773504527625": {
         "name": "Creeper",
         "visualColor": "SKY",
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true,
         "effects": [
             {
                 "type": "RUN",
@@ -49,14 +46,14 @@
                     }
                 ]
             }
-        ]
+        ],
+        "memory": 3,
+        "weight": 10,
+        "isStartingCard": true
     },
     "card_1773504541091": {
         "name": "Buster",
         "visualColor": "SKY",
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true,
         "effects": [
             {
                 "type": "RUN",
@@ -79,31 +76,34 @@
                     }
                 ]
             }
-        ]
+        ],
+        "memory": 2,
+        "weight": 10,
+        "isStartingCard": true
     },
     "card_1773504553037": {
         "name": "Data Miner",
         "visualColor": "SKY",
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true,
         "effects": [
             {
                 "type": "REPROGRAM",
                 "amount": 3
             }
-        ]
+        ],
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": true
     },
     "card_1773504601715": {
         "name": "System Reset",
         "visualColor": "SKY",
-        "memory": 1,
-        "weight": 10,
-        "isStartingCard": true,
         "effects": [
             {
                 "type": "SYSTEM_RESET"
             }
-        ]
+        ],
+        "memory": 1,
+        "weight": 10,
+        "isStartingCard": true
     }
 }

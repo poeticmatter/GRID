@@ -1,8 +1,9 @@
-import type { Card as CardType, CellColor, Coordinate, Effect } from '../../engine/types';
+import type { Card as CardType, Coordinate, Effect } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
 
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
+import { Cpu } from 'lucide-react';
 
 interface CardProps {
   card: CardType;
@@ -84,17 +85,6 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
       onClick={onClick}
       animate={{ y: isSelected ? -30 : 0 }}
     >
-      {/* Memory Badge — outside overflow-hidden so it protrudes */}
-      <div
-        className={clsx(
-          "absolute -top-2 -left-2 w-[clamp(1.5rem,3vh,2rem)] h-[clamp(1.5rem,3vh,2rem)] border-2 rounded-full flex items-center justify-center text-[clamp(0.6rem,1.2vh,0.875rem)] font-bold text-white shadow-lg z-20",
-          LAYER_THEME[visualColor].badge
-        )}
-        title="Memory Cost"
-      >
-        {memory}
-      </div>
-
       {/* Card body — owns the border, rounded corners and overflow clip */}
       <div className={clsx(
         'w-full h-full border-2 rounded-lg flex flex-col backdrop-blur-md overflow-hidden',
@@ -106,6 +96,17 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
           LAYER_THEME[visualColor].banner
         )}>
           {name}
+        </div>
+
+        {/* Memory chips — stacked row under the title */}
+        <div className="flex flex-row items-center px-1.5 pt-1 pb-0">
+          {Array.from({ length: memory }).map((_, i) => (
+            <Cpu
+              key={i}
+              className="w-[clamp(0.6rem,1.2vh,0.8rem)] h-[clamp(0.6rem,1.2vh,0.8rem)] text-phosphor/70"
+              style={{ marginLeft: i === 0 ? 0 : '-0.2em' }}
+            />
+          ))}
         </div>
 
         <div className="flex-1 flex flex-col items-center justify-center space-y-2 overflow-hidden py-1 px-2">
