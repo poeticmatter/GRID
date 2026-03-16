@@ -2,6 +2,9 @@ import { AssetCard } from '../components/AssetCard';
 import Favicon1 from '../assets/Favicon1';
 import Favicon2 from '../assets/Favicon2';
 import Favicon3 from '../assets/Favicon3';
+import Favicon4 from '../assets/Favicon4';
+import Favicon5 from '../assets/Favicon5';
+import Favicon6 from '../assets/Favicon6';
 
 const FAVICONS = [
     {
@@ -24,6 +27,27 @@ const FAVICONS = [
         filename: 'grid-favicon-sector-lock.svg',
         Component: Favicon3,
         note: 'Ultra-minimal, reads perfectly at 16×16',
+    },
+    {
+        label: 'Trace Run',
+        description: 'PCB L-run across 3×3 cell grid — 32×32',
+        filename: 'grid-favicon-trace-run.svg',
+        Component: Favicon4,
+        note: 'Favicon1 feel without the G. Circuit trace + solder nodes.',
+    },
+    {
+        label: 'Grid Square',
+        description: 'Square-framed 3×3 cell grid — 32×32',
+        filename: 'grid-favicon-grid-square.svg',
+        Component: Favicon5,
+        note: 'Favicon2 grid inside a square bracket frame. No hex.',
+    },
+    {
+        label: 'Signal Matrix',
+        description: '4×4 game-board with diagonal trace run — 32×32',
+        filename: 'grid-favicon-signal-matrix.svg',
+        Component: Favicon6,
+        note: 'Minimal grid-as-icon. Diagonal run pattern highlighted.',
     },
 ];
 
