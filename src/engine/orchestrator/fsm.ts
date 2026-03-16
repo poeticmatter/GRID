@@ -65,8 +65,8 @@ export function evaluateQueue(snapshot: ReadonlyDeep<GameSnapshot>, payload?: an
                 currentPayload = undefined;
                 history.push(stepDeltas);
 
-                // If the mechanic deliberately kept the same effect queue by value
-                if (nextQueue === queue || (nextQueue.length > 0 && nextQueue[0] === queue[0])) {
+                // Mechanic formally requested a pause (e.g. awaiting player confirmation)
+                if (resultDeltas.yielded) {
                     return history;
                 }
             } else {

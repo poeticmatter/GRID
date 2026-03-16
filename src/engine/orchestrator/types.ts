@@ -87,6 +87,9 @@ export interface StateDeltas {
     durationMs?: number;
     harvestedCells?: Cell[];
     targetHacked?: boolean;
+    /** When true, signals the FSM to yield control back to the caller.
+     *  Used by DEFERRED mechanics to formally request a pause (e.g. awaiting player confirmation). */
+    yielded?: boolean;
 
     // ----- Legacy compatibility fields (NetworkNode[]) -----
     // These are kept to support the transitional read path in resetMechanic
