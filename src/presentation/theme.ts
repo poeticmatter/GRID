@@ -22,8 +22,8 @@ export const LAYER_THEME: Record<CellColor, LayerTheme> = {
     bg: 'bg-sky-400',
     text: 'text-sky-400',
     border: 'border-sky-400',
-    badge: 'bg-sky-600 border-sky-400',
-    banner: 'bg-grid-bg border-b-2 border-sky-400 text-sky-400',
+    badge: 'bg-grid-surface border-phosphor',
+    banner: 'bg-grid-bg border-b-2 border-phosphor text-phosphor',
     surface: 'bg-grid-bg',
   },
   EMERALD: {

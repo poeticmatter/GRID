@@ -47,7 +47,7 @@ const renderEffect = (effect: Effect, index: number, rotation: number) => {
                 key={i}
                 className={clsx(
                   'w-2 h-2 rounded-[1px]',
-                  active ? 'bg-white shadow-[0_0_3px_rgba(255,255,255,0.8)]' : 'bg-white/5'
+                  active ? 'bg-phosphor shadow-[0_0_4px_rgba(57,255,122,0.9)]' : 'bg-phosphor/5'
                 )}
               />
             );
@@ -56,7 +56,7 @@ const renderEffect = (effect: Effect, index: number, rotation: number) => {
       );
     case 'REPROGRAM':
       return (
-        <div key={index} className="flex flex-col items-center text-cyan-400 mt-1 flex-shrink-0 bg-cyan-950/50 border border-cyan-500/30 px-2 py-0.5 rounded">
+        <div key={index} className="flex flex-col items-center text-phosphor mt-1 flex-shrink-0 bg-phosphor/5 border border-phosphor/30 px-2 py-0.5 rounded">
           <div className="flex items-center space-x-1">
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -78,19 +78,16 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
     <motion.div
       layoutId={`card-${card.id}`}
       className={clsx(
-        'h-[clamp(140px,22vh,192px)] aspect-[2/3] border-2 rounded-lg flex flex-col relative cursor-pointer transition-all duration-300 backdrop-blur-md overflow-hidden',
-        LAYER_THEME[visualColor].surface,
-        isSelected ? 'border-phosphor shadow-[0_0_20px_rgba(57,255,122,0.5)] scale-110 z-30' : 'border-phosphor/40 opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
+        'h-[clamp(140px,22vh,192px)] aspect-[2/3] relative cursor-pointer transition-all duration-300',
+        isSelected ? 'scale-110 z-30' : 'opacity-90 hover:opacity-100 hover:scale-[1.15] hover:z-20 hover:-translate-y-4'
       )}
       onClick={onClick}
-      animate={{
-        y: isSelected ? -30 : 0
-      }}
+      animate={{ y: isSelected ? -30 : 0 }}
     >
-      {/* Memory Badge */}
+      {/* Memory Badge — outside overflow-hidden so it protrudes */}
       <div
         className={clsx(
-          "absolute -top-2 -left-2 w-[clamp(1.5rem,3vh,2rem)] h-[clamp(1.5rem,3vh,2rem)] border-2 rounded-full flex items-center justify-center text-[clamp(0.6rem,1.2vh,0.875rem)] font-bold text-white shadow-lg z-10",
+          "absolute -top-2 -left-2 w-[clamp(1.5rem,3vh,2rem)] h-[clamp(1.5rem,3vh,2rem)] border-2 rounded-full flex items-center justify-center text-[clamp(0.6rem,1.2vh,0.875rem)] font-bold text-white shadow-lg z-20",
           LAYER_THEME[visualColor].badge
         )}
         title="Memory Cost"
@@ -98,19 +95,26 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
         {memory}
       </div>
 
+      {/* Card body — owns the border, rounded corners and overflow clip */}
       <div className={clsx(
-        "text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center p-1 truncate leading-tight",
-        LAYER_THEME[visualColor].banner
+        'w-full h-full border-2 rounded-lg flex flex-col backdrop-blur-md overflow-hidden',
+        LAYER_THEME[visualColor].surface,
+        isSelected ? 'border-phosphor shadow-[0_0_20px_rgba(57,255,122,0.5)]' : 'border-phosphor/40'
       )}>
-        {name}
-      </div>
+        <div className={clsx(
+          "text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center p-1 truncate leading-tight",
+          LAYER_THEME[visualColor].banner
+        )}>
+          {name}
+        </div>
 
-      <div className="flex-1 flex flex-col items-center justify-center space-y-2 overflow-hidden py-1 px-2">
-        {effects.map((effect, idx) => renderEffect(effect, idx, rotation))}
-      </div>
+        <div className="flex-1 flex flex-col items-center justify-center space-y-2 overflow-hidden py-1 px-2">
+          {effects.map((effect, idx) => renderEffect(effect, idx, rotation))}
+        </div>
 
-      <div className="mt-1 pb-2 text-[10px] font-mono text-phosphor/50 text-center animate-pulse">
-        EXECUTE
+        <div className="mt-1 pb-2 text-[10px] font-mono text-phosphor/50 text-center animate-pulse">
+          EXECUTE
+        </div>
       </div>
     </motion.div>
   );
