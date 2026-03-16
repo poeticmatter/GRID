@@ -51,7 +51,7 @@ export const Board = () => {
 
   return (
     <div
-      className="bg-slate-900 border border-slate-700 p-2 rounded-lg shadow-xl relative backdrop-blur-sm w-full h-full flex flex-col items-center justify-center p-2"
+      className="bg-grid-bg border border-grid-border p-2 rounded-lg shadow-xl relative w-full h-full flex flex-col items-center justify-center p-2"
     >
       <div
         ref={gridRef}
@@ -79,7 +79,7 @@ export const Board = () => {
       <TargetingInteractionLayer />
 
       {/* Background Grid Pattern */}
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#39ff7a0a_1px,transparent_1px),linear-gradient(to_bottom,#39ff7a0a_1px,transparent_1px)] bg-[size:24px_24px] pointer-events-none" />
 
       {/* Virus Tracker */}
       <AnimatePresence>
@@ -88,7 +88,7 @@ export const Board = () => {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="absolute -right-20 top-4 flex flex-col items-center gap-2 bg-slate-900/90 border border-red-500/50 p-3 rounded-lg backdrop-blur-md shadow-2xl z-50 overflow-hidden"
+            className="absolute -right-20 top-4 flex flex-col items-center gap-2 bg-grid-bg/95 border border-red-500/50 p-3 rounded-lg backdrop-blur-md shadow-2xl z-50 overflow-hidden"
           >
             <div className="absolute inset-0 bg-red-500/5 animate-pulse pointer-events-none" />
             <motion.div

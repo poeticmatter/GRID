@@ -57,7 +57,7 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
   if (state === 'BROKEN') {
     return (
       <div
-        className="w-full h-full bg-slate-900/50 border border-slate-800 rounded-sm"
+        className="w-full h-full bg-grid-bg/60 border border-grid-border rounded-sm"
         data-x={x}
         data-y={y}
       />

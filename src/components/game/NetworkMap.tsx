@@ -83,11 +83,11 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-            className="w-[clamp(140px,25vw,192px)] bg-green-950/40 border border-green-500/50 rounded p-[clamp(0.375rem,1vh,0.5rem)] flex flex-col gap-1 backdrop-blur-sm shadow-lg pointer-events-auto min-h-0"
+            className="w-[clamp(140px,25vw,192px)] bg-grid-bg border border-green-500/40 rounded p-[clamp(0.375rem,1vh,0.5rem)] flex flex-col gap-1 shadow-lg pointer-events-auto min-h-0"
         >
             <div className="flex justify-between items-center border-b border-white/10 pb-1">
                 <span className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-mono font-bold text-white/80 truncate w-32">{server.name}</span>
-                <span className="text-[clamp(0.5rem,1vh,0.625rem)] bg-green-950 px-1 rounded text-green-500/50 leading-none">{server.type.substring(0, 3)}</span>
+                <span className="text-[clamp(0.5rem,1vh,0.625rem)] bg-grid-surface px-1 rounded text-phosphor/50 leading-none">{server.type.substring(0, 3)}</span>
             </div>
 
             {/* Layers */}
@@ -125,7 +125,7 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                 {(server.countermeasures || []).map((cm, idx) => {
                     const SymbolIcon: Record<string, typeof Shield> = { SHIELD: Shield, EYE: Eye, SKULL: Skull };
                     return (
-                        <div key={idx} className="text-[clamp(0.5rem,1.2vh,0.625rem)] flex items-center gap-1.5 text-white/50">
+                        <div key={idx} className="flex items-center gap-1.5 text-white/50">
                             <div className="flex items-center gap-0.5">
                                 {cm.requiredSymbols.length > 0 ? cm.requiredSymbols.map((sym: CellSymbol, sIdx: number) => {
                                     const Icon = SymbolIcon[sym];
@@ -151,11 +151,11 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
     const isHome = state === 'HOME';
 
     let bgClass = "bg-zinc-900/50 border-zinc-700 text-zinc-600";
-    if (isHome) bgClass = "bg-zinc-900 border-green-500 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]";
-    if (isCleared) bgClass = "bg-zinc-950 border-green-500 text-green-400 opacity-80 grid-clear";
-    if (isBypassed) bgClass = "bg-zinc-950 border-zinc-800 text-zinc-800 opacity-40 grayscale";
-    if (isLocked) bgClass = "bg-zinc-950 border-zinc-900 text-zinc-900 opacity-50 grayscale";
-    if (isActive) bgClass = "bg-green-950/40 border-green-400 text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)] z-50";
+    if (isHome) bgClass = "bg-grid-bg border-green-500 text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)]";
+    if (isCleared) bgClass = "bg-grid-bg border-green-500 text-phosphor opacity-80 grid-clear";
+    if (isBypassed) bgClass = "bg-grid-bg border-grid-border text-grid-border opacity-40 grayscale";
+    if (isLocked) bgClass = "bg-grid-bg border-grid-border text-grid-border opacity-50 grayscale";
+    if (isActive) bgClass = "bg-grid-surface border-phosphor text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)] z-50";
 
     const STEP_TIME = 0.5;
     const CYCLE_TIME = 4;
@@ -203,7 +203,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
 
             {isActive && (
                 <motion.div
-                    className="absolute -inset-2 border-2 border-green-400 rounded-full pointer-events-none"
+                    className="absolute -inset-2 border-2 border-phosphor rounded-full pointer-events-none"
                     initial={{ scale: 1, opacity: 0.8 }}
                     animate={{ scale: 1.5, opacity: 0 }}
                     transition={{
@@ -218,7 +218,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
 
             {/* Tooltip on hover */}
             <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/95 text-white text-[10px] py-1.5 px-3 rounded pointer-events-none whitespace-nowrap font-mono border border-slate-600/50 z-50 flex flex-col items-center shadow-xl">
-                <span className="font-bold text-green-400 text-xs mb-0.5">{server.name}</span>
+                <span className="font-bold text-phosphor text-xs mb-0.5">{server.name}</span>
                 <span className="text-white/60">{server.type} {server.type !== 'HOME' && `L${server.difficulty}`}</span>
             </div>
 
@@ -242,13 +242,13 @@ const TopologyToggleButton = ({ isOpen, onClick }: { isOpen: boolean, onClick: (
                 className={clsx(
                     "pointer-events-auto bg-zinc-950 rounded-xl flex items-center justify-center gap-3 transition-colors text-white group",
                     isOpen
-                        ? "border border-green-500/50 px-8 py-2 hover:bg-green-900/20 shadow-[0_0_15px_rgba(34,197,94,0.3)]"
+                        ? "border border-green-500/50 px-8 py-2 hover:bg-phosphor/5 shadow-[0_0_15px_rgba(57,255,122,0.2)]"
                         : "border border-zinc-800/80 px-8 py-2 hover:bg-zinc-900 shadow-lg shadow-black/50"
                 )}
             >
                 <Globe className={clsx(
                     "w-5 h-5 transition-all duration-500",
-                    isOpen ? "text-green-400 drop-shadow-[0_0_8px_rgba(34,197,94,0.8)]" : "text-white/40 group-hover:text-green-400/70"
+                    isOpen ? "text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)]" : "text-white/40 group-hover:text-phosphor/70"
                 )} />
                 <span className={clsx(
                     "text-sm font-mono font-bold tracking-[0.2em] transition-colors uppercase",
@@ -369,15 +369,15 @@ export const NetworkMap = () => {
                                             <line
                                                 x1={`${p1.x}%`} y1={`${p1.y}%`}
                                                 x2={`${p2.x}%`} y2={`${p2.y}%`}
-                                                stroke={isActiveConnection ? "rgba(34, 197, 94, 0.4)" : "rgba(34, 197, 94, 0.15)"}
+                                                stroke={isActiveConnection ? "rgba(57, 255, 122, 0.5)" : "rgba(57, 255, 122, 0.12)"}
                                                 strokeWidth={isActiveConnection ? "3" : "1.5"}
                                                 strokeDasharray={!isActiveConnection ? "5 5" : "none"}
                                             />
                                             {isActiveConnection && (
                                                 <motion.circle
                                                     r="4"
-                                                    fill="#22c55e"
-                                                    style={{ filter: 'drop-shadow(0 0 6px #22c55e)' }}
+                                                    fill="#39ff7a"
+                                                    style={{ filter: 'drop-shadow(0 0 6px #39ff7a)' }}
                                                     initial={{ cx: `${p1.x}%`, cy: `${p1.y}%`, opacity: 0 }}
                                                     animate={{ cx: `${p2.x}%`, cy: `${p2.y}%`, opacity: [0, 1, 1, 0] }}
                                                     transition={{

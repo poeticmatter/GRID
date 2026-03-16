@@ -34,16 +34,16 @@ export const DesktopConsoleView = ({
             onClick={(e) => e.stopPropagation()}
             className="fixed right-6 top-1/2 -translate-y-1/2 z-[70] w-72 pointer-events-auto"
         >
-            <div className="bg-zinc-950/90 backdrop-blur-xl border border-green-500/30 rounded-xl p-5 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
+            <div className="bg-grid-bg/95 backdrop-blur-xl border border-green-500/30 rounded-xl p-5 shadow-[0_0_40px_rgba(0,0,0,0.6)]">
                 <div className="flex items-center justify-between mb-4 border-b border-green-500/20 pb-3">
                     <div className="flex items-center gap-2">
-                        <Layers className="w-4 h-4 text-green-400" />
-                        <h3 className="text-[11px] font-black text-green-400 uppercase tracking-[0.2em]">Console</h3>
+                        <Layers className="w-4 h-4 text-phosphor" />
+                        <h3 className="text-[11px] font-black text-phosphor uppercase tracking-[0.2em]">Console</h3>
                     </div>
                     {isResolving && (
-                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-green-500/10 border border-green-500/20">
-                            <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                            <span className="text-[9px] font-mono text-green-400">RESOLVING</span>
+                        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-phosphor/10 border border-phosphor/20">
+                            <span className="w-1.5 h-1.5 rounded-full bg-phosphor animate-pulse" />
+                            <span className="text-[9px] font-mono text-phosphor">RESOLVING</span>
                         </div>
                     )}
                 </div>
@@ -72,7 +72,7 @@ export const DesktopConsoleView = ({
                     <div className="mt-6 pt-6 border-t border-green-500/20 animate-in fade-in slide-in-from-bottom-2">
                             <button
                             onClick={onRotate}
-                            className="w-full flex items-center justify-center gap-2 bg-green-900/40 hover:bg-green-800/60 text-white p-3 rounded-lg font-bold transition-all border border-green-800/50 hover:border-green-400 hover:text-green-400 shadow-xl group"
+                            className="w-full flex items-center justify-center gap-2 bg-phosphor/10 hover:bg-phosphor/20 text-white p-3 rounded-lg font-bold transition-all border border-phosphor/30 hover:border-phosphor hover:text-phosphor shadow-xl group"
                         >
                             <RotateCw className="w-4 h-4 group-hover:rotate-45 transition-transform" />
                             ROTATE GRID
@@ -123,7 +123,7 @@ export const DesktopConsoleView = ({
                 {!isResolving && pendingEffects.length > 0 && (
                     <div className="mt-5 pt-3 border-t border-green-500/20">
                         <p className="text-[9px] font-mono text-green-500/50 leading-tight flex items-center gap-2">
-                            <span className="w-1 h-1 bg-green-500 rounded-full animate-pulse" />
+                            <span className="w-1 h-1 bg-phosphor rounded-full animate-pulse" />
                             SELECT PROCESS TO INITIALIZE_
                         </p>
                     </div>

@@ -1,6 +1,14 @@
 @import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
 
+@theme {
+  --color-phosphor: #39ff7a;
+  --color-grid-bg: #020f02;
+  --color-grid-surface: #050e05;
+  --color-grid-border: #0d2210;
+
+}
+
 @keyframes menu-scan-sweep {
     0%   { transform: translateY(-100vh); opacity: 0; }
     5%   { opacity: 1; }
