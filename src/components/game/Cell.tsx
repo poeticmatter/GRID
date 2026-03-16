@@ -67,23 +67,26 @@ export const Cell = ({ cell, isAffected, isValidCut, onClick, onMouseEnter }: Ce
   if (state === 'CORRUPTED') {
     return (
       <div
-        className="w-full h-full bg-slate-950 border border-slate-800 rounded-sm relative overflow-hidden flex items-center justify-center transition-all duration-300 animate-pulse"
+        className="w-full h-full bg-black border border-green-900 rounded-sm relative overflow-hidden"
         data-x={x}
         data-y={y}
       >
-        <div 
-          className="absolute inset-0 opacity-40 mix-blend-screen" 
-          style={{ 
-            backgroundImage: 'repeating-conic-gradient(#000 0% 25%, #222 0% 50%)', 
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage: 'repeating-conic-gradient(#00ff41 0% 25%, #001a00 0% 50%)',
             backgroundSize: '2px 2px',
-            animation: 'noise-move 0.2s infinite steps(2)'
-          }} 
+            opacity: 0.85,
+            animation: 'corrupt-noise 0.12s infinite steps(4)'
+          }}
         />
         <style>{`
-          @keyframes noise-move {
-            0% { transform: translate(0, 0); }
-            50% { transform: translate(1px, 1px); }
-            100% { transform: translate(-1px, 0); }
+          @keyframes corrupt-noise {
+            0%   { transform: translate(0, 0); }
+            25%  { transform: translate(-1px, 1px); }
+            50%  { transform: translate(1px, -1px); }
+            75%  { transform: translate(-1px, -1px); }
+            100% { transform: translate(1px, 0); }
           }
         `}</style>
       </div>

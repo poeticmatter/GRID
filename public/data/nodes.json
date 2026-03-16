@@ -71,7 +71,7 @@
                     "requiredSymbols": [
                         "EYE"
                     ],
-                    "type": "VIRUS",
+                    "type": "CORRUPT",
                     "value": 1
                 }
             ],
