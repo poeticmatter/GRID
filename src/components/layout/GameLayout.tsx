@@ -3,6 +3,7 @@ import { useGameStore } from '../../store/useGameStore';
 import { usePlayerStore } from '../../store/usePlayerStore';
 import { Dispatch } from '../../engine/orchestrator';
 import { Board } from '../game/Board';
+import { MenuTitle } from '../game/MenuTitle';
 import { TraceBar } from '../game/TraceBar';
 import { Hand } from '../game/Hand';
 import { NetworkMap } from '../game/NetworkMap';
@@ -123,26 +124,112 @@ export const GameLayout = () => {
             <AnimatePresence>
                 {isMenuOpen && (
                     <motion.div
-                        className="absolute inset-0 z-[100] bg-black/80 backdrop-blur-md flex flex-col items-center justify-center"
+                        className="absolute inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
+                        style={{ background: '#020f02' }}
                         initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
                     >
-                        <h1 className="text-6xl font-black text-green-400 mb-8 tracking-tighter drop-shadow-[0_0_10px_rgba(34,197,94,0.5)]">G.R.I.D</h1>
-                        <div className="flex flex-col gap-4">
-                            <button
-                                className="px-8 py-3 bg-green-600 hover:bg-green-500 text-white font-bold rounded text-xl shadow-lg shadow-green-500/20 transition-all hover:scale-105"
-                                onClick={handleStart}
-                            >
-                                NEW RUN
-                            </button>
-                            {gameState !== 'MENU' && (
+                        {/* Dot grid */}
+                        <div className="absolute inset-0 pointer-events-none" style={{
+                            backgroundImage: 'radial-gradient(circle, #0a1f0a 1px, transparent 1px)',
+                            backgroundSize: '16px 16px',
+                        }} />
+                        {/* Sub-pixel horizontal lines */}
+                        <div className="absolute inset-0 pointer-events-none" style={{
+                            backgroundImage: 'repeating-linear-gradient(transparent, transparent 7px, #0a1f0a 7px, #0a1f0a 8px)',
+                        }} />
+                        {/* Scanning beam */}
+                        <div className="menu-scan-beam absolute inset-0 pointer-events-none" style={{
+                            background: 'linear-gradient(to bottom, transparent, rgba(57,255,122,0.08) 40%, rgba(57,255,122,0.18) 50%, rgba(57,255,122,0.08) 60%, transparent)',
+                        }} />
+                        {/* Interlace */}
+                        <div className="absolute inset-0 pointer-events-none" style={{
+                            backgroundImage: 'repeating-linear-gradient(transparent, transparent 2px, rgba(0,0,0,0.1) 2px, rgba(0,0,0,0.1) 4px)',
+                        }} />
+                        {/* CRT vignette */}
+                        <div className="absolute inset-0 pointer-events-none" style={{
+                            background: 'radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,0.7) 100%)',
+                        }} />
+                        {/* Corner chrome */}
+                        <div className="absolute top-4 left-4 w-10 h-10 pointer-events-none" style={{ borderTop: '1px solid #22c55e', borderLeft: '1px solid #22c55e', opacity: 0.35 }} />
+                        <div className="absolute top-4 right-4 w-10 h-10 pointer-events-none" style={{ borderTop: '1px solid #22c55e', borderRight: '1px solid #22c55e', opacity: 0.35 }} />
+                        <div className="absolute bottom-4 left-4 w-10 h-10 pointer-events-none" style={{ borderBottom: '1px solid #22c55e', borderLeft: '1px solid #22c55e', opacity: 0.35 }} />
+                        <div className="absolute bottom-4 right-4 w-10 h-10 pointer-events-none" style={{ borderBottom: '1px solid #22c55e', borderRight: '1px solid #22c55e', opacity: 0.35 }} />
+
+                        {/* Title + menu */}
+                        <div className="relative z-10 flex flex-col items-center">
+                            <MenuTitle />
+                            {/* Subtitle with emphasized initials */}
+                            <p style={{
+                                fontFamily: "'VT323', 'Courier New', monospace",
+                                color: '#22c55e',
+                                letterSpacing: '0.25em',
+                                lineHeight: 1,
+                                marginTop: '0.1em',
+                                marginBottom: '0',
+                                opacity: 0.7,
+                                fontSize: 'clamp(0.75rem, 2vw, 1.05rem)',
+                            }}>
+                                <span style={{ fontSize: '1.6em', color: '#39ff7a', opacity: 1, textShadow: '0 0 6px rgba(57,255,122,0.7)' }}>G</span>OVERNMENT{' '}
+                                <span style={{ fontSize: '1.6em', color: '#39ff7a', opacity: 1, textShadow: '0 0 6px rgba(57,255,122,0.7)' }}>R</span>UNTIME{' '}
+                                <span style={{ fontSize: '1.6em', color: '#39ff7a', opacity: 1, textShadow: '0 0 6px rgba(57,255,122,0.7)' }}>I</span>NJECTION{' '}
+                                <span style={{ fontSize: '1.6em', color: '#39ff7a', opacity: 1, textShadow: '0 0 6px rgba(57,255,122,0.7)' }}>D</span>AEMON
+                            </p>
+                            <div className="flex flex-col gap-3 mt-10 w-full">
                                 <button
-                                    className="px-8 py-3 bg-zinc-800 hover:bg-zinc-700 text-white font-bold rounded text-xl shadow-lg transition-all hover:scale-105 border border-white/10"
-                                    onClick={() => setIsMenuOpen(false)}
+                                    style={{
+                                        fontFamily: "'VT323', 'Courier New', monospace",
+                                        fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
+                                        color: '#39ff7a',
+                                        letterSpacing: '0.2em',
+                                        border: '1px solid rgba(57,255,122,0.5)',
+                                        textShadow: '0 0 8px rgba(57,255,122,0.6)',
+                                        boxShadow: '0 0 12px rgba(57,255,122,0.08) inset',
+                                        background: 'transparent',
+                                        padding: '0.4em 2em',
+                                        transition: 'background 0.15s, box-shadow 0.15s',
+                                    }}
+                                    onMouseEnter={e => {
+                                        (e.currentTarget as HTMLButtonElement).style.background = 'rgba(57,255,122,0.08)';
+                                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(57,255,122,0.2) inset';
+                                    }}
+                                    onMouseLeave={e => {
+                                        (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                                        (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 12px rgba(57,255,122,0.08) inset';
+                                    }}
+                                    onClick={handleStart}
                                 >
-                                    CONTINUE
+                                    &gt; NEW RUN
                                 </button>
-                            )}
+                                {gameState !== 'MENU' && (
+                                    <button
+                                        style={{
+                                            fontFamily: "'VT323', 'Courier New', monospace",
+                                            fontSize: 'clamp(1.5rem, 4vw, 2.2rem)',
+                                            color: '#22c55e',
+                                            letterSpacing: '0.2em',
+                                            border: '1px solid rgba(34,197,94,0.4)',
+                                            textShadow: '0 0 8px rgba(34,197,94,0.4)',
+                                            boxShadow: '0 0 12px rgba(34,197,94,0.06) inset',
+                                            background: 'transparent',
+                                            padding: '0.4em 2em',
+                                            transition: 'background 0.15s, box-shadow 0.15s',
+                                        }}
+                                        onMouseEnter={e => {
+                                            (e.currentTarget as HTMLButtonElement).style.background = 'rgba(34,197,94,0.08)';
+                                            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 20px rgba(34,197,94,0.15) inset';
+                                        }}
+                                        onMouseLeave={e => {
+                                            (e.currentTarget as HTMLButtonElement).style.background = 'transparent';
+                                            (e.currentTarget as HTMLButtonElement).style.boxShadow = '0 0 12px rgba(34,197,94,0.06) inset';
+                                        }}
+                                        onClick={() => setIsMenuOpen(false)}
+                                    >
+                                        &gt; CONTINUE
+                                    </button>
+                                )}
+                            </div>
                         </div>
+
                     </motion.div>
                 )}
 

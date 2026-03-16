@@ -2,6 +2,7 @@ import { AssetCard } from '../components/AssetCard';
 import Title1 from '../assets/Title1';
 import Title2 from '../assets/Title2';
 import Title3 from '../assets/Title3';
+import Title4 from '../assets/Title4';
 
 const TITLES = [
     {
@@ -27,6 +28,14 @@ const TITLES = [
         Component: Title3,
         font: 'Share Tech Mono',
         note: 'Hacker terminal. Sweeping beam. Online for font.',
+    },
+    {
+        label: 'Phosphor Terminal',
+        description: 'VT323 · phosphor green · scan beam · blink cursor · interlace',
+        filename: 'grid-title-phosphor-terminal.svg',
+        Component: Title4,
+        font: 'VT323',
+        note: 'Phosphor tube meets terminal grid. Online for font.',
     },
 ];
 
