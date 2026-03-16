@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import { useGameStore } from '../../store/useGameStore';
 import { usePlayerStore } from '../../store/usePlayerStore';
 import { Dispatch } from '../../engine/orchestrator';
@@ -8,6 +9,8 @@ import { NetworkMap } from '../game/NetworkMap';
 import { Console } from '../game/Console';
 import { AudioController } from '../audio/AudioController';
 import { PlaybackController } from '../game/PlaybackController';
+import { LogController } from '../game/LogController';
+import { ActionLog } from '../game/ActionLog';
 import { gameEventBus } from '../../engine/eventBus';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useVisualQueueStore } from '../../store/useVisualQueueStore';
@@ -15,15 +18,31 @@ import { Menu } from 'lucide-react';
 import { useGameInput } from '../../hooks/useGameInput';
 import { useViewModelManager } from '../../hooks/useViewModel';
 import { useUIStore } from '../../store/useUIStore';
+import { twMerge } from 'tailwind-merge';
 
 export const GameLayout = () => {
     const gameState = useGameStore(state => state.gameState);
     const credits = usePlayerStore(state => state.playerStats.credits);
     const isMenuOpen = useUIStore(state => state.isMenuOpen);
     const setIsMenuOpen = useUIStore(state => state.setIsMenuOpen);
+    const [isShaking, setIsShaking] = useState(false);
+    const [showVignette, setShowVignette] = useState(false);
 
     useGameInput();
     useViewModelManager();
+
+    useEffect(() => {
+        const handler = (payload: any) => {
+            if (payload?.type === 'NET_DAMAGE' || payload?.type === 'HARDWARE_DAMAGE') {
+                setIsShaking(true);
+                setShowVignette(true);
+                setTimeout(() => setIsShaking(false), 320);
+                setTimeout(() => setShowVignette(false), 500);
+            }
+        };
+        gameEventBus.on('VISUAL_COUNTERMEASURE', handler);
+        return () => gameEventBus.off('VISUAL_COUNTERMEASURE', handler);
+    }, []);
 
     const handleStart = () => {
         gameEventBus.emit('AUDIO_INIT');
@@ -39,10 +58,25 @@ export const GameLayout = () => {
     return (
         <div
             onClick={() => { if (gameState === 'EFFECT_ORDERING') Dispatch({ type: 'CANCEL_CARD' }); }}
-            className="h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-black text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans"
+            className={twMerge(
+                "h-dvh w-screen max-w-[100vw] overflow-x-hidden bg-black text-white overflow-hidden grid grid-cols-1 grid-rows-[auto_1fr_auto] relative font-sans",
+                isShaking && "animate-shake"
+            )}
         >
             <PlaybackController />
             <AudioController />
+            <LogController />
+            <ActionLog />
+            {/* Red damage vignette */}
+            {showVignette && (
+                <div
+                    className="absolute inset-0 z-[300] pointer-events-none"
+                    style={{
+                        background: 'radial-gradient(ellipse at center, transparent 40%, rgba(220,38,38,0.45) 100%)',
+                        animation: 'glitch-flash 0.5s ease-out'
+                    }}
+                />
+            )}
             {/* Background Ambience & Widescreen Gutters */}
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-zinc-800 via-zinc-950 to-black opacity-80 pointer-events-none" />
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:4vw_4vw] pointer-events-none mask-image-[radial-gradient(ellipse_at_center,transparent_20%,black_80%)]" style={{ WebkitMaskImage: 'radial-gradient(ellipse at center, transparent 40%, black 100%)' }} />
