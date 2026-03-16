@@ -1,262 +1,223 @@
 import { nodeRegistry } from './registry/NodeRegistry';
-import type { NetworkNode, NodeType } from './types';
+import type { NetworkNode, NodeType, CellColor } from './types';
 
-export const generateGraph = (): NetworkNode[] => {
-    const nodes: NetworkNode[] = [];
-    const MAX_DEPTH = 5; // depth levels 0 to 4
-    let nodeIdCounter = 0;
+// ─── Constants ──────────────────────────────────────────────────────────────
+const MAX_DEPTH = 5;   // rows 0 (HOME) … 4 (terminal)
+const COLUMNS   = 3;   // gridX ∈ {0, 1, 2}
+const ALL_XS: readonly number[] = [0, 1, 2];
 
-    /**
-     * Generates a single NetworkNode.
-     * @param typeOverride — forces a specific NodeType. HOME is hand-built;
-     *   MAINFRAME / ICE / SERVER delegate to nodeRegistry.selectNodeByType.
-     *   undefined falls through to a random pool pick (legacy path).
-     */
-    const generateNode = (
-        typeOverride?: NodeType,
-        gridX: number = 1,
-        gridY: number = 0
-    ): NetworkNode => {
-        let node: NetworkNode;
+// ─── Crossing predicate ────────────────────────────────────────────────────
+// Two edges (p1→c1) and (p2→c2) cross iff parent order and child order
+// are strictly reversed.  Shared endpoints never cross.
+function edgesCross(p1: number, c1: number, p2: number, c2: number): boolean {
+    return (p1 < p2 && c1 > c2) || (p1 > p2 && c1 < c2);
+}
 
-        if (typeOverride === 'HOME') {
-            node = {
-                id: `node-${nodeIdCounter++}-HOME`,
-                type: 'HOME',
-                name: 'Home Gateway',
-                difficulty: 0,
-                layers: {},
-                progress: {},
-                countermeasures: [],
-                resetTrace: 0,
-                status: 'ACTIVE',
-                visibility: 'REVEALED',
-                children: [],
-                gridX,
-                gridY
-            } as NetworkNode;
-        } else if (typeOverride) {
-            // ICE, SERVER, or MAINFRAME — resolved via registry type filter
-            const diff = typeOverride === 'MAINFRAME'
-                ? 5
-                : Math.floor((gridY - 1) / 3) + 1;
-            node = nodeRegistry.selectNodeByType(typeOverride, diff);
-            node.id = `node-${nodeIdCounter++}-${node.name.replace(/\s/g, '')}-${Date.now()}`;
-            node.type = typeOverride;       // enforce override in case registry returned a different sub-type
-            node.gridX = gridX;
-            node.gridY = gridY;
-            node.status = 'ACTIVE';
-            node.visibility = 'HIDDEN';
-            node.children = [];
-        } else {
-            // Legacy random path (no type constraint)
-            const poolId = nodeRegistry.getRandomPoolId();
-            const diff = Math.floor((gridY - 1) / 3) + 1;
-            node = nodeRegistry.selectNode(poolId, diff);
-            node.id = `node-${nodeIdCounter++}-${node.name.replace(/\s/g, '')}-${Date.now()}`;
-            node.gridX = gridX;
-            node.gridY = gridY;
-            node.status = 'ACTIVE';
-            node.visibility = 'HIDDEN';
-            node.children = [];
-        }
+// ─── Non-crossing edge builder ──────────────────────────────────────────────
+// Given sorted parent x-positions and sorted child x-positions, returns a
+// set of (parentX, childX) pairs such that:
+//   1. Every parent has ≥ 1 child          (no dead-end parents)
+//   2. Every child  has ≥ 1 parent         (no orphan children)
+//   3. No two edges cross                  (monotone mapping)
+//   4. Optional extra diagonals add variety (still monotone)
+//
+// Bounded: O(P × C) with P,C ≤ 3 → at most 9 iterations per phase.
+function buildNonCrossingEdges(
+    parentXs: number[],
+    childXs: number[]
+): [parentX: number, childX: number][] {
+    const edges: [number, number][] = [];
 
-        // Initialize progress arrays
-        if (!node.progress) {
-            node.progress = {};
-        }
-        for (const color of Object.keys(node.layers || {})) {
-            const c = color as import('./types').CellColor;
-            if (!node.progress[c]) {
-                node.progress[c] = Array(node.layers[c]?.length || 0).fill(false);
+    const wouldCross = (px: number, cx: number) =>
+        edges.some(([ep, ec]) => edgesCross(px, cx, ep, ec));
+
+    // Phase 1 — Primary: every parent gets its nearest safe child.
+    for (const px of parentXs) {
+        const ranked = [...childXs].sort(
+            (a, b) => Math.abs(a - px) - Math.abs(b - px)
+        );
+        for (const cx of ranked) {
+            if (!wouldCross(px, cx)) {
+                edges.push([px, cx]);
+                break;
             }
         }
-
-        nodes.push(node);
-        return node;
-    };
-
-    // ─── Row 0: HOME ──────────────────────────────────────────────────
-    let currentRow = [generateNode('HOME', 1, 0)];
-
-    // ─── Pre-compute terminal row composition ─────────────────────────
-    // Exactly 3 terminal nodes at gridX 0, 1, 2.
-    // One MAINFRAME at a random position, two SERVERs elsewhere.
-    const mainframeX = Math.floor(Math.random() * 3); // 0, 1, or 2
-    const terminalTypes: Record<number, NodeType> = {
-        0: mainframeX === 0 ? 'MAINFRAME' : 'SERVER',
-        1: mainframeX === 1 ? 'MAINFRAME' : 'SERVER',
-        2: mainframeX === 2 ? 'MAINFRAME' : 'SERVER',
-    };
-
-    // ─── Build rows 1 → MAX_DEPTH-1 ──────────────────────────────────
-    for (let y = 0; y < MAX_DEPTH - 1; y++) {
-        const nextY = y + 1;
-        const isTerminalRow   = nextY === MAX_DEPTH - 1;        // y+1 == 4
-        const isPenultimateRow = nextY === MAX_DEPTH - 2;       // y+1 == 3
-
-        const requestedConnections: { parent: NetworkNode; targetX: number }[] = [];
-
-        for (const parent of currentRow) {
-            // ── Connection count ──────────────────────────────────────
-            let connCount = 1;
-            if (parent.type === 'HOME') {
-                connCount = 3;
-            } else if (isPenultimateRow) {
-                // Penultimate parents → 1–2 children for coverage
-                const rand = Math.random();
-                connCount = rand > 0.5 ? 2 : 1;
-            } else if (!isTerminalRow) {
-                const diffBase = parent.difficulty || 1;
-                const rand = Math.random();
-                if (diffBase >= 3) {
-                    connCount = rand > 0.5 ? 2 : 1;
-                } else {
-                    connCount = rand > 0.8 ? 3 : (rand > 0.3 ? 2 : 1);
-                }
-            }
-
-            // ── Target X candidates ───────────────────────────────────
-            if (isTerminalRow) {
-                // Penultimate → terminal: default straight-up only
-                connCount = 1;
-                requestedConnections.push({ parent, targetX: parent.gridX });
-            } else {
-                const candidates = [parent.gridX - 1, parent.gridX, parent.gridX + 1]
-                    .filter(x => x >= 0 && x <= 2);
-                candidates.sort(() => Math.random() - 0.5);
-                const targets = candidates.slice(0, connCount);
-                for (const tX of targets) {
-                    requestedConnections.push({ parent, targetX: tX });
-                }
-            }
-        }
-
-
-        // ── Handle Crossings: drop connections that cross diagonally ──
-        {
-            let crossingsExist = true;
-            while (crossingsExist) {
-                crossingsExist = false;
-                for (let i = 0; i < requestedConnections.length; i++) {
-                    for (let j = i + 1; j < requestedConnections.length; j++) {
-                        const c1 = requestedConnections[i];
-                        const c2 = requestedConnections[j];
-
-                        const x1Start = c1.parent.gridX;
-                        const x1End = c1.targetX;
-                        const x2Start = c2.parent.gridX;
-                        const x2End = c2.targetX;
-
-                        if (x1Start === x2Start) continue;
-                        if (x1End === x2End) continue;
-
-                        if ((x1Start < x2Start && x1End > x2End) || (x1Start > x2Start && x1End < x2End)) {
-                            requestedConnections.splice(j, 1);
-                            crossingsExist = true;
-                            break;
-                        }
-                    }
-                    if (crossingsExist) break;
-                }
-            }
-        }
-
-        // ── Penultimate Orphan Resolution ─────────────────────────────
-        // Placed AFTER crossing removal so forced connections cannot be
-        // stripped.  Guarantees all 3 X-coordinates (0, 1, 2) are
-        // present before the strictly-vertical terminal row ascent.
-        if (isPenultimateRow) {
-            const targetedXs = new Set(requestedConnections.map(c => c.targetX));
-            for (let x = 0; x <= 2; x++) {
-                if (!targetedXs.has(x)) {
-                    // Pick the closest parent from currentRow to form a diagonal
-                    const sorted = [...currentRow].sort(
-                        (a, b) => Math.abs(a.gridX - x) - Math.abs(b.gridX - x)
-                    );
-                    requestedConnections.push({ parent: sorted[0], targetX: x });
-                }
-            }
-        }
-
-        // ── Post-Injection Crossing Pass ──────────────────────────────
-        // Orphan-resolution connections (appended at the tail) may cross
-        // existing natural diagonals.  When that happens we cull the
-        // *natural* line (lower index) to preserve the structural
-        // injection that guarantees 3-wide penultimate coverage.
-        if (isPenultimateRow) {
-            let crossingsExist = true;
-            while (crossingsExist) {
-                crossingsExist = false;
-                for (let i = 0; i < requestedConnections.length; i++) {
-                    for (let j = i + 1; j < requestedConnections.length; j++) {
-                        const c1 = requestedConnections[i];
-                        const c2 = requestedConnections[j];
-
-                        const x1Start = c1.parent.gridX;
-                        const x1End = c1.targetX;
-                        const x2Start = c2.parent.gridX;
-                        const x2End = c2.targetX;
-
-                        if (x1Start === x2Start) continue;
-                        if (x1End === x2End) continue;
-
-                        if ((x1Start < x2Start && x1End > x2End) || (x1Start > x2Start && x1End < x2End)) {
-                            // Cull the earlier (natural) connection,
-                            // preserving the later (injected) one.
-                            requestedConnections.splice(i, 1);
-                            crossingsExist = true;
-                            break;
-                        }
-                    }
-                    if (crossingsExist) break;
-                }
-            }
-        }
-
-        // ── Anti-Termination Safeguard ────────────────────────────────
-        for (const parent of currentRow) {
-            const hasConnection = requestedConnections.some(conn => conn.parent.id === parent.id);
-            if (!hasConnection) {
-                const safeTx = parent.gridX;
-                requestedConnections.push({ parent, targetX: safeTx });
-            }
-        }
-
-        // ── Instantiate nodes in the new row ──────────────────────────
-        const nextRowNodesByX: Record<number, NetworkNode> = {};
-
-        for (const conn of requestedConnections) {
-            if (!nextRowNodesByX[conn.targetX]) {
-                let typeForNode: NodeType | undefined;
-                if (isTerminalRow) {
-                    typeForNode = terminalTypes[conn.targetX];
-                } else {
-                    // Middle tier: force ICE
-                    typeForNode = 'ICE';
-                }
-                nextRowNodesByX[conn.targetX] = generateNode(typeForNode, conn.targetX, nextY);
-            }
-            const childNode = nextRowNodesByX[conn.targetX];
-
-            if (!conn.parent.children.includes(childNode.id)) {
-                conn.parent.children.push(childNode.id);
-            }
-        }
-
-        // Move to next row
-        currentRow = Object.values(nextRowNodesByX);
     }
 
-    // Initial revealed nodes are children of Home.
-    const homeNode = nodes.find(n => n.type === 'HOME');
-    if (homeNode) {
-        homeNode.children.forEach(childId => {
-            const child = nodes.find(n => n.id === childId);
-            if (child) {
-                child.visibility = 'REVEALED';
+    // Phase 2 — Coverage: every child gets a parent if not already connected.
+    for (const cx of childXs) {
+        if (edges.some(([, ec]) => ec === cx)) continue;
+        const ranked = [...parentXs].sort(
+            (a, b) => Math.abs(a - cx) - Math.abs(b - cx)
+        );
+        for (const px of ranked) {
+            if (!wouldCross(px, cx)) {
+                edges.push([px, cx]);
+                break;
             }
-        });
+        }
+    }
+
+    // Phase 3 — Enrichment: randomly add extra diagonal edges for variety.
+    for (const px of parentXs) {
+        for (const cx of childXs) {
+            if (cx === px) continue;                                       // already handled
+            if (edges.some(([ep, ec]) => ep === px && ec === cx)) continue; // duplicate
+            if (Math.random() > 0.3) continue;                            // ~30% chance
+            if (!wouldCross(px, cx)) {
+                edges.push([px, cx]);
+            }
+        }
+    }
+
+    return edges;
+}
+
+// ─── Pick which x-positions the next row occupies ───────────────────────────
+// Returns a sorted subset of {0, 1, 2} with 2–3 elements.
+function pickChildXPositions(): number[] {
+    const count = Math.random() > 0.4 ? COLUMNS : 2;       // 60% → 3, 40% → 2
+    if (count === COLUMNS) return [...ALL_XS];
+    // Pick 2 of 3 positions uniformly at random
+    const drop = Math.floor(Math.random() * COLUMNS);
+    return ALL_XS.filter(x => x !== drop);
+}
+
+// ─── Node factory ───────────────────────────────────────────────────────────
+// Wraps nodeRegistry calls and bookkeeps the flat `nodes` collector array.
+let nodeIdCounter = 0;
+
+function createNode(
+    nodes: NetworkNode[],
+    type: NodeType,
+    gridX: number,
+    gridY: number
+): NetworkNode {
+    let node: NetworkNode;
+
+    if (type === 'HOME') {
+        node = {
+            id: `node-${nodeIdCounter++}-HOME`,
+            type: 'HOME',
+            name: 'Home Gateway',
+            difficulty: 0,
+            layers: {},
+            progress: {},
+            countermeasures: [],
+            resetTrace: 0,
+            status: 'ACTIVE',
+            visibility: 'REVEALED',
+            children: [],
+            gridX,
+            gridY
+        } as NetworkNode;
+    } else {
+        const diff = type === 'MAINFRAME'
+            ? 5
+            : Math.floor((gridY - 1) / 3) + 1;
+        node = nodeRegistry.selectNodeByType(type, diff);
+        node.id = `node-${nodeIdCounter++}-${node.name.replace(/\s/g, '')}-${Date.now()}`;
+        node.type = type;
+        node.gridX = gridX;
+        node.gridY = gridY;
+        node.status = 'ACTIVE';
+        node.visibility = 'HIDDEN';
+        node.children = [];
+    }
+
+    // Ensure progress arrays are initialized for every layer color.
+    if (!node.progress) node.progress = {};
+    for (const color of Object.keys(node.layers || {})) {
+        const c = color as CellColor;
+        if (!node.progress[c]) {
+            node.progress[c] = Array(node.layers[c]?.length || 0).fill(false);
+        }
+    }
+
+    nodes.push(node);
+    return node;
+}
+
+// ─── Build a row of child nodes and wire non-crossing edges from parents ────
+function buildRow(
+    nodes: NetworkNode[],
+    parents: NetworkNode[],
+    childXs: number[],
+    gridY: number,
+    childType: NodeType
+): NetworkNode[] {
+    // Instantiate child nodes at each x-position.
+    const childByX = new Map<number, NetworkNode>();
+    for (const x of childXs) {
+        childByX.set(x, createNode(nodes, childType, x, gridY));
+    }
+
+    // Compute non-crossing parent→child edges.
+    const parentXs = parents.map(p => p.gridX);
+    const edges = buildNonCrossingEdges(parentXs, childXs);
+
+    // Wire edges into parent.children arrays.
+    for (const [px, cx] of edges) {
+        const parent = parents.find(p => p.gridX === px)!;
+        const child = childByX.get(cx)!;
+        if (!parent.children.includes(child.id)) {
+            parent.children.push(child.id);
+        }
+    }
+
+    // Return children sorted by gridX for the next iteration.
+    return [...childByX.values()].sort((a, b) => a.gridX - b.gridX);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+//  generateGraph — single-pass, constraint-first DAG construction.
+//
+//  Layout (5 rows, 3 columns):
+//    Row 0  HOME (1 node at x=1)
+//    Row 1  ICE  (3 nodes at x=0,1,2 — fan-out from HOME)
+//    Row 2  ICE  (2–3 nodes — subset of columns)
+//    Row 3  ICE  (3 nodes at x=0,1,2 — penultimate, ensures full terminal coverage)
+//    Row 4  Terminal (1 MAINFRAME + 2 SERVERs at x=0,1,2 — vertical from row 3)
+//
+//  Guarantees:
+//    • Valid DAG with no orphans or disconnected clusters.
+//    • No visually crossing edges (monotone edge invariant).
+//    • Bounded O(n²) with n ≤ 15 total nodes — no while-loops.
+// ═══════════════════════════════════════════════════════════════════════════
+export const generateGraph = (): NetworkNode[] => {
+    const nodes: NetworkNode[] = [];
+    nodeIdCounter = 0;
+
+    // ─── Row 0: HOME ────────────────────────────────────────────────────
+    const home = createNode(nodes, 'HOME', 1, 0);
+
+    // ─── Row 1: Full-width ICE fan-out from HOME ────────────────────────
+    const row1: NetworkNode[] = [];
+    for (const x of ALL_XS) {
+        const child = createNode(nodes, 'ICE', x, 1);
+        row1.push(child);
+        home.children.push(child.id);
+    }
+
+    // ─── Row 2: Variable-width ICE layer ────────────────────────────────
+    const row2Xs = pickChildXPositions();
+    const row2 = buildRow(nodes, row1, row2Xs, 2, 'ICE');
+
+    // ─── Row 3: Penultimate — must cover all 3 columns ─────────────────
+    const row3 = buildRow(nodes, row2, [...ALL_XS], 3, 'ICE');
+
+    // ─── Row 4: Terminal — straight vertical from row 3 ─────────────────
+    const mainframeX = Math.floor(Math.random() * COLUMNS);
+    for (const parent of row3) {
+        const terminalType: NodeType = parent.gridX === mainframeX ? 'MAINFRAME' : 'SERVER';
+        const child = createNode(nodes, terminalType, parent.gridX, MAX_DEPTH - 1);
+        parent.children.push(child.id);
+    }
+
+    // ─── Reveal HOME's direct children ──────────────────────────────────
+    for (const childId of home.children) {
+        const child = nodes.find(n => n.id === childId);
+        if (child) child.visibility = 'REVEALED';
     }
 
     return nodes;
