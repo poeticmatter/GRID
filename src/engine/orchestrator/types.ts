@@ -45,9 +45,10 @@ export interface GameSnapshot {
 
 export type PlaybackEventType =
     | 'PLAY_SFX'
-    | 'ANIMATE_CELLS'    // board cell state transitions
-    | 'ANIMATE_NODES'    // server progress / status animations
-    | 'WAIT';            // pure time delay with no other side effect
+    | 'ANIMATE_CELLS'           // board cell state transitions
+    | 'ANIMATE_NODES'           // server progress / status animations
+    | 'ANIMATE_COUNTERMEASURE'  // countermeasure penalty notification: { nodeId, type, value }
+    | 'WAIT';                   // pure time delay with no other side effect
 
 export interface PlaybackEvent {
     type: PlaybackEventType;

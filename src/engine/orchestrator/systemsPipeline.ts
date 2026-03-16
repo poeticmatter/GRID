@@ -53,6 +53,12 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
 
                     applyCountermeasure(cm, context, id);
 
+                    // Emit visual event so the playback pipeline can animate this penalty
+                    newEvents.push({
+                        type: 'COUNTERMEASURE_FIRED',
+                        payload: { nodeId: id, type: cm.type, value: cm.value }
+                    });
+
                     // Sync mutable values back to deltas
                     deltas.pendingNetDamage = context.pendingNetDamage;
                     gridModified = true;

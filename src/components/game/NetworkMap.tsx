@@ -1,7 +1,8 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useViewModel } from '../../hooks/useViewModel';
 import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
+import { gameEventBus } from '../../engine/eventBus';
 
 import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle, Shield, Eye, Skull } from 'lucide-react';
 import { clsx } from 'clsx';
@@ -9,6 +10,71 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { CityBackground } from './CityBackground';
 
 
+
+interface CountermeasureNotification {
+    id: number;
+    nodeId: string;
+    type: string;
+    value: number;
+}
+
+const CM_LABEL: Record<string, string> = {
+    TRACE:           'TRACE +',
+    HARDWARE_DAMAGE: 'HW DMG -',
+    NET_DAMAGE:      'NET DMG',
+    VIRUS:           'VIRUS ×',
+    CORRUPT:         'CORRUPT ×',
+    NOISE:           'NOISE +',
+};
+
+const CM_COLOR: Record<string, string> = {
+    TRACE:           'border-yellow-500/60 bg-yellow-950/80 text-yellow-300',
+    HARDWARE_DAMAGE: 'border-orange-500/60 bg-orange-950/80 text-orange-300',
+    NET_DAMAGE:      'border-red-500/60 bg-red-950/80 text-red-300',
+    VIRUS:           'border-purple-500/60 bg-purple-950/80 text-purple-300',
+    CORRUPT:         'border-pink-500/60 bg-pink-950/80 text-pink-300',
+    NOISE:           'border-cyan-500/60 bg-cyan-950/80 text-cyan-300',
+};
+
+const CountermeasureToastLayer = () => {
+    const [toasts, setToasts] = useState<CountermeasureNotification[]>([]);
+
+    useEffect(() => {
+        let counter = 0;
+        const handler = (payload: any) => {
+            const id = ++counter;
+            setToasts(prev => [...prev, { id, nodeId: payload.nodeId, type: payload.type, value: payload.value }]);
+            setTimeout(() => {
+                setToasts(prev => prev.filter(t => t.id !== id));
+            }, 650);
+        };
+
+        gameEventBus.on('VISUAL_COUNTERMEASURE', handler);
+        return () => gameEventBus.off('VISUAL_COUNTERMEASURE', handler);
+    }, []);
+
+    if (toasts.length === 0) return null;
+
+    return (
+        <div className="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-[200] flex flex-col items-center gap-2 pointer-events-none">
+            <AnimatePresence>
+                {toasts.map(toast => (
+                    <motion.div
+                        key={toast.id}
+                        initial={{ opacity: 0, scale: 0.8, y: 10 }}
+                        animate={{ opacity: 1, scale: 1, y: 0 }}
+                        exit={{ opacity: 0, scale: 0.9, y: -10 }}
+                        transition={{ duration: 0.15 }}
+                        className={`px-5 py-2 rounded-lg border backdrop-blur-xl font-mono font-bold text-sm shadow-2xl ${CM_COLOR[toast.type] ?? 'border-zinc-500/60 bg-zinc-900/80 text-zinc-300'}`}
+                    >
+                        <span className="tracking-widest uppercase text-xs opacity-70 mr-2">{CM_LABEL[toast.type] ?? toast.type}</span>
+                        <span className="text-base">{toast.value}</span>
+                    </motion.div>
+                ))}
+            </AnimatePresence>
+        </div>
+    );
+};
 
 const ServerCard = ({ server }: { server: NetworkNode }) => {
     return (
@@ -242,6 +308,7 @@ export const NetworkMap = () => {
 
     return (
         <>
+            <CountermeasureToastLayer />
             <div className="w-full flex flex-col items-center pt-[clamp(0.5rem,2vh,1.5rem)] gap-[clamp(0.25rem,1vh,0.75rem)] pointer-events-none">
                 <TopologyToggleButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
 

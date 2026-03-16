@@ -126,6 +126,12 @@ function buildPlaybackEvents(deltaHistory: StateDeltas[]): PlaybackEvent[] {
                         durationMs: e.durationMs ?? 0,
                         payload: e.payload
                     });
+                } else if (e.type === 'COUNTERMEASURE_FIRED') {
+                    events.push({
+                        type: 'ANIMATE_COUNTERMEASURE',
+                        durationMs: 700,
+                        payload: e.payload
+                    });
                 }
             }
         }

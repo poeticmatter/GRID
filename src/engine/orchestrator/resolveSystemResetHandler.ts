@@ -61,6 +61,7 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
     let playerStats = { ...snapshot.playerStats };
     let newNodes = { ...snapshot.nodes } as NodeRecord;
     let netDamageTally = 0;
+    const countermeasureEvents: Array<{ type: string; payload?: any; durationMs?: number }> = [];
 
     for (const nodeId of snapshot.activeServerIds) {
         const node = snapshot.nodes[nodeId] as NetworkNode;
@@ -76,6 +77,12 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
             };
 
             applyCountermeasure(cm, context, nodeId);
+
+            // Emit visual event so the playback pipeline can animate this penalty
+            countermeasureEvents.push({
+                type: 'COUNTERMEASURE_FIRED',
+                payload: { nodeId, type: cm.type, value: cm.value }
+            });
 
             // Sync mutable values back
             netDamageTally = context.pendingNetDamage;
@@ -109,7 +116,7 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
         effectQueue: [],
         activeCardId: null,
         selectedCardId: null,
-        events: [{ type: 'AUDIO_PLAY_SFX', payload: sfx }],
+        events: [{ type: 'AUDIO_PLAY_SFX', payload: sfx }, ...countermeasureEvents],
         durationMs: 800
     };
 }

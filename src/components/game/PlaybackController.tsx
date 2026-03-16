@@ -50,6 +50,11 @@ export const PlaybackController = () => {
                         gameEventBus.emit('VISUAL_ANIMATE_NODES', event.payload);
                         break;
 
+                    case 'ANIMATE_COUNTERMEASURE':
+                        // Notify presentation layer to display the countermeasure penalty.
+                        gameEventBus.emit('VISUAL_COUNTERMEASURE', event.payload);
+                        break;
+
                     case 'WAIT':
                         // Pure pacing delay — no side effect.
                         break;
