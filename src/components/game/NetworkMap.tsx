@@ -86,7 +86,7 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
             className="w-[clamp(140px,25vw,192px)] bg-grid-bg border border-green-500/40 rounded p-[clamp(0.375rem,1vh,0.5rem)] flex flex-col gap-1 shadow-lg pointer-events-auto min-h-0"
         >
             <div className="flex justify-between items-center border-b border-white/10 pb-1">
-                <span className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-mono font-bold text-white/80 truncate w-32">{server.name}</span>
+                <span className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-mono font-bold text-phosphor truncate w-32">{server.name}</span>
                 <span className="text-[clamp(0.5rem,1vh,0.625rem)] bg-grid-surface px-1 rounded text-phosphor/50 leading-none">{server.type.substring(0, 3)}</span>
             </div>
 
@@ -125,14 +125,14 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
                 {(server.countermeasures || []).map((cm, idx) => {
                     const SymbolIcon: Record<string, typeof Shield> = { SHIELD: Shield, EYE: Eye, SKULL: Skull };
                     return (
-                        <div key={idx} className="flex items-center gap-1.5 text-white/50">
+                        <div key={idx} className="flex items-center gap-1.5">
                             <div className="flex items-center gap-0.5">
                                 {cm.requiredSymbols.length > 0 ? cm.requiredSymbols.map((sym: CellSymbol, sIdx: number) => {
                                     const Icon = SymbolIcon[sym];
-                                    return Icon ? <Icon key={sIdx} className="w-3 h-3 text-amber-400" /> : null;
+                                    return Icon ? <Icon key={sIdx} className="w-3 h-3 text-phosphor" /> : null;
                                 }) : <span className="text-red-400 text-[9px] font-bold">!</span>}
                             </div>
-                            <span className="font-mono">
+                            <span className="font-mono text-phosphor">
                                 {cm.value} {cm.type.replace('_', ' ')}
                             </span>
                         </div>
