@@ -29,6 +29,9 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
     const mutableGrid = currentGrid.map(row => row.map(cell => ({ ...cell })));
     let gridModified = false;
 
+    // Track net damage locally to maintain pipeline purity
+    let currentPendingNetDamage = deltas.pendingNetDamage ?? snapshot.pendingNetDamage ?? 0;
+
     const baseNodes: NodeRecord = deltas.nodes ?? (snapshot.nodes as NodeRecord);
     const activeServerIds: string[] = deltas.activeServerIds ?? (snapshot.activeServerIds as string[]);
 
@@ -48,7 +51,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                         playerStats: newPlayerStats,
                         nodes: nodeDraft, // Immer draft of nodes SSOT
                         activeServerIds,
-                        pendingNetDamage: deltas.pendingNetDamage || snapshot.pendingNetDamage || 0
+                        pendingNetDamage: currentPendingNetDamage
                     };
 
                     applyCountermeasure(cm, context, id);
@@ -59,8 +62,8 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                         payload: { nodeId: id, type: cm.type, value: cm.value }
                     });
 
-                    // Sync mutable values back to deltas
-                    deltas.pendingNetDamage = context.pendingNetDamage;
+                    // Sync mutable values back to local accumulator
+                    currentPendingNetDamage = context.pendingNetDamage;
                     gridModified = true;
                 }
             }
@@ -70,7 +73,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
         }
     });
 
-    const isResolvingNetDamage = (deltas.pendingNetDamage || 0) > 0;
+    const isResolvingNetDamage = currentPendingNetDamage > 0;
 
     return mergeDeltas(deltas, {
         nodes: newNodes,
@@ -79,6 +82,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
         hand: newHand as Card[],
         deck: newDeck as Card[],
         trashPile: newTrashPile as Card[],
+        pendingNetDamage: currentPendingNetDamage,
         gameState: isResolvingNetDamage ? 'RESOLVING_NET_DAMAGE' : undefined,
         effectQueue: isResolvingNetDamage ? [] : undefined,
         activeCardId: isResolvingNetDamage ? null : undefined,
