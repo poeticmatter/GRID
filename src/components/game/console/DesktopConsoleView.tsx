@@ -10,6 +10,8 @@ interface DesktopConsoleViewProps {
     onQueueEffect: (effect: Effect) => void;
     onRotate: () => void;
     onResolveSystemReset: () => void;
+    onCancel: () => void;
+    isCardCommitted: boolean;
     activeEffectType?: string;
 }
 
@@ -20,6 +22,8 @@ export const DesktopConsoleView = ({
     onQueueEffect,
     onRotate,
     onResolveSystemReset,
+    onCancel,
+    isCardCommitted,
     activeEffectType
 }: DesktopConsoleViewProps) => {
     return (
@@ -73,9 +77,26 @@ export const DesktopConsoleView = ({
                             <RotateCw className="w-4 h-4 group-hover:rotate-45 transition-transform" />
                             ROTATE GRID
                         </button>
+                        <button
+                            onClick={onCancel}
+                            className="mt-2 w-full flex items-center justify-center gap-2 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white p-3 rounded-lg font-bold transition-all border border-zinc-700/50 hover:border-zinc-400 shadow-xl uppercase tracking-widest text-xs"
+                        >
+                            {isCardCommitted ? 'Finish Early' : 'Cancel / Undo'}
+                        </button>
                         <div className="mt-3 text-[9px] font-mono text-green-700/60 text-center uppercase tracking-widest opacity-60">
                             Manual Spatial Override Active
                         </div>
+                    </div>
+                )}
+
+                {isResolving && activeEffectType === 'REPROGRAM' && (
+                    <div className="mt-6 pt-6 border-t border-green-500/20 animate-in fade-in slide-in-from-bottom-2">
+                        <button
+                            onClick={onCancel}
+                            className="w-full flex items-center justify-center gap-2 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white p-3 rounded-lg font-bold transition-all border border-zinc-700/50 hover:border-zinc-400 shadow-xl uppercase tracking-widest text-xs"
+                        >
+                            {isCardCommitted ? 'End Reprogram' : 'Cancel / Undo'}
+                        </button>
                     </div>
                 )}
 
@@ -86,6 +107,12 @@ export const DesktopConsoleView = ({
                             className="w-full flex items-center justify-center gap-2 bg-red-900/40 hover:bg-red-800/60 text-white p-3 rounded-lg font-bold transition-all border border-red-800/50 hover:border-red-400 hover:text-red-400 shadow-xl group uppercase tracking-widest text-xs"
                         >
                             Confirm System Reset
+                        </button>
+                        <button
+                            onClick={onCancel}
+                            className="mt-2 w-full flex items-center justify-center gap-2 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white p-3 rounded-lg font-bold transition-all border border-zinc-700/50 hover:border-zinc-400 shadow-xl uppercase tracking-widest text-xs"
+                        >
+                            {isCardCommitted ? 'Finish Early' : 'Cancel / Undo'}
                         </button>
                         <div className="mt-3 text-[9px] font-mono text-red-500/60 text-center uppercase tracking-widest opacity-60">
                             Warning: Grid Wipe Imminent

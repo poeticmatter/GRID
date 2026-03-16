@@ -80,6 +80,7 @@ export const reprogramMechanic: IEffectMechanic = {
         const deltas: StateDeltas = {
             grid: newGrid as typeof grid,
             reprogramTargetSource: null,
+            isCardCommitted: true,
             events: [
                 { type: 'AUDIO_PLAY_SFX', payload: 'reprogram' },
                 { 

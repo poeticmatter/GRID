@@ -9,7 +9,7 @@ import { RotateCw, Play } from 'lucide-react';
 export const Hand = () => {
     const { hand } = useDeckStore();
     const { selectedCardId, rotation } = useUIStore();
-    const { gameState, pendingNetDamage } = useGameStore();
+    const { gameState, pendingNetDamage, isCardCommitted } = useGameStore();
 
     const handleRotate = (e: React.MouseEvent) => {
         e.stopPropagation();
@@ -52,8 +52,14 @@ export const Hand = () => {
                                 onClick={() => {
                                     if (gameState === 'PLAYING') {
                                         Dispatch({ type: 'PLAY_CARD', payload: { cardId: card.id, effects: card.effects } });
-                                    } else if (gameState === 'EFFECT_ORDERING' && selectedCardId === card.id) {
-                                        Dispatch({ type: 'CANCEL_CARD' });
+                                    } else if (gameState === 'EFFECT_ORDERING' || gameState === 'EFFECT_RESOLUTION') {
+                                        if (selectedCardId === card.id) {
+                                            Dispatch({ type: 'CANCEL_CARD' });
+                                        } else if (!isCardCommitted) {
+                                            Dispatch({ type: 'CANCEL_CARD' });
+                                            Dispatch({ type: 'PLAY_CARD', payload: { cardId: card.id, effects: card.effects } });
+                                        }
+                                        // If committed, ignore click to enforce finishing via console
                                     } else if (gameState === 'RESOLVING_NET_DAMAGE') {
                                         Dispatch({ type: 'DISCARD_FOR_NET_DAMAGE', payload: { cardId: card.id } });
                                     }

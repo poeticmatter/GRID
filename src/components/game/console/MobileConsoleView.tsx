@@ -15,6 +15,8 @@ interface MobileConsoleViewProps {
     onRotate: () => void;
     onConfirm: () => void;
     onResolveSystemReset: () => void;
+    onCancel: () => void;
+    isCardCommitted: boolean;
     activeEffectType?: string;
 }
 
@@ -29,6 +31,8 @@ export const MobileConsoleView = ({
     onRotate,
     onConfirm,
     onResolveSystemReset,
+    onCancel,
+    isCardCommitted,
     activeEffectType
 }: MobileConsoleViewProps) => {
     return (
@@ -76,18 +80,32 @@ export const MobileConsoleView = ({
                                                 >
                                                     Confirm System Reset
                                                 </button>
+                                                <button
+                                                    onClick={onCancel}
+                                                    className="mt-2 w-full flex items-center justify-center gap-2 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white p-4 rounded-xl font-bold transition-all border border-zinc-700/50 hover:border-zinc-400 active:scale-95 shadow-xl uppercase tracking-[0.2em] text-sm"
+                                                >
+                                                    {isCardCommitted ? 'Finish Early' : 'Cancel / Undo'}
+                                                </button>
                                                 <div className="mt-4 text-[10px] font-mono text-red-500/60 text-center uppercase tracking-widest opacity-60">
                                                     CRITICAL: Terminal Reboot Required
                                                 </div>
                                             </div>
                                         ) : (
-                                            <DPad 
-                                                layout="horizontal" 
-                                                onMove={onDpadMove} 
-                                                onRotate={onRotate} 
-                                                onConfirm={onConfirm}
-                                                confirmLabel="Confirm"
-                                            />
+                                            <div>
+                                                <DPad
+                                                    layout="horizontal"
+                                                    onMove={onDpadMove}
+                                                    onRotate={onRotate}
+                                                    onConfirm={onConfirm}
+                                                    confirmLabel="Confirm"
+                                                />
+                                                <button
+                                                    onClick={onCancel}
+                                                    className="mt-3 w-full flex items-center justify-center gap-2 bg-zinc-800/60 hover:bg-zinc-700/60 text-zinc-300 hover:text-white p-3 rounded-xl font-bold transition-all border border-zinc-700/50 hover:border-zinc-400 active:scale-95 shadow-xl uppercase tracking-[0.2em] text-xs"
+                                                >
+                                                    {isCardCommitted ? (activeEffectType === 'REPROGRAM' ? 'End Reprogram' : 'Finish Early') : 'Cancel / Undo'}
+                                                </button>
+                                            </div>
                                         )}
                                     </div>
                                 ) : (

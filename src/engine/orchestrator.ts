@@ -52,7 +52,8 @@ function buildSnapshot(): GameSnapshot {
         effectQueue: gameStore.effectQueue,
         activeCardId: gameStore.activeCardId,
         reprogramTargetSource: gameStore.reprogramTargetSource,
-        pendingNetDamage: gameStore.pendingNetDamage
+        pendingNetDamage: gameStore.pendingNetDamage,
+        isCardCommitted: gameStore.isCardCommitted
     };
 }
 
@@ -94,6 +95,7 @@ export function commitLogicalState(deltas: StateDeltas) {
     if (deltas.activeCardId !== undefined) gameStore.setActiveCardId(deltas.activeCardId);
     if (deltas.reprogramTargetSource !== undefined) gameStore.setReprogramSource(deltas.reprogramTargetSource);
     if (deltas.pendingNetDamage !== undefined) gameStore.setPendingNetDamage(deltas.pendingNetDamage);
+    if (deltas.isCardCommitted !== undefined) gameStore.setIsCardCommitted(deltas.isCardCommitted);
 
     // Fire events immediately (audio, analytics) — these are one-shot side effects.
     if (deltas.events) {
@@ -218,6 +220,7 @@ export const Dispatch = (action: GameAction) => {
                     pendingEffects: [...effects],
                     effectQueue: [],
                     reprogramTargetSource: null,
+                    isCardCommitted: false,
                 }];
             } else if (effects.length === 1) {
                 const initDeltas: StateDeltas = {
@@ -227,6 +230,7 @@ export const Dispatch = (action: GameAction) => {
                     pendingEffects: [],
                     effectQueue: [{ cardId, effect: effects[0] }],
                     reprogramTargetSource: null,
+                    isCardCommitted: false,
                 };
                 deltaHistory = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
             }
@@ -246,15 +250,26 @@ export const Dispatch = (action: GameAction) => {
         }
 
         case 'CANCEL_CARD': {
-            deltaHistory = [{
-                gameState: 'PLAYING',
-                activeCardId: null,
-                selectedCardId: null,
-                pendingEffects: [],
-                effectQueue: [],
-                reprogramTargetSource: null,
-                rotation: 0
-            }];
+            if (!snapshot.isCardCommitted) {
+                // Full undo: card was never committed, restore to clean PLAYING state
+                deltaHistory = [{
+                    gameState: 'PLAYING',
+                    activeCardId: null,
+                    selectedCardId: null,
+                    pendingEffects: [],
+                    effectQueue: [],
+                    reprogramTargetSource: null,
+                    rotation: 0,
+                    isCardCommitted: false,
+                }];
+            } else {
+                // Fast-forward discard: card was committed, drain remaining effects via FSM
+                const initDeltas: StateDeltas = {
+                    pendingEffects: [],
+                    effectQueue: [],
+                };
+                deltaHistory = [initDeltas, ...evaluateQueue(patchSnapshot(snapshot, initDeltas))];
+            }
             break;
         }
 

@@ -53,6 +53,7 @@ export const runMechanic: IEffectMechanic = {
             harvestedCells: affected,
             selectedCardId: null,
             rotation: 0,
+            isCardCommitted: true,
             events: events.length > 0 ? events : undefined,
             durationMs: 150
         };

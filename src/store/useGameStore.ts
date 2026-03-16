@@ -20,6 +20,7 @@ interface GameState {
 
     reprogramTargetSource: Coordinate | null;
     pendingNetDamage: number;
+    isCardCommitted: boolean;
 
     setGameState: (state: GamePhase) => void;
     setTurn: (turn: number) => void;
@@ -29,6 +30,7 @@ interface GameState {
 
     setReprogramSource: (source: Coordinate | null) => void;
     setPendingNetDamage: (pendingNetDamage: number) => void;
+    setIsCardCommitted: (isCardCommitted: boolean) => void;
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -40,6 +42,7 @@ export const useGameStore = create<GameState>((set) => ({
     activeCardId: null,
     reprogramTargetSource: null,
     pendingNetDamage: 0,
+    isCardCommitted: false,
 
     setGameState: (gameState) => set({ gameState }),
     setTurn: (turn) => set({ turn }),
@@ -50,4 +53,5 @@ export const useGameStore = create<GameState>((set) => ({
 
     setReprogramSource: (source: Coordinate | null) => set({ reprogramTargetSource: source }),
     setPendingNetDamage: (pendingNetDamage: number) => set({ pendingNetDamage }),
+    setIsCardCommitted: (isCardCommitted: boolean) => set({ isCardCommitted }),
 }));

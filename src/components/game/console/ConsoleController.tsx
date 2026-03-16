@@ -10,7 +10,7 @@ import { DesktopConsoleView } from './DesktopConsoleView';
 import type { Effect } from '../../../engine/types';
 
 export const ConsoleController = () => {
-    const { gameState, pendingEffects, effectQueue } = useGameStore();
+    const { gameState, pendingEffects, effectQueue, isCardCommitted } = useGameStore();
     const { hoveredCoordinate, setHoveredCoordinate } = useTargetingStore();
     const { grid } = useViewModel();
     const isMobile = useIsMobile();
@@ -78,6 +78,10 @@ export const ConsoleController = () => {
         Dispatch({ type: 'RESOLVE_SYSTEM_RESET' });
     }, []);
 
+    const handleCancel = useCallback(() => {
+        Dispatch({ type: 'CANCEL_CARD' });
+    }, []);
+
     return (
         <AnimatePresence mode="wait">
             {isVisible && (
@@ -94,6 +98,8 @@ export const ConsoleController = () => {
                         onRotate={handleRotate}
                         onConfirm={handleConfirm}
                         onResolveSystemReset={handleResolveSystemReset}
+                        onCancel={handleCancel}
+                        isCardCommitted={isCardCommitted}
                         activeEffectType={activeEffect?.type}
                     />
                 ) : (
@@ -105,6 +111,8 @@ export const ConsoleController = () => {
                         onQueueEffect={handleQueueEffect}
                         onRotate={handleRotate}
                         onResolveSystemReset={handleResolveSystemReset}
+                        onCancel={handleCancel}
+                        isCardCommitted={isCardCommitted}
                         activeEffectType={activeEffect?.type}
                     />
                 )

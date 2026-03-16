@@ -36,6 +36,7 @@ export interface GameSnapshot {
     activeCardId: string | null;
     reprogramTargetSource: Coordinate | null;
     pendingNetDamage: number;
+    isCardCommitted: boolean;
 }
 
 // ----- Visual Playback Event -----
@@ -81,6 +82,7 @@ export interface StateDeltas {
     activeCardId?: string | null;
     reprogramTargetSource?: Coordinate | null;
     pendingNetDamage?: number;
+    isCardCommitted?: boolean;
     durationMs?: number;
     harvestedCells?: Cell[];
     targetHacked?: boolean;

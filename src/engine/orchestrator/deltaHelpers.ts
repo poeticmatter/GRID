@@ -37,5 +37,6 @@ export function patchSnapshot(
         if (deltas.effectQueue !== undefined) draft.effectQueue = deltas.effectQueue;
         if (deltas.activeCardId !== undefined) draft.activeCardId = deltas.activeCardId;
         if (deltas.reprogramTargetSource !== undefined) draft.reprogramTargetSource = deltas.reprogramTargetSource;
+        if (deltas.isCardCommitted !== undefined) draft.isCardCommitted = deltas.isCardCommitted;
     }) as ReadonlyDeep<GameSnapshot>;
 }
