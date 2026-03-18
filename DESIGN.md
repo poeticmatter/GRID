@@ -54,7 +54,7 @@ The player has three tracked resources:
 ## Cards & the Deck
 
 Cards are the player's primary tool. Each card has:
-- A **name** and **visual colour** (cosmetic).
+- A **name**.
 - One or more **effects** (see Effects section).
 - A **memory** cost (currently tracked, not yet spent).
 - A **weight** (used by the procedural card pool for deck building).
@@ -100,7 +100,7 @@ The core offensive action. The player places a **pattern** of cells onto the gri
 
 **Pattern placement rules:**
 - The pattern can be rotated before placement (90° increments).
-- Cells in `BROKEN` or `CORRUPTED` state can still be targeted (they just contribute nothing useful).
+- `CORRUPTED` cells block pattern placement — a pattern cannot be placed if any cell it covers is `CORRUPTED`. `BROKEN` cells do not block; they can be included in a pattern but contribute nothing to harvesting.
 - The pattern must fit within the 6×6 boundary.
 
 After the RUN resolves, harvested colours are applied to all currently active server nodes (see Network section), and countermeasures are evaluated.

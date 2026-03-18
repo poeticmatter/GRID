@@ -1,6 +1,4 @@
 import type { Card as CardType, Coordinate, Effect } from '../../engine/types';
-import { LAYER_THEME } from '../../presentation/theme';
-
 import { clsx } from 'clsx';
 import { motion } from 'framer-motion';
 import { Cpu } from 'lucide-react';
@@ -78,7 +76,7 @@ const renderEffect = (effect: Effect, index: number, rotation: number) => {
 };
 
 export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => {
-  const { name, visualColor, effects, memory } = card;
+  const { name, effects, memory } = card;
 
   return (
     <motion.div
@@ -92,14 +90,10 @@ export const Card = ({ card, isSelected, onClick, rotation = 0 }: CardProps) => 
     >
       {/* Card body — owns the border, rounded corners and overflow clip */}
       <div className={clsx(
-        'w-full h-full border-2 rounded-lg flex flex-col backdrop-blur-md overflow-hidden',
-        LAYER_THEME[visualColor].surface,
+        'w-full h-full border-2 rounded-lg flex flex-col backdrop-blur-md overflow-hidden bg-grid-bg',
         isSelected ? 'border-phosphor shadow-[0_0_20px_rgba(57,255,122,0.5)]' : 'border-phosphor/40'
       )}>
-        <div className={clsx(
-          "text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center p-1 truncate leading-tight",
-          LAYER_THEME[visualColor].banner
-        )}>
+        <div className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-bold uppercase tracking-wider text-center p-1 truncate leading-tight bg-grid-bg border-b-2 border-phosphor text-phosphor">
           {name}
         </div>
 

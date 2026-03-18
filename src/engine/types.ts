@@ -18,7 +18,6 @@ export type Grid = Cell[][];
 export interface Card {
   id: string;
   name: string;
-  visualColor: CellColor;
   effects: Effect[];
   memory: number;
 }

@@ -94,7 +94,6 @@ export default function App() {
             ...prev,
             [id]: {
                 name: 'New Card',
-                visualColor: 'SKY',
                 memory: 1,
                 weight: 10,
                 isStartingCard: false,

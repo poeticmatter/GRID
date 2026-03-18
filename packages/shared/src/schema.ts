@@ -30,7 +30,6 @@ export const EffectSchema = z.discriminatedUnion('type', [
 
 export const CardDefinitionSchema = z.object({
     name: z.string(),
-    visualColor: CellColorSchema,
     effects: z.array(EffectSchema),
     memory: z.number(),
     weight: z.number(),

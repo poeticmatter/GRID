@@ -49,7 +49,7 @@ export const checkPatternFit = (grid: Grid, pattern: Coordinate[], centerX: numb
     if (!isValidCoordinate(grid, targetX, targetY)) return false;
     
     const cell = grid[targetY][targetX];
-    return cell.state !== 'BROKEN' && cell.state !== 'CORRUPTED';
+    return cell.state !== 'CORRUPTED';
   });
 };
 

@@ -27,7 +27,6 @@ export type Effect = EffectRun | EffectReprogram | EffectSystemReset;
 
 export interface CardDefinition {
   name: string;
-  visualColor: CellColor;
   effects: Effect[];
   memory: number;
   weight: number;

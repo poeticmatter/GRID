@@ -76,7 +76,6 @@ export class CardRegistry {
         return {
             id: `card-${this.idCounter}-${Date.now()}`,
             name: def.name,
-            visualColor: def.visualColor,
             effects: clonedEffects,
             memory: def.memory
         };

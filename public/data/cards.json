@@ -1,7 +1,6 @@
 {
     "card_1773404065295": {
         "name": "Fidget",
-        "visualColor": "SKY",
         "effects": [
             {
                 "type": "RUN",
@@ -27,7 +26,6 @@
     },
     "card_1773504527625": {
         "name": "Creeper",
-        "visualColor": "SKY",
         "effects": [
             {
                 "type": "RUN",
@@ -53,7 +51,6 @@
     },
     "card_1773504541091": {
         "name": "Buster",
-        "visualColor": "SKY",
         "effects": [
             {
                 "type": "RUN",
@@ -83,7 +80,6 @@
     },
     "card_1773504553037": {
         "name": "Data Miner",
-        "visualColor": "SKY",
         "effects": [
             {
                 "type": "REPROGRAM",
@@ -96,7 +92,6 @@
     },
     "card_1773504601715": {
         "name": "System Reset",
-        "visualColor": "SKY",
         "effects": [
             {
                 "type": "SYSTEM_RESET"
