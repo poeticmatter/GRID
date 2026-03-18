@@ -20,6 +20,7 @@
                     "value": 1
                 }
             ],
+            "globalCountermeasures": [],
             "resetTrace": 1,
             "hasHorizontalConnection": true
         },
@@ -43,6 +44,7 @@
                     "value": 1
                 }
             ],
+            "globalCountermeasures": [],
             "resetTrace": 1,
             "hasHorizontalConnection": true
         },
@@ -66,6 +68,7 @@
                     "value": 1
                 }
             ],
+            "globalCountermeasures": [],
             "resetTrace": 1,
             "hasHorizontalConnection": true
         },
@@ -94,6 +97,7 @@
                     "value": 1
                 }
             ],
+            "globalCountermeasures": [],
             "resetTrace": 1,
             "hasHorizontalConnection": true
         },
@@ -117,6 +121,7 @@
                     "value": 1
                 }
             ],
+            "globalCountermeasures": [],
             "resetTrace": 1,
             "hasHorizontalConnection": false
         },
@@ -143,6 +148,7 @@
                     "value": 1
                 }
             ],
+            "globalCountermeasures": [],
             "resetTrace": 1,
             "hasHorizontalConnection": false
         },
@@ -164,6 +170,13 @@
                     "requiredSymbols": [
                         "NESTED"
                     ],
+                    "type": "TRACE",
+                    "value": 1
+                }
+            ],
+            "globalCountermeasures": [
+                {
+                    "requiredSymbols": [],
                     "type": "TRACE",
                     "value": 1
                 }
@@ -194,6 +207,13 @@
                         "NESTED"
                     ],
                     "type": "VIRUS",
+                    "value": 1
+                }
+            ],
+            "globalCountermeasures": [
+                {
+                    "requiredSymbols": [],
+                    "type": "TRACE",
                     "value": 1
                 }
             ],

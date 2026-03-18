@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { usePlayerStore } from '../../store/usePlayerStore';
+import { useGameStore } from '../../store/useGameStore';
+import { useActiveGlobalCountermeasures } from '../../store/selectors';
 import { SvgMaskIcon } from './CellSymbols';
 import { twMerge } from 'tailwind-merge';
 import { gameEventBus } from '../../engine/eventBus';
@@ -7,6 +9,18 @@ import { gameEventBus } from '../../engine/eventBus';
 export const TraceBar: React.FC = () => {
     const { trace, maxTrace } = usePlayerStore((state) => state.playerStats);
     const [isFlashing, setIsFlashing] = useState(false);
+
+    // Ghost preview: compute projected trace when SYSTEM_RESET is active
+    const effectQueue = useGameStore(s => s.effectQueue);
+    const gameState = useGameStore(s => s.gameState);
+    const activeEffect = effectQueue[0]?.effect;
+    const isSystemResetPending = gameState === 'EFFECT_RESOLUTION' && activeEffect?.type === 'SYSTEM_RESET';
+
+    const globalCountermeasures = useActiveGlobalCountermeasures();
+    const ghostTraceDelta = isSystemResetPending
+        ? globalCountermeasures.filter(cm => cm.type === 'TRACE').reduce((sum, cm) => sum + cm.value, 0)
+        : 0;
+    const projectedTrace = Math.min(maxTrace, trace + ghostTraceDelta);
 
     useEffect(() => {
         const handler = (payload: any) => {
@@ -36,7 +50,9 @@ export const TraceBar: React.FC = () => {
                                 ? isFlashing
                                     ? "bg-phosphor shadow-[0_0_10px_rgba(57,255,122,0.8)] z-10"
                                     : "bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.8)] z-10"
-                                : "bg-grid-surface"
+                                : i < projectedTrace
+                                    ? "bg-amber-400/40 border-amber-400/60 animate-pulse z-10"
+                                    : "bg-grid-surface"
                         )}
                     />
                 ))}

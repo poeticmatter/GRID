@@ -1,8 +1,20 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { Layers, ChevronUp, ChevronDown } from 'lucide-react';
+import { Layers, ChevronUp, ChevronDown, AlertTriangle } from 'lucide-react';
 import { DPad } from './DPad';
 import { EffectCard } from './EffectCard';
-import type { Effect } from '../../../engine/types';
+import type { Countermeasure, Effect } from '../../../engine/types';
+
+function describeCountermeasure(cm: Countermeasure): string {
+    switch (cm.type) {
+        case 'TRACE':           return `+${cm.value} TRACE`;
+        case 'HARDWARE_DAMAGE': return `-${cm.value} HARDWARE`;
+        case 'NET_DAMAGE':      return `+${cm.value} NET DAMAGE`;
+        case 'VIRUS':           return `INJECT ×${cm.value} VIRUS`;
+        case 'CORRUPT':         return `CORRUPT ×${cm.value} CELLS`;
+        case 'NOISE':           return `+${cm.value} NOISE`;
+        default:                return cm.type;
+    }
+}
 
 interface MobileConsoleViewProps {
     isExpanded: boolean;
@@ -18,6 +30,7 @@ interface MobileConsoleViewProps {
     onCancel: () => void;
     isCardCommitted: boolean;
     activeEffectType?: string;
+    globalCountermeasures?: Countermeasure[];
 }
 
 export const MobileConsoleView = ({
@@ -33,7 +46,8 @@ export const MobileConsoleView = ({
     onResolveSystemReset,
     onCancel,
     isCardCommitted,
-    activeEffectType
+    activeEffectType,
+    globalCountermeasures = []
 }: MobileConsoleViewProps) => {
     return (
         <motion.div 
@@ -74,6 +88,22 @@ export const MobileConsoleView = ({
                                     <div className="py-2 animate-in fade-in zoom-in-95 duration-200">
                                         {activeEffectType === 'SYSTEM_RESET' ? (
                                             <div className="py-6 pt-2 animate-in fade-in zoom-in-95 duration-200">
+                                                {globalCountermeasures.length > 0 && (
+                                                    <div className="mb-4 rounded-xl border border-amber-500/60 bg-amber-950/40 p-3 shadow-[0_0_12px_rgba(245,158,11,0.15)]">
+                                                        <div className="flex items-center gap-1.5 mb-2">
+                                                            <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                                                            <span className="text-[10px] font-black text-amber-400 uppercase tracking-[0.2em]">System Override Detected</span>
+                                                        </div>
+                                                        <ul className="flex flex-col gap-1.5">
+                                                            {globalCountermeasures.map((cm, i) => (
+                                                                <li key={i} className="text-[11px] font-mono text-amber-300 flex items-center gap-2">
+                                                                    <span className="w-1 h-1 rounded-full bg-amber-500 shrink-0" />
+                                                                    {describeCountermeasure(cm)} on Reset
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    </div>
+                                                )}
                                                 <button
                                                     onClick={onResolveSystemReset}
                                                     className="w-full flex items-center justify-center gap-2 bg-red-900/40 hover:bg-red-800/60 text-white p-4 rounded-xl font-bold transition-all border border-red-800/50 hover:border-red-400 active:scale-95 shadow-xl uppercase tracking-[0.2em] text-sm"

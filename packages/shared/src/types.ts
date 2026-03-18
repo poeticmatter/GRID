@@ -55,6 +55,8 @@ export interface NodeDefinition {
   weight: number;
   layers: NodeLayers;
   countermeasures: Countermeasure[];
+  /** Countermeasures that fire unconditionally when SYSTEM_RESET resolves. */
+  globalCountermeasures?: Countermeasure[];
   resetTrace: number;
   hasHorizontalConnection?: boolean;
 }

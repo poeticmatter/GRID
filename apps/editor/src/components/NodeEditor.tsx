@@ -12,7 +12,6 @@ import clsx from 'clsx';
 export function NodeEditor({ node, update }: { node: NodeDefinition, update: (n: NodeDefinition) => void }) {
     const addCountermeasure = () => {
         const newCM: Countermeasure = { requiredSymbols: [], type: 'TRACE', value: 10 };
-        // Initialize from blueprint defaults
         Object.entries(COUNTERMEASURE_METADATA.fields).forEach(([key, fieldCfg]) => {
             (newCM as any)[key] = structuredClone(fieldCfg.default);
         });
@@ -29,6 +28,23 @@ export function NodeEditor({ node, update }: { node: NodeDefinition, update: (n:
         const next = [...node.countermeasures];
         next.splice(index, 1);
         update({ ...node, countermeasures: next });
+    };
+
+    const addGlobalCountermeasure = () => {
+        const newCM: Countermeasure = { requiredSymbols: [], type: 'TRACE', value: 1 };
+        update({ ...node, globalCountermeasures: [...(node.globalCountermeasures ?? []), newCM] });
+    };
+
+    const updateGlobalCMField = (index: number, field: string, value: any) => {
+        const next = structuredClone(node.globalCountermeasures ?? []);
+        (next[index] as any)[field] = value;
+        update({ ...node, globalCountermeasures: next });
+    };
+
+    const removeGlobalCountermeasure = (index: number) => {
+        const next = [...(node.globalCountermeasures ?? [])];
+        next.splice(index, 1);
+        update({ ...node, globalCountermeasures: next });
     };
 
     return (
@@ -152,6 +168,61 @@ export function NodeEditor({ node, update }: { node: NodeDefinition, update: (n:
                             </div>
                         )}
                     </div>
+
+                    {(node.type === 'SERVER' || node.type === 'MAINFRAME') && (
+                        <>
+                            <div className="flex items-center justify-between border-b border-amber-900/40 pb-2 mt-10">
+                                <div>
+                                    <h3 className="text-xs font-black text-amber-700 uppercase tracking-[0.3em]">Global Countermeasures</h3>
+                                    <p className="text-[10px] text-slate-600 mt-0.5">Fire unconditionally when System Reset resolves.</p>
+                                </div>
+                                <button
+                                    onClick={addGlobalCountermeasure}
+                                    className="bg-amber-700 text-[10px] font-black text-white px-3 py-1 rounded-full uppercase tracking-widest cursor-pointer hover:bg-amber-600 transition-colors"
+                                >
+                                    + ADD_GLOBAL
+                                </button>
+                            </div>
+
+                            <div className="space-y-4">
+                                {(node.globalCountermeasures ?? []).map((cm, idx) => (
+                                    <div key={idx} className="bg-amber-950/20 border border-amber-900/40 rounded-2xl p-6 relative group animate-in zoom-in-95 duration-300">
+                                        <div className="flex items-center justify-between mb-6">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-6 h-6 rounded-full bg-amber-500/10 flex items-center justify-center text-[10px] font-bold text-amber-500 border border-amber-500/20">
+                                                    {idx + 1}
+                                                </div>
+                                                <span className="font-black text-xs uppercase tracking-widest text-amber-400">Global CM</span>
+                                            </div>
+                                            <button
+                                                onClick={() => removeGlobalCountermeasure(idx)}
+                                                className="p-1 opacity-0 group-hover:opacity-100 hover:text-red-500 transition-all"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                            </button>
+                                        </div>
+                                        <div className="space-y-4">
+                                            {Object.entries(COUNTERMEASURE_METADATA.fields)
+                                                .filter(([fieldName]) => fieldName !== 'requiredSymbols')
+                                                .map(([fieldName, field]) => (
+                                                <BlueprintRenderer
+                                                    key={fieldName}
+                                                    field={field}
+                                                    value={(cm as any)[fieldName]}
+                                                    onChange={(val) => updateGlobalCMField(idx, fieldName, val)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                {(node.globalCountermeasures ?? []).length === 0 && (
+                                    <div className="text-center py-8 border-2 border-dashed border-amber-900/30 rounded-3xl text-amber-900 text-xs font-bold uppercase tracking-widest">
+                                        NO_GLOBAL_CMs
+                                    </div>
+                                )}
+                            </div>
+                        </>
+                    )}
                 </div>
             </div>
         </div>

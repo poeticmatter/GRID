@@ -1,6 +1,6 @@
 import { produce } from 'immer';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from '../types';
-import type { Coordinate, ActiveEffect } from '../../types';
+import type { Coordinate, ActiveEffect, Grid } from '../../types';
 import type { IEffectMechanic } from '../mechanicRegistry';
 
 export const reprogramMechanic: IEffectMechanic = {
@@ -78,7 +78,7 @@ export const reprogramMechanic: IEffectMechanic = {
         const destState = snapshot.grid[dest.y][dest.x];
 
         const deltas: StateDeltas = {
-            grid: newGrid as typeof grid,
+            grid: newGrid as unknown as Grid,
             reprogramTargetSource: null,
             isCardCommitted: true,
             events: [

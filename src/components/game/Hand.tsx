@@ -4,31 +4,12 @@ import { useGameStore } from '../../store/useGameStore';
 import { Dispatch } from '../../engine/orchestrator';
 import { Card } from './Card';
 import { motion, AnimatePresence } from 'framer-motion';
-import { RotateCw, Play } from 'lucide-react';
 
 export const Hand = () => {
     const { hand } = useDeckStore();
     const { selectedCardId, rotation } = useUIStore();
     const { gameState, pendingNetDamage, isCardCommitted } = useGameStore();
 
-    const handleRotate = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        Dispatch({ type: 'ROTATE_CARD' });
-    };
-
-    const handlePlay = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        if (selectedCardId && gameState === 'PLAYING') {
-            const card = hand.find(c => c.id === selectedCardId);
-            if (card) {
-                Dispatch({ type: 'PLAY_CARD', payload: { cardId: selectedCardId, effects: card.effects } });
-            }
-        }
-    };
-
-    const selectedCard = hand.find(c => c.id === selectedCardId);
-    const isPlayingPhase = gameState === 'PLAYING';
-    const isReset = selectedCard?.effects?.some(e => e.type === 'SYSTEM_RESET');
 
     return (
         <div 

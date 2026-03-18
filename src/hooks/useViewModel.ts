@@ -5,8 +5,6 @@ import { useVisualQueueStore } from '../store/useVisualQueueStore';
 import type { Grid, NodeRecord } from '../engine/types';
 import { useEffect } from 'react';
 import { gameEventBus } from '../engine/eventBus';
-import { produce } from 'immer';
-
 interface ViewModelStore {
     visualGrid: Grid | null;
     visualNodes: NodeRecord | null;
@@ -17,7 +15,7 @@ interface ViewModelStore {
     updateVisualNodes: (nodes: NodeRecord, activeIds: string[]) => void;
 }
 
-export const useViewModelStore = create<ViewModelStore>((set, get) => ({
+export const useViewModelStore = create<ViewModelStore>((set) => ({
     visualGrid: null,
     visualNodes: null,
     visualActiveServerIds: null,

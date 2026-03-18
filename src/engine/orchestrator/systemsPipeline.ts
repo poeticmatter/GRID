@@ -1,6 +1,6 @@
 import { produce } from 'immer';
 import { calculateServerProgress } from '../game-logic';
-import type { NetworkNode, NodeRecord, Card, Grid, CellColor } from '../types';
+import type { NetworkNode, NodeRecord, Card, Grid } from '../types';
 import type { ReadonlyDeep, GameSnapshot, StateDeltas } from './types';
 import { mergeDeltas } from './deltaHelpers';
 import { applyCountermeasure } from './countermeasureExecutor';
@@ -54,7 +54,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                         pendingNetDamage: currentPendingNetDamage
                     };
 
-                    applyCountermeasure(cm, context, id);
+                    applyCountermeasure({ ...cm, requiredSymbols: [] }, context, id);
 
                     // Emit visual event so the playback pipeline can animate this penalty
                     newEvents.push({

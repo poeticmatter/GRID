@@ -61,6 +61,7 @@ export const NodeDefinitionSchema = z.object({
     weight: z.number(),
     layers: NodeLayersSchema,
     countermeasures: z.array(CountermeasureSchema),
+    globalCountermeasures: z.array(CountermeasureSchema).optional().default([]),
     resetTrace: z.number(),
     hasHorizontalConnection: z.boolean().optional().default(false)
 });

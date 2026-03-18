@@ -63,6 +63,7 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
     let netDamageTally = 0;
     const countermeasureEvents: Array<{ type: string; payload?: any; durationMs?: number }> = [];
 
+    // 2a. Local Loop: ICE countermeasures for frontline nodes
     for (const nodeId of snapshot.activeServerIds) {
         const node = snapshot.nodes[nodeId] as NetworkNode;
         if (!node) continue;
@@ -85,6 +86,34 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
             });
 
             // Sync mutable values back
+            netDamageTally = context.pendingNetDamage;
+        }
+    }
+
+    // 2b. Global Loop: Server/Mainframe global countermeasures across entire dictionary
+    for (const rawNode of Object.values(snapshot.nodes)) {
+        if (!rawNode || (rawNode.type !== 'SERVER' && rawNode.type !== 'MAINFRAME') || !rawNode.globalCountermeasures?.length) {
+            continue;
+        }
+
+        const node = rawNode as NetworkNode;
+        const nodeId = node.id;
+        for (const cm of node.globalCountermeasures ?? []) {
+            const context: CountermeasureContext = {
+                grid: newGrid,
+                playerStats,
+                nodes: newNodes,
+                activeServerIds: [...snapshot.activeServerIds],
+                pendingNetDamage: netDamageTally
+            };
+
+            applyCountermeasure(cm, context, nodeId);
+
+            countermeasureEvents.push({
+                type: 'COUNTERMEASURE_FIRED',
+                payload: { nodeId, type: cm.type, value: cm.value, isGlobal: true }
+            });
+
             netDamageTally = context.pendingNetDamage;
         }
     }

@@ -7,6 +7,7 @@ import { Dispatch } from '../../../engine/orchestrator';
 import { AnimatePresence } from 'framer-motion';
 import { MobileConsoleView } from './MobileConsoleView';
 import { DesktopConsoleView } from './DesktopConsoleView';
+import { useActiveGlobalCountermeasures } from '../../../store/selectors';
 import type { Effect } from '../../../engine/types';
 
 export const ConsoleController = () => {
@@ -15,6 +16,7 @@ export const ConsoleController = () => {
     const { grid } = useViewModel();
     const isMobile = useIsMobile();
     const [isExpanded, setIsExpanded] = useState(false);
+    const globalCountermeasures = useActiveGlobalCountermeasures();
 
     const activeEffect = effectQueue[0]?.effect;
     const isResolving = gameState === 'EFFECT_RESOLUTION' && (activeEffect?.type === 'RUN' || activeEffect?.type === 'REPROGRAM' || activeEffect?.type === 'SYSTEM_RESET');
@@ -101,6 +103,7 @@ export const ConsoleController = () => {
                         onCancel={handleCancel}
                         isCardCommitted={isCardCommitted}
                         activeEffectType={activeEffect?.type}
+                        globalCountermeasures={globalCountermeasures}
                     />
                 ) : (
                     <DesktopConsoleView
@@ -114,6 +117,7 @@ export const ConsoleController = () => {
                         onCancel={handleCancel}
                         isCardCommitted={isCardCommitted}
                         activeEffectType={activeEffect?.type}
+                        globalCountermeasures={globalCountermeasures}
                     />
                 )
             )}

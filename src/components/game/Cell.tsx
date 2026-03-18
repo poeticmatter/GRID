@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import type { Cell as CellType, CellColor, CellSymbol } from '../../engine/types';
+import type { Cell as CellType } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
 import { SymbolIcon } from './CellSymbols';
 import { clsx } from 'clsx';

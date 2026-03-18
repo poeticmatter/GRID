@@ -17,7 +17,7 @@ interface NodeState {
     patchNodes: (patches: Record<string, Partial<NetworkNode>>) => void;
 }
 
-export const useServerStore = create<NodeState>((set, get) => ({
+export const useServerStore = create<NodeState>((set) => ({
     nodes: {},
     activeServerIds: [],
 

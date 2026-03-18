@@ -19,7 +19,7 @@ export const ReprogramOverlay = () => {
     return (
         <div className="absolute inset-2 w-full h-full grid grid-cols-6 grid-rows-6 gap-1 z-30 pointer-events-none">
             {grid.map((row, y) => (
-                row.map((cell, x) => {
+                row.map((_cell, x) => {
                     const isSource = reprogramTargetSource?.x === x && reprogramTargetSource?.y === y;
                     const isHovered = hoveredCoordinate?.x === x && hoveredCoordinate?.y === y;
                     const dx = reprogramTargetSource ? x - reprogramTargetSource.x : 0;

@@ -4,7 +4,7 @@ import { gameEventBus } from '../../engine/eventBus';
 import { useUIStore } from '../../store/useUIStore';
 import { LAYER_THEME } from '../../presentation/theme';
 import { clsx } from 'clsx';
-import type { CellColor, CellSymbol, Coordinate, Cell as CellType } from '../../engine/types';
+import type { Coordinate, Cell as CellType } from '../../engine/types';
 import { SymbolIcon } from './CellSymbols';
 
 interface SwapEvent {

@@ -172,6 +172,7 @@ export class NodeRegistry {
             layers: newLayers,
             progress: newProgress,
             countermeasures: [...def.countermeasures],
+            globalCountermeasures: def.globalCountermeasures ? [...def.globalCountermeasures] : [],
             resetTrace: def.resetTrace,
             status: 'ACTIVE',
             visibility: 'HIDDEN',
