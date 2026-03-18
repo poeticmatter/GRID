@@ -92,9 +92,8 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
 
 // ---------------------------------------------------------------------------
 // networkGraphSystem
-// After server progression, determines: which nodes became hacked, which
-// children to promote, and which branches to mark BYPASSED.
-// Operates exclusively on the `nodes` dict — no separate activeServers array.
+// After server progression, determines which nodes became hacked and promotes
+// their children to REVEALED. Operates on the `nodes` dict.
 // ---------------------------------------------------------------------------
 export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
     // Only runs if nodes were mutated this tick
@@ -118,8 +117,7 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
             updated &&
             previous &&
             updated.status === 'HACKED' &&
-            previous.status !== 'HACKED' &&
-            previous.status !== 'BYPASSED'
+            previous.status !== 'HACKED'
         ) {
             newlyHackedNodeIds.push(id);
             newPlayerStats.credits += updated.difficulty * 10;
@@ -149,64 +147,12 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
             // Remove from active set
             nextActiveIds = nextActiveIds.filter(id => id !== hackedId);
 
-            // Reveal immediate unhacked, non-bypassed children without activating them.
+            // Reveal immediate unhacked children without activating them.
             // Players must manually access revealed nodes via ACCESS_NODE.
             for (const childId of hackedNode.children) {
                 const child = draft[childId];
-                if (
-                    child &&
-                    child.status !== 'HACKED' &&
-                    child.status !== 'BYPASSED'
-                ) {
+                if (child && child.status !== 'HACKED') {
                     child.visibility = 'REVEALED';
-                }
-            }
-        }
-
-        // Bypass redundant branches
-        const memo = new Map<string, boolean>();
-        const isRedundant = (nodeId: string, visited: Set<string>): boolean => {
-            if (memo.has(nodeId)) return memo.get(nodeId)!;
-            if (visited.has(nodeId)) return false;
-
-            const node = draft[nodeId];
-            if (!node) return false;
-
-            if (node.type === 'MAINFRAME' || node.type === 'HOME' || node.status === 'HACKED') {
-                memo.set(nodeId, false);
-                return false;
-            }
-            if (node.status === 'BYPASSED') {
-                memo.set(nodeId, true);
-                return true;
-            }
-
-            visited.add(nodeId);
-
-            let redundant: boolean;
-            if (node.children.length === 0) {
-                redundant = false; // terminal destination is always integral
-            } else {
-                redundant = node.children.every(childId => {
-                    const child = draft[childId];
-                    if (!child) return true;
-                    if (child.status === 'HACKED') return true;
-                    if (nextActiveIds.includes(childId)) return true;
-                    return isRedundant(childId, visited);
-                });
-            }
-
-            visited.delete(nodeId);
-            memo.set(nodeId, redundant);
-            return redundant;
-        };
-
-        for (const nodeId of Object.keys(draft)) {
-            const node = draft[nodeId];
-            if (node && node.type !== 'HOME' && node.status !== 'HACKED') {
-                if (isRedundant(nodeId, new Set<string>())) {
-                    node.status = 'BYPASSED';
-                    nextActiveIds = nextActiveIds.filter(id => id !== nodeId);
                 }
             }
         }

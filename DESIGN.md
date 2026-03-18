@@ -160,7 +160,7 @@ Each node has:
 - **Progress** — which lanes are completed. A node is `HACKED` when all lanes of all colours are filled.
 - **Countermeasures** — defences that fire under specific conditions during a RUN.
 - **Global Countermeasures** (`SERVER`/`MAINFRAME` only) — defences that fire unconditionally on System Reset.
-- **Status** — `ACTIVE`, `HACKED`, `LOCKED`, `BYPASSED`.
+- **Status** — `ACTIVE`, `HACKED`, `LOCKED`.
 - **Visibility** — `HIDDEN` or `REVEALED`.
 - **Horizontal connection flag** — cosmetic layout hint for the network graph renderer.
 
@@ -170,7 +170,6 @@ Each node has:
 - Initially only the frontline ICE nodes are active.
 - When a node is **hacked**, its direct children become `REVEALED` (visible but not active).
 - The player must manually **access** a revealed node (`ACCESS_NODE` action) to make it active and begin attacking it.
-- If a node's entire subtree becomes irrelevant (all paths lead to hacked nodes), it is marked `BYPASSED`.
 
 ### Layer Filling
 
@@ -256,9 +255,8 @@ MENU
 
 The following are areas with intentional design space or known loose ends as of this document version.
 
-- **Credits** are tracked and awarded but have no spend mechanic yet. This is reserved for a future shop, upgrade, or bypass system.
-- **Countermeasure neutralisation** is currently an inverse check (fire if you harvest *fewer* symbols than required). This creates the interesting design where players must strategically break specific symbols. Whether the threshold should be exact or a minimum is an open question.
+- **Credits** are tracked and awarded but have no spend mechanic yet. This is reserved for a future shop or upgrade system.
+- **Countermeasure neutralisation** is a minimum threshold check: a countermeasure is neutralised if the player harvests *at least* the required number of symbols. Players must strategically break enough of the right symbols to suppress defences.
 - **Net Damage cap:** The net damage tally is capped to the current hand size to prevent a soft-lock where the player cannot satisfy the discard requirement.
 - **System Reset scope:** Global CMs fire from all non-hacked SERVER/MAINFRAME nodes. Already-hacked nodes are silent — their defences have been dismantled.
-- **Bypassed nodes** do not award credits. Whether bypassed nodes should partially reward (or penalise) the player is unresolved.
-- **Node access** is currently a free action. Whether accessing a revealed node should cost resources is an open design decision.
+- **Node access** is currently a free action.

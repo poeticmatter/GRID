@@ -32,7 +32,7 @@ export interface NetworkNode {
   countermeasures: Countermeasure[];
   /** Countermeasures that fire unconditionally when SYSTEM_RESET resolves. */
   globalCountermeasures?: Countermeasure[];
-  status: 'ACTIVE' | 'HACKED' | 'LOCKED' | 'BYPASSED';
+  status: 'ACTIVE' | 'HACKED' | 'LOCKED';
   visibility: 'REVEALED' | 'HIDDEN';
   children: string[];
   gridX: number;

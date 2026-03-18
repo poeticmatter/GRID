@@ -144,9 +144,8 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
     );
 };
 
-const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'BYPASSED' | 'LOCKED' | 'HOME' | 'REACHABLE', onClick?: () => void, isSelected?: boolean }) => {
+const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'LOCKED' | 'HOME' | 'REACHABLE', onClick?: () => void, isSelected?: boolean }) => {
     const isCleared = state === 'CLEARED';
-    const isBypassed = state === 'BYPASSED';
     const isLocked = state === 'LOCKED';
     const isActive = state === 'ACTIVE';
     const isHome = state === 'HOME';
@@ -155,7 +154,6 @@ const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: Netw
     let bgClass = "bg-zinc-900/50 border-zinc-700 text-zinc-600";
     if (isHome) bgClass = "bg-grid-bg border-green-500 text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)]";
     if (isCleared) bgClass = "bg-grid-bg border-green-500 text-phosphor opacity-80 grid-clear";
-    if (isBypassed) bgClass = "bg-grid-bg border-grid-border text-grid-border opacity-40 grayscale";
     if (isLocked) bgClass = "bg-zinc-900/80 border-zinc-500 text-zinc-400 opacity-70";
     if (isActive) bgClass = "bg-grid-surface border-phosphor text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)] z-50";
     if (isReachable) bgClass = isSelected
@@ -230,7 +228,6 @@ const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: Netw
             <div className="absolute -bottom-5 text-[9px] font-mono font-bold tracking-widest text-slate-400 pointer-events-none drop-shadow-md whitespace-nowrap">
                 {isHome && 'GATEWAY'}
                 {isCleared && 'HACKED'}
-                {isBypassed && 'BYPASSED'}
                 {isLocked && 'ENCRYPTED'}
                 {isActive && server.type}
                 {isReachable && <span className="text-amber-400">REACHABLE</span>}
@@ -306,10 +303,9 @@ export const NetworkMap = () => {
     if (!networkGraph || networkGraph.length === 0) return null;
 
     // Derive node visual state purely from the SSOT — no cross-referencing two arrays.
-    const getNodeState = (node: NetworkNode): 'HOME' | 'CLEARED' | 'BYPASSED' | 'ACTIVE' | 'REACHABLE' | 'LOCKED' => {
+    const getNodeState = (node: NetworkNode): 'HOME' | 'CLEARED' | 'ACTIVE' | 'REACHABLE' | 'LOCKED' => {
         if (node.type === 'HOME') return 'HOME';
         if (node.status === 'HACKED') return 'CLEARED';
-        if (node.status === 'BYPASSED') return 'BYPASSED';
         // A node is ACTIVE if it appears in the activeServerIds index
         if (activeServerIds.includes(node.id)) return 'ACTIVE';
         // A node is REACHABLE if it has been revealed but not yet accessed
