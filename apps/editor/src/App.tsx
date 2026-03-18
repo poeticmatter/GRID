@@ -110,8 +110,7 @@ export default function App() {
             baseDifficulty: 1,
             weight: 10,
             layers: {},
-            countermeasures: [],
-            resetTrace: 1
+            countermeasures: []
         };
         setNodes(prev => ({
             ...prev,

@@ -10,7 +10,7 @@ export function getActiveGlobalCountermeasures(): Countermeasure[] {
     const { nodes } = useServerStore.getState();
     const result: Countermeasure[] = [];
     for (const node of Object.values(nodes)) {
-        if (node && (node.type === 'SERVER' || node.type === 'MAINFRAME') && node.globalCountermeasures?.length) {
+        if (node && (node.type === 'SERVER' || node.type === 'MAINFRAME') && node.status !== 'HACKED' && node.globalCountermeasures?.length) {
             result.push(...node.globalCountermeasures);
         }
     }
@@ -27,7 +27,7 @@ export function useActiveGlobalCountermeasures(): Countermeasure[] {
     return useMemo(() => {
         const result: Countermeasure[] = [];
         for (const node of Object.values(nodes)) {
-            if (node && (node.type === 'SERVER' || node.type === 'MAINFRAME') && node.globalCountermeasures?.length) {
+            if (node && (node.type === 'SERVER' || node.type === 'MAINFRAME') && node.status !== 'HACKED' && node.globalCountermeasures?.length) {
                 result.push(...node.globalCountermeasures);
             }
         }

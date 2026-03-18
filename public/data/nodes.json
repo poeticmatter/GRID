@@ -21,7 +21,6 @@
                 }
             ],
             "globalCountermeasures": [],
-            "resetTrace": 1,
             "hasHorizontalConnection": true
         },
         {
@@ -45,7 +44,6 @@
                 }
             ],
             "globalCountermeasures": [],
-            "resetTrace": 1,
             "hasHorizontalConnection": true
         },
         {
@@ -69,7 +67,6 @@
                 }
             ],
             "globalCountermeasures": [],
-            "resetTrace": 1,
             "hasHorizontalConnection": true
         },
         {
@@ -98,7 +95,6 @@
                 }
             ],
             "globalCountermeasures": [],
-            "resetTrace": 1,
             "hasHorizontalConnection": true
         },
         {
@@ -122,7 +118,6 @@
                 }
             ],
             "globalCountermeasures": [],
-            "resetTrace": 1,
             "hasHorizontalConnection": false
         },
         {
@@ -149,7 +144,6 @@
                 }
             ],
             "globalCountermeasures": [],
-            "resetTrace": 1,
             "hasHorizontalConnection": false
         },
         {
@@ -181,7 +175,6 @@
                     "value": 1
                 }
             ],
-            "resetTrace": 1,
             "hasHorizontalConnection": false
         },
         {
@@ -217,7 +210,6 @@
                     "value": 1
                 }
             ],
-            "resetTrace": 1,
             "hasHorizontalConnection": false
         }
     ]

@@ -33,7 +33,6 @@ function createNode(
             layers: {},
             progress: {},
             countermeasures: [],
-            resetTrace: 0,
             status: 'ACTIVE',
             visibility: 'REVEALED',
             children: [],

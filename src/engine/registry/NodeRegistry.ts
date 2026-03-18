@@ -39,8 +39,7 @@ export class NodeRegistry {
                 baseDifficulty: 1,
                 weight: 1,
                 layers: { ORANGE: [1] },
-                countermeasures: [{ requiredSymbols: [], type: 'TRACE', value: 5 }],
-                resetTrace: 1
+                countermeasures: [{ requiredSymbols: [], type: 'TRACE', value: 5 }]
             });
         }
 
@@ -173,7 +172,6 @@ export class NodeRegistry {
             progress: newProgress,
             countermeasures: [...def.countermeasures],
             globalCountermeasures: def.globalCountermeasures ? [...def.globalCountermeasures] : [],
-            resetTrace: def.resetTrace,
             status: 'ACTIVE',
             visibility: 'HIDDEN',
             children: [],

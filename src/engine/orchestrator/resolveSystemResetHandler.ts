@@ -92,7 +92,7 @@ export function handleResolveSystemReset(snapshot: ReadonlyDeep<GameSnapshot>): 
 
     // 2b. Global Loop: Server/Mainframe global countermeasures across entire dictionary
     for (const rawNode of Object.values(snapshot.nodes)) {
-        if (!rawNode || (rawNode.type !== 'SERVER' && rawNode.type !== 'MAINFRAME') || !rawNode.globalCountermeasures?.length) {
+        if (!rawNode || (rawNode.type !== 'SERVER' && rawNode.type !== 'MAINFRAME') || rawNode.status === 'HACKED' || !rawNode.globalCountermeasures?.length) {
             continue;
         }
 
