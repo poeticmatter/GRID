@@ -46,7 +46,7 @@ export const reprogramMechanic: IEffectMechanic = {
                 // Move source properties onto broken destination
                 dCell.color = sCell.color;
                 dCell.symbol = sCell.symbol;
-                dCell.state = 'DEFAULT';
+                dCell.state = 'PRIMED';
                 sCell.state = 'BROKEN';
                 sCell.symbol = 'NONE';
                 validAction = true;

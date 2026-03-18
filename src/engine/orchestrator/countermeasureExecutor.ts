@@ -36,10 +36,9 @@ export function applyCountermeasure(
 
         case 'VIRUS': {
             // VIRUS: Apply viral infection flag to random available cells.
-            // BUG FIX: Untouched cells are 'LOCKED'.
             const candidates: { x: number, y: number }[] = [];
             grid.forEach((row, y) => row.forEach((cell, x) => {
-                if (cell.state === 'LOCKED' && !cell.hasVirus) candidates.push({ x, y });
+                if (cell.state === 'PRIMED' && !cell.hasVirus) candidates.push({ x, y });
             }));
             
             const count = Math.min(cm.value, candidates.length);
@@ -56,7 +55,7 @@ export function applyCountermeasure(
             // and blocks them from being targeted by RUN (same as CORRUPTED state).
             const candidates: { x: number, y: number }[] = [];
             grid.forEach((row, y) => row.forEach((cell, x) => {
-                if (cell.state === 'LOCKED') candidates.push({ x, y });
+                if (cell.state === 'PRIMED') candidates.push({ x, y });
             }));
 
             const count = Math.min(cm.value, candidates.length);

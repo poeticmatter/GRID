@@ -29,7 +29,7 @@ export const createRandomCell = (x: number, y: number): Cell => {
     y,
     color,
     symbol: symbol as CellSymbol,
-    state: 'LOCKED',
+    state: 'PRIMED',
   };
 };
 

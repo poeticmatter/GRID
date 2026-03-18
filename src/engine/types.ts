@@ -1,7 +1,7 @@
 import type { CellColor, CellSymbol, Effect, NodeType, NodeLayers, Countermeasure } from '@grid/shared';
 export * from '@grid/shared';
 
-export type CellState = 'DEFAULT' | 'LOCKED' | 'BROKEN' | 'CORRUPTED';
+export type CellState = 'PRIMED' | 'BROKEN' | 'CORRUPTED';
 
 export interface Cell {
   id: string;

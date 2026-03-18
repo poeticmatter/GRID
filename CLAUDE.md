@@ -91,6 +91,12 @@ When adding a new `Effect` type or `Countermeasure` type, **all of these must be
 3. **`src/engine/orchestrator/countermeasureExecutor.ts`** — Handle the new countermeasure in `applyCountermeasure()`; or register a new mechanic in `orchestrator/mechanicsInit.ts` for new effects
 4. **`public/data/cards.json` / `nodes.json`** — Add data using the editor app
 
+## Design Document
+
+`DESIGN.md` in the repo root is the authoritative plain-language description of GRID's rules and mechanics. It is written for human and AI readers who do not have access to the source code.
+
+**Keep it in sync.** Whenever a mechanic changes — effect behaviour, countermeasure rules, win/loss conditions, node progression, card rules — update the relevant section of `DESIGN.md` in the same pass as the code change. Do not defer this. The document must always reflect what the code actually does, not what was originally planned.
+
 ## Engineering Standards
 
 ### Architecture Rules
