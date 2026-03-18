@@ -71,7 +71,7 @@ function createNode(
 // Phase 1: Every parent connects straight-up to the same-X child (vertical).
 // Phase 2: If a parent has hasHorizontalConnection, also connect to X±1
 //          children, provided the diagonal edge does not cross any existing edge.
-function wireEdges(parents: NetworkNode[], children: NetworkNode[]): void {
+function wireEdges(parents: NetworkNode[], children: NetworkNode[], allowDiagonals = true): void {
     const childByX = new Map<number, NetworkNode>(children.map(c => [c.gridX, c]));
     const addedEdges: [number, number][] = [];
 
@@ -84,7 +84,8 @@ function wireEdges(parents: NetworkNode[], children: NetworkNode[]): void {
         }
     }
 
-    // Phase 2 — diagonal (only for flagged nodes, only if non-crossing)
+    // Phase 2 — diagonal (only for flagged nodes, only if non-crossing, only if allowed)
+    if (!allowDiagonals) return;
     for (const parent of parents) {
         if (!parent.hasHorizontalConnection) continue;
         for (const dx of [-1, 1]) {
@@ -158,7 +159,7 @@ export const generateGraph = (): NetworkNode[] => {
         const terminalType: NodeType = x === mainframeX ? 'MAINFRAME' : 'SERVER';
         row4.push(createNode(nodes, terminalType, x, MAX_DEPTH - 1));
     }
-    wireEdges(row3, row4);
+    wireEdges(row3, row4, false);
 
     // ─── Reveal HOME's direct children ──────────────────────────────────
     for (const childId of home.children) {
