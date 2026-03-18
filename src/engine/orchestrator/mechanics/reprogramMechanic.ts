@@ -29,7 +29,7 @@ export const reprogramMechanic: IEffectMechanic = {
 
         let validAction = false;
 
-        const newGrid = produce(grid, draft => {
+        const newGrid = produce(grid as Grid, draft => {
             const sCell = draft[source.y][source.x];
             const dCell = draft[dest.y][dest.x];
 
@@ -78,7 +78,7 @@ export const reprogramMechanic: IEffectMechanic = {
         const destState = snapshot.grid[dest.y][dest.x];
 
         const deltas: StateDeltas = {
-            grid: newGrid as unknown as Grid,
+            grid: newGrid,
             reprogramTargetSource: null,
             isCardCommitted: true,
             events: [

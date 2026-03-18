@@ -54,7 +54,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
                         pendingNetDamage: currentPendingNetDamage
                     };
 
-                    applyCountermeasure({ ...cm, requiredSymbols: [] }, context, id);
+                    applyCountermeasure(cm, context, id);
 
                     // Emit visual event so the playback pipeline can animate this penalty
                     newEvents.push({

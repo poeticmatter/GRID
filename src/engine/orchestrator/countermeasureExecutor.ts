@@ -1,5 +1,5 @@
 import { produce } from 'immer';
-import type { Grid, PlayerStats, NodeRecord, CellColor, Countermeasure } from '../types';
+import type { Grid, PlayerStats, NodeRecord, CellColor, CountermeasurePayload } from '../types';
 
 export interface CountermeasureContext {
     grid: Grid;
@@ -11,9 +11,11 @@ export interface CountermeasureContext {
 
 /**
  * Centrally executes a countermeasure effect, mutating the provided context.
+ * Accepts any CountermeasurePayload — requiredSymbols is a trigger concern,
+ * not an execution concern, so it is intentionally excluded from this signature.
  */
 export function applyCountermeasure(
-    cm: Countermeasure,
+    cm: CountermeasurePayload,
     context: CountermeasureContext,
     sourceNodeId: string
 ) {
