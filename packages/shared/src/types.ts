@@ -56,6 +56,7 @@ export interface NodeDefinition {
   layers: NodeLayers;
   countermeasures: Countermeasure[];
   resetTrace: number;
+  hasHorizontalConnection?: boolean;
 }
 
 // Runtime Metadata Blueprints for Schema-Driven UI

@@ -273,6 +273,7 @@ export const NetworkMap = () => {
     const isOpen = useUIStore(state => state.isTopologyOpen);
     const setIsOpen = useUIStore(state => state.setIsTopologyOpen);
     const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
+    const [showHiddenEdges, setShowHiddenEdges] = useState(false);
 
     // Derived: all nodes as an array (for topology rendering)
     const networkGraph = useMemo(() => Object.values(nodes), [nodes]);
@@ -370,24 +371,37 @@ export const NetworkMap = () => {
                                     const p2 = nodeCoords[childId];
                                     if (!p2) return null;
 
-                                    const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
+                                    // Hide diagonal edges until the parent node is hacked (unless debug mode is on).
                                     const childNode = nodes[childId];
+                                    const isHorizontalEdge = childNode && childNode.gridX !== node.gridX;
+                                    const isHiddenEdge = isHorizontalEdge && node.type !== 'HOME' && node.status !== 'HACKED';
+                                    if (isHiddenEdge && !showHiddenEdges) {
+                                        return null;
+                                    }
+
+                                    const isParentCleared = node.status === 'HACKED' || node.type === 'HOME';
                                     const isChildActive = activeServerIds.includes(childId);
                                     const isChildActiveOrHacked = isChildActive || (childNode && childNode.status === 'HACKED');
-                                    const isActiveConnection = isParentCleared && isChildActiveOrHacked;
+                                    const isActiveConnection = isParentCleared && isChildActiveOrHacked && !isHiddenEdge;
 
                                     const STEP_TIME = 0.5;
                                     const CYCLE_TIME = 4;
                                     const pulseDelay = (node.gridY || 0) * STEP_TIME;
+
+                                    const edgeStroke = isHiddenEdge
+                                        ? "rgba(251, 191, 36, 0.25)"
+                                        : isActiveConnection ? "rgba(57, 255, 122, 0.5)" : "rgba(57, 255, 122, 0.12)";
+                                    const edgeWidth = isActiveConnection ? "3" : "1.5";
+                                    const edgeDash = isHiddenEdge ? "3 6" : !isActiveConnection ? "5 5" : "none";
 
                                     return (
                                         <g key={`${node.id}-${childId}`}>
                                             <line
                                                 x1={`${p1.x}%`} y1={`${p1.y}%`}
                                                 x2={`${p2.x}%`} y2={`${p2.y}%`}
-                                                stroke={isActiveConnection ? "rgba(57, 255, 122, 0.5)" : "rgba(57, 255, 122, 0.12)"}
-                                                strokeWidth={isActiveConnection ? "3" : "1.5"}
-                                                strokeDasharray={!isActiveConnection ? "5 5" : "none"}
+                                                stroke={edgeStroke}
+                                                strokeWidth={edgeWidth}
+                                                strokeDasharray={edgeDash}
                                             />
                                             {isActiveConnection && (
                                                 <motion.circle
@@ -452,6 +466,19 @@ export const NetworkMap = () => {
                                 </div>
                             );
                         })}
+
+                        {/* Z-30: Debug toggle */}
+                        <button
+                            onClick={() => setShowHiddenEdges(v => !v)}
+                            className={clsx(
+                                "absolute bottom-4 right-4 z-30 px-3 py-1.5 font-mono font-bold text-[10px] tracking-widest uppercase rounded border transition-colors",
+                                showHiddenEdges
+                                    ? "bg-amber-500/20 border-amber-400 text-amber-300 hover:bg-amber-500/30"
+                                    : "bg-zinc-900/80 border-zinc-700 text-zinc-500 hover:border-zinc-500 hover:text-zinc-400"
+                            )}
+                        >
+                            {showHiddenEdges ? 'DBG: ON' : 'DBG: OFF'}
+                        </button>
                     </motion.div>
                 )}
             </AnimatePresence>

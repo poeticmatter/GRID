@@ -177,7 +177,8 @@ export class NodeRegistry {
             visibility: 'HIDDEN',
             children: [],
             gridX: 0,
-            gridY: 0
+            gridY: 0,
+            hasHorizontalConnection: def.hasHorizontalConnection ?? false
         };
     }
 }

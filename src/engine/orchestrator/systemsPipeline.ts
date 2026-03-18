@@ -77,7 +77,7 @@ export const serverProgressionSystem: SystemFunction = (snapshot, deltas) => {
 
     return mergeDeltas(deltas, {
         nodes: newNodes,
-        grid: gridModified ? mutableGrid : undefined,
+        ...(gridModified ? { grid: mutableGrid } : {}),
         playerStats: newPlayerStats,
         hand: newHand as Card[],
         deck: newDeck as Card[],

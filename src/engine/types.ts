@@ -37,6 +37,7 @@ export interface NetworkNode {
   children: string[];
   gridX: number;
   gridY: number;
+  hasHorizontalConnection?: boolean;
 }
 
 // Normalized dictionary: the Single Source of Truth for all NetworkNode entities.

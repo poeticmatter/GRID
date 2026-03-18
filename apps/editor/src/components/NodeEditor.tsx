@@ -67,6 +67,22 @@ export function NodeEditor({ node, update }: { node: NodeDefinition, update: (n:
                         </div>
                     </div>
 
+                    <div className="flex items-center gap-4 mt-8">
+                        <label className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Horizontal Connection</label>
+                        <button
+                            type="button"
+                            onClick={() => update({ ...node, hasHorizontalConnection: !node.hasHorizontalConnection })}
+                            className={clsx(
+                                "px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest transition-colors",
+                                node.hasHorizontalConnection
+                                    ? "bg-emerald-600 text-white hover:bg-emerald-500"
+                                    : "bg-slate-800 text-slate-400 hover:bg-slate-700"
+                            )}
+                        >
+                            {node.hasHorizontalConnection ? 'ENABLED' : 'DISABLED'}
+                        </button>
+                    </div>
+
                     <h3 className="text-xs font-black text-slate-600 uppercase tracking-[0.3em] border-b border-slate-900 pb-2 mt-8">Defense Layers</h3>
                     <div className="space-y-3">
                         {['ORANGE', 'SKY', 'EMERALD', 'LIME', 'FUCHSIA'].map(color => (

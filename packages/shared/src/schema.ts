@@ -61,7 +61,8 @@ export const NodeDefinitionSchema = z.object({
     weight: z.number(),
     layers: NodeLayersSchema,
     countermeasures: z.array(CountermeasureSchema),
-    resetTrace: z.number()
+    resetTrace: z.number(),
+    hasHorizontalConnection: z.boolean().optional().default(false)
 });
 
 export const CardPoolSchema = z.record(z.string(), CardDefinitionSchema);

@@ -13,78 +13,7 @@ function edgesCross(p1: number, c1: number, p2: number, c2: number): boolean {
     return (p1 < p2 && c1 > c2) || (p1 > p2 && c1 < c2);
 }
 
-// ─── Non-crossing edge builder ──────────────────────────────────────────────
-// Given sorted parent x-positions and sorted child x-positions, returns a
-// set of (parentX, childX) pairs such that:
-//   1. Every parent has ≥ 1 child          (no dead-end parents)
-//   2. Every child  has ≥ 1 parent         (no orphan children)
-//   3. No two edges cross                  (monotone mapping)
-//   4. Optional extra diagonals add variety (still monotone)
-//
-// Bounded: O(P × C) with P,C ≤ 3 → at most 9 iterations per phase.
-function buildNonCrossingEdges(
-    parentXs: number[],
-    childXs: number[]
-): [parentX: number, childX: number][] {
-    const edges: [number, number][] = [];
-
-    const wouldCross = (px: number, cx: number) =>
-        edges.some(([ep, ec]) => edgesCross(px, cx, ep, ec));
-
-    // Phase 1 — Primary: every parent gets its nearest safe child.
-    for (const px of parentXs) {
-        const ranked = [...childXs].sort(
-            (a, b) => Math.abs(a - px) - Math.abs(b - px)
-        );
-        for (const cx of ranked) {
-            if (!wouldCross(px, cx)) {
-                edges.push([px, cx]);
-                break;
-            }
-        }
-    }
-
-    // Phase 2 — Coverage: every child gets a parent if not already connected.
-    for (const cx of childXs) {
-        if (edges.some(([, ec]) => ec === cx)) continue;
-        const ranked = [...parentXs].sort(
-            (a, b) => Math.abs(a - cx) - Math.abs(b - cx)
-        );
-        for (const px of ranked) {
-            if (!wouldCross(px, cx)) {
-                edges.push([px, cx]);
-                break;
-            }
-        }
-    }
-
-    // Phase 3 — Enrichment: randomly add extra diagonal edges for variety.
-    for (const px of parentXs) {
-        for (const cx of childXs) {
-            if (cx === px) continue;                                       // already handled
-            if (edges.some(([ep, ec]) => ep === px && ec === cx)) continue; // duplicate
-            if (Math.random() > 0.3) continue;                            // ~30% chance
-            if (!wouldCross(px, cx)) {
-                edges.push([px, cx]);
-            }
-        }
-    }
-
-    return edges;
-}
-
-// ─── Pick which x-positions the next row occupies ───────────────────────────
-// Returns a sorted subset of {0, 1, 2} with 2–3 elements.
-function pickChildXPositions(): number[] {
-    const count = Math.random() > 0.4 ? COLUMNS : 2;       // 60% → 3, 40% → 2
-    if (count === COLUMNS) return [...ALL_XS];
-    // Pick 2 of 3 positions uniformly at random
-    const drop = Math.floor(Math.random() * COLUMNS);
-    return ALL_XS.filter(x => x !== drop);
-}
-
 // ─── Node factory ───────────────────────────────────────────────────────────
-// Wraps nodeRegistry calls and bookkeeps the flat `nodes` collector array.
 let nodeIdCounter = 0;
 
 function createNode(
@@ -138,51 +67,60 @@ function createNode(
     return node;
 }
 
-// ─── Build a row of child nodes and wire non-crossing edges from parents ────
-function buildRow(
-    nodes: NetworkNode[],
-    parents: NetworkNode[],
-    childXs: number[],
-    gridY: number,
-    childType: NodeType
-): NetworkNode[] {
-    // Instantiate child nodes at each x-position.
-    const childByX = new Map<number, NetworkNode>();
-    for (const x of childXs) {
-        childByX.set(x, createNode(nodes, childType, x, gridY));
-    }
+// ─── Wire edges from parents to children ────────────────────────────────────
+// Phase 1: Every parent connects straight-up to the same-X child (vertical).
+// Phase 2: If a parent has hasHorizontalConnection, also connect to X±1
+//          children, provided the diagonal edge does not cross any existing edge.
+function wireEdges(parents: NetworkNode[], children: NetworkNode[]): void {
+    const childByX = new Map<number, NetworkNode>(children.map(c => [c.gridX, c]));
+    const addedEdges: [number, number][] = [];
 
-    // Compute non-crossing parent→child edges.
-    const parentXs = parents.map(p => p.gridX);
-    const edges = buildNonCrossingEdges(parentXs, childXs);
-
-    // Wire edges into parent.children arrays.
-    for (const [px, cx] of edges) {
-        const parent = parents.find(p => p.gridX === px)!;
-        const child = childByX.get(cx)!;
-        if (!parent.children.includes(child.id)) {
+    // Phase 1 — vertical (always)
+    for (const parent of parents) {
+        const child = childByX.get(parent.gridX);
+        if (child && !parent.children.includes(child.id)) {
             parent.children.push(child.id);
+            addedEdges.push([parent.gridX, child.gridX]);
         }
     }
 
-    // Return children sorted by gridX for the next iteration.
-    return [...childByX.values()].sort((a, b) => a.gridX - b.gridX);
+    // Phase 2 — diagonal (only for flagged nodes, only if non-crossing)
+    for (const parent of parents) {
+        if (!parent.hasHorizontalConnection) continue;
+        for (const dx of [-1, 1]) {
+            const targetX = parent.gridX + dx;
+            if (targetX < 0 || targetX >= COLUMNS) continue;
+            const child = childByX.get(targetX);
+            if (!child) continue;
+            if (parent.children.includes(child.id)) continue;
+            const wouldCross = addedEdges.some(([ep, ec]) => edgesCross(parent.gridX, targetX, ep, ec));
+            if (!wouldCross) {
+                parent.children.push(child.id);
+                addedEdges.push([parent.gridX, targetX]);
+            }
+        }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════
-//  generateGraph — single-pass, constraint-first DAG construction.
+//  generateGraph — deterministic DAG with optional horizontal branches.
 //
-//  Layout (5 rows, 3 columns):
-//    Row 0  HOME (1 node at x=1)
-//    Row 1  ICE  (3 nodes at x=0,1,2 — fan-out from HOME)
-//    Row 2  ICE  (2–3 nodes — subset of columns)
-//    Row 3  ICE  (3 nodes at x=0,1,2 — penultimate, ensures full terminal coverage)
-//    Row 4  Terminal (1 MAINFRAME + 2 SERVERs at x=0,1,2 — vertical from row 3)
+//  Layout (5 rows, 3 columns — all rows fully populated):
+//    Row 0  HOME   (1 node at x=1)
+//    Row 1  ICE    (3 nodes at x=0,1,2 — fan-out from HOME)
+//    Row 2  ICE    (3 nodes at x=0,1,2)
+//    Row 3  ICE    (3 nodes at x=0,1,2)
+//    Row 4  Terminal (1 MAINFRAME + 2 SERVERs at x=0,1,2)
+//
+//  Edge rules:
+//    • Every node always connects vertically to (X, Y+1).
+//    • If node.hasHorizontalConnection, may ALSO connect to (X±1, Y+1),
+//      provided no existing edge would cross (monotone invariant).
 //
 //  Guarantees:
-//    • Valid DAG with no orphans or disconnected clusters.
-//    • No visually crossing edges (monotone edge invariant).
-//    • Bounded O(n²) with n ≤ 15 total nodes — no while-loops.
+//    • Valid DAG — no orphans, no disconnected clusters.
+//    • No visually crossing edges.
+//    • Bounded O(n) — no while-loops, no randomness in layout.
 // ═══════════════════════════════════════════════════════════════════════════
 export const generateGraph = (): NetworkNode[] => {
     const nodes: NetworkNode[] = [];
@@ -191,7 +129,7 @@ export const generateGraph = (): NetworkNode[] => {
     // ─── Row 0: HOME ────────────────────────────────────────────────────
     const home = createNode(nodes, 'HOME', 1, 0);
 
-    // ─── Row 1: Full-width ICE fan-out from HOME ────────────────────────
+    // ─── Row 1: Full-width ICE fan-out from HOME ─────────────────────────
     const row1: NetworkNode[] = [];
     for (const x of ALL_XS) {
         const child = createNode(nodes, 'ICE', x, 1);
@@ -199,20 +137,28 @@ export const generateGraph = (): NetworkNode[] => {
         home.children.push(child.id);
     }
 
-    // ─── Row 2: Variable-width ICE layer ────────────────────────────────
-    const row2Xs = pickChildXPositions();
-    const row2 = buildRow(nodes, row1, row2Xs, 2, 'ICE');
-
-    // ─── Row 3: Penultimate — must cover all 3 columns ─────────────────
-    const row3 = buildRow(nodes, row2, [...ALL_XS], 3, 'ICE');
-
-    // ─── Row 4: Terminal — straight vertical from row 3 ─────────────────
-    const mainframeX = Math.floor(Math.random() * COLUMNS);
-    for (const parent of row3) {
-        const terminalType: NodeType = parent.gridX === mainframeX ? 'MAINFRAME' : 'SERVER';
-        const child = createNode(nodes, terminalType, parent.gridX, MAX_DEPTH - 1);
-        parent.children.push(child.id);
+    // ─── Row 2: Full ICE layer ───────────────────────────────────────────
+    const row2: NetworkNode[] = [];
+    for (const x of ALL_XS) {
+        row2.push(createNode(nodes, 'ICE', x, 2));
     }
+    wireEdges(row1, row2);
+
+    // ─── Row 3: Full ICE layer ───────────────────────────────────────────
+    const row3: NetworkNode[] = [];
+    for (const x of ALL_XS) {
+        row3.push(createNode(nodes, 'ICE', x, 3));
+    }
+    wireEdges(row2, row3);
+
+    // ─── Row 4: Terminal — 1 MAINFRAME + 2 SERVERs ──────────────────────
+    const mainframeX = Math.floor(Math.random() * COLUMNS);
+    const row4: NetworkNode[] = [];
+    for (const x of ALL_XS) {
+        const terminalType: NodeType = x === mainframeX ? 'MAINFRAME' : 'SERVER';
+        row4.push(createNode(nodes, terminalType, x, MAX_DEPTH - 1));
+    }
+    wireEdges(row3, row4);
 
     // ─── Reveal HOME's direct children ──────────────────────────────────
     for (const childId of home.children) {
