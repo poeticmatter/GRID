@@ -34,21 +34,29 @@ export const reprogramMechanic: IEffectMechanic = {
             const dCell = draft[dest.y][dest.x];
 
             if (sCell.state !== 'BROKEN' && dCell.state !== 'BROKEN') {
-                // Swap properties of existing grid cells
+                // Swap all cell properties including state and virus
                 const tempColor = sCell.color;
                 const tempSymbol = sCell.symbol;
+                const tempState = sCell.state;
+                const tempVirus = sCell.hasVirus;
                 sCell.color = dCell.color;
                 sCell.symbol = dCell.symbol;
+                sCell.state = dCell.state;
+                sCell.hasVirus = dCell.hasVirus;
                 dCell.color = tempColor;
                 dCell.symbol = tempSymbol;
+                dCell.state = tempState;
+                dCell.hasVirus = tempVirus;
                 validAction = true;
             } else if (sCell.state !== 'BROKEN' && dCell.state === 'BROKEN') {
-                // Move source properties onto broken destination
+                // Move source properties onto broken destination, carrying state and virus
                 dCell.color = sCell.color;
                 dCell.symbol = sCell.symbol;
-                dCell.state = 'PRIMED';
+                dCell.state = sCell.state;
+                dCell.hasVirus = sCell.hasVirus;
                 sCell.state = 'BROKEN';
                 sCell.symbol = 'NONE';
+                sCell.hasVirus = false;
                 validAction = true;
             }
         });

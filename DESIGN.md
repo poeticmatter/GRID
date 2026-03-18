@@ -112,8 +112,8 @@ After the RUN resolves, harvested colours are applied to all currently active se
 A cell manipulation effect. The player performs a number of **swaps** up to the card's `amount`.
 
 **Rules:**
-- Each swap moves the **colour and symbol** of one cell onto an orthogonally adjacent cell (up, down, left, right — not diagonal).
-- If the destination cell is `BROKEN`, the source cell's properties move into it and the source cell becomes `BROKEN` — effectively sliding a live cell into a broken slot.
+- Each swap moves **all properties** (colour, symbol, state, and virus flag) of one cell onto an orthogonally adjacent cell (up, down, left, right — not diagonal). This means a `CORRUPTED` cell can be reprogrammed — its corruption travels with it to the destination.
+- If the destination cell is `BROKEN`, the source cell's properties (including state and virus flag) move into it and the source cell becomes `BROKEN` — effectively sliding the live cell into a broken slot.
 - If both cells are `BROKEN`, the swap is invalid.
 - The player can stop early; unused swaps are forfeited.
 - The card is marked as committed after the first successful swap, meaning it cannot be cancelled mid-chain.
