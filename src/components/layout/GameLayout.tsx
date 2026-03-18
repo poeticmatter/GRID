@@ -26,6 +26,7 @@ export const GameLayout = () => {
     const credits = usePlayerStore(state => state.playerStats.credits);
     const isMenuOpen = useUIStore(state => state.isMenuOpen);
     const setIsMenuOpen = useUIStore(state => state.setIsMenuOpen);
+    const setIsTopologyOpen = useUIStore(state => state.setIsTopologyOpen);
     const [isShaking, setIsShaking] = useState(false);
     const [showVignette, setShowVignette] = useState(false);
 
@@ -49,6 +50,7 @@ export const GameLayout = () => {
         gameEventBus.emit('AUDIO_INIT');
         Dispatch({ type: 'INITIALIZE_GAME' });
         setIsMenuOpen(false);
+        setIsTopologyOpen(true);
     };
 
     const handleMenu = () => {

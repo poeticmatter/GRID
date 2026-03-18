@@ -149,17 +149,16 @@ export const networkGraphSystem: SystemFunction = (snapshot, deltas) => {
             // Remove from active set
             nextActiveIds = nextActiveIds.filter(id => id !== hackedId);
 
-            // Promote immediate unhacked, non-bypassed children
+            // Reveal immediate unhacked, non-bypassed children without activating them.
+            // Players must manually access revealed nodes via ACCESS_NODE.
             for (const childId of hackedNode.children) {
                 const child = draft[childId];
                 if (
                     child &&
                     child.status !== 'HACKED' &&
-                    child.status !== 'BYPASSED' &&
-                    !nextActiveIds.includes(childId)
+                    child.status !== 'BYPASSED'
                 ) {
                     child.visibility = 'REVEALED';
-                    nextActiveIds.push(childId);
                 }
             }
         }

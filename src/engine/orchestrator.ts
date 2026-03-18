@@ -317,6 +317,17 @@ export const Dispatch = (action: GameAction) => {
             deltaHistory = evaluateQueue(snapshot);
             break;
         }
+
+        case 'ACCESS_NODE': {
+            const { nodeId } = action.payload;
+            const node = snapshot.nodes[nodeId];
+            if (!node || node.visibility !== 'REVEALED' || snapshot.activeServerIds.includes(nodeId)) break;
+            deltaHistory = [{
+                activeServerIds: [...snapshot.activeServerIds, nodeId],
+                events: [{ type: 'AUDIO_PLAY_SFX', payload: 'click' }]
+            }];
+            break;
+        }
     }
 
     if (deltaHistory.length === 0) return;

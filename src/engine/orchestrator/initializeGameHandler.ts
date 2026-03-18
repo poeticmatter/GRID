@@ -18,9 +18,8 @@ export const handleInitializeGame = (_snapshot: ReadonlyDeep<GameSnapshot>): Sta
         nodes[node.id] = node;
     }
 
-    // Active servers are the immediate children of the HOME node.
-    const homeNode = graphArray.find(n => n.type === 'HOME');
-    const activeServerIds: string[] = homeNode ? homeNode.children : [];
+    // No servers are active at start — player must manually access revealed nodes.
+    const activeServerIds: string[] = [];
 
     return {
         grid,

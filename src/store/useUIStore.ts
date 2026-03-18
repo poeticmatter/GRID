@@ -11,10 +11,12 @@ interface UIState {
     rotation: number;
     spatialMetrics: SpatialMetrics;
     isMenuOpen: boolean;
+    isTopologyOpen: boolean;
     setSelectedCardId: (id: string | null) => void;
     setRotation: (rot: number) => void;
     setSpatialMetrics: (metrics: SpatialMetrics) => void;
     setIsMenuOpen: (isOpen: boolean) => void;
+    setIsTopologyOpen: (isOpen: boolean) => void;
 }
 
 export const useUIStore = create<UIState>((set) => ({
@@ -26,8 +28,10 @@ export const useUIStore = create<UIState>((set) => ({
         nodeRadius: 4,
     },
     isMenuOpen: true,
+    isTopologyOpen: false,
     setSelectedCardId: (selectedCardId) => set({ selectedCardId }),
     setRotation: (rotation) => set({ rotation }),
     setSpatialMetrics: (spatialMetrics) => set({ spatialMetrics }),
     setIsMenuOpen: (isMenuOpen) => set({ isMenuOpen }),
+    setIsTopologyOpen: (isTopologyOpen) => set({ isTopologyOpen }),
 }));

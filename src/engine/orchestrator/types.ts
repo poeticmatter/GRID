@@ -114,4 +114,5 @@ export type GameAction =
     | { type: 'RESOLVE_SYSTEM_RESET' }
     | { type: 'DISCARD_FOR_NET_DAMAGE'; payload: { cardId: string } }
     | { type: 'FINISH_CARD_RESOLUTION' }
-    | { type: 'CANCEL_CARD' };
+    | { type: 'CANCEL_CARD' }
+    | { type: 'ACCESS_NODE'; payload: { nodeId: string } };

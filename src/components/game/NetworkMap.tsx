@@ -3,6 +3,8 @@ import { useViewModel } from '../../hooks/useViewModel';
 import type { NetworkNode, CellColor, CellSymbol } from '../../engine/types';
 import { LAYER_THEME } from '../../presentation/theme';
 import { gameEventBus } from '../../engine/eventBus';
+import { Dispatch } from '../../engine/orchestrator';
+import { useUIStore } from '../../store/useUIStore';
 
 import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle } from 'lucide-react';
 import { SymbolIcon } from './CellSymbols';
@@ -142,19 +144,26 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
     );
 };
 
-const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'BYPASSED' | 'LOCKED' | 'HOME' }) => {
+const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'BYPASSED' | 'LOCKED' | 'HOME' | 'REACHABLE', onClick?: () => void, isSelected?: boolean }) => {
     const isCleared = state === 'CLEARED';
     const isBypassed = state === 'BYPASSED';
     const isLocked = state === 'LOCKED';
     const isActive = state === 'ACTIVE';
     const isHome = state === 'HOME';
+    const isReachable = state === 'REACHABLE';
 
     let bgClass = "bg-zinc-900/50 border-zinc-700 text-zinc-600";
     if (isHome) bgClass = "bg-grid-bg border-green-500 text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)]";
     if (isCleared) bgClass = "bg-grid-bg border-green-500 text-phosphor opacity-80 grid-clear";
     if (isBypassed) bgClass = "bg-grid-bg border-grid-border text-grid-border opacity-40 grayscale";
-    if (isLocked) bgClass = "bg-grid-bg border-grid-border text-grid-border opacity-50 grayscale";
+    if (isLocked) bgClass = "bg-zinc-900/80 border-zinc-500 text-zinc-400 opacity-70";
     if (isActive) bgClass = "bg-grid-surface border-phosphor text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)] z-50";
+    if (isReachable) bgClass = isSelected
+        ? "bg-amber-950/80 border-amber-400 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] z-50 cursor-pointer"
+        : "bg-zinc-900/70 border-amber-500/60 text-amber-400/80 cursor-pointer hover:border-amber-400 hover:drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] transition-all";
+
+    const isTerminal = server.type === 'SERVER' || server.type === 'MAINFRAME';
+    const shapeClass = isTerminal ? 'rounded-lg' : 'rounded-full';
 
     const STEP_TIME = 0.5;
     const CYCLE_TIME = 4;
@@ -163,13 +172,15 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
     return (
         <motion.div
             layoutId={`server-${server.id}`}
-            className={`w-12 h-12 rounded-full flex flex-col items-center justify-center border-2 backdrop-blur-md relative cursor-default group shadow-lg pointer-events-auto ${bgClass}`}
+            className={`w-12 h-12 ${shapeClass} flex flex-col items-center justify-center border-2 backdrop-blur-md relative group shadow-lg pointer-events-auto ${bgClass}`}
+            onClick={onClick}
         >
             {isHome ? <Globe className="w-6 h-6" /> :
                 isLocked ? <HelpCircle className="w-5 h-5" /> :
-                    server.type === 'MAINFRAME' ? <Database className="w-5 h-5" /> :
-                        server.type === 'ICE' ? <Lock className="w-5 h-5" /> :
-                            <ServerIcon className="w-5 h-5" />}
+                    isReachable ? <HelpCircle className="w-5 h-5" /> :
+                        server.type === 'MAINFRAME' ? <Database className="w-5 h-5" /> :
+                            server.type === 'ICE' ? <Lock className="w-5 h-5" /> :
+                                <ServerIcon className="w-5 h-5" />}
 
             {/* Active Server Layer Preview */}
             {isActive && (
@@ -202,7 +213,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
 
             {isActive && (
                 <motion.div
-                    className="absolute -inset-2 border-2 border-phosphor rounded-full pointer-events-none"
+                    className={`absolute -inset-2 border-2 border-phosphor pointer-events-none ${shapeClass}`}
                     initial={{ scale: 1, opacity: 0.8 }}
                     animate={{ scale: 1.5, opacity: 0 }}
                     transition={{
@@ -215,12 +226,6 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
                 />
             )}
 
-            {/* Tooltip on hover */}
-            <div className="absolute -top-12 opacity-0 group-hover:opacity-100 transition-opacity bg-black/95 text-white text-[10px] py-1.5 px-3 rounded pointer-events-none whitespace-nowrap font-mono border border-slate-600/50 z-50 flex flex-col items-center shadow-xl">
-                <span className="font-bold text-phosphor text-xs mb-0.5">{server.name}</span>
-                <span className="text-white/60">{server.type} {server.type !== 'HOME' && `L${server.difficulty}`}</span>
-            </div>
-
             {/* Sub-label for status */}
             <div className="absolute -bottom-5 text-[9px] font-mono font-bold tracking-widest text-slate-400 pointer-events-none drop-shadow-md whitespace-nowrap">
                 {isHome && 'GATEWAY'}
@@ -228,6 +233,7 @@ const CircularNodeIcon = ({ server, state }: { server: NetworkNode, state: 'ACTI
                 {isBypassed && 'BYPASSED'}
                 {isLocked && 'ENCRYPTED'}
                 {isActive && server.type}
+                {isReachable && <span className="text-amber-400">REACHABLE</span>}
             </div>
         </motion.div>
     );
@@ -264,7 +270,9 @@ const TopologyToggleButton = ({ isOpen, onClick }: { isOpen: boolean, onClick: (
 export const NetworkMap = () => {
     // Consume normalized node state from the ViewModel for temporal decoupling.
     const { nodes, activeServerIds } = useViewModel();
-    const [isOpen, setIsOpen] = useState(false);
+    const isOpen = useUIStore(state => state.isTopologyOpen);
+    const setIsOpen = useUIStore(state => state.setIsTopologyOpen);
+    const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
 
     // Derived: all nodes as an array (for topology rendering)
     const networkGraph = useMemo(() => Object.values(nodes), [nodes]);
@@ -293,23 +301,32 @@ export const NetworkMap = () => {
         return coords;
     }, [networkGraph]);
 
+
     if (!networkGraph || networkGraph.length === 0) return null;
 
     // Derive node visual state purely from the SSOT — no cross-referencing two arrays.
-    const getNodeState = (node: NetworkNode) => {
+    const getNodeState = (node: NetworkNode): 'HOME' | 'CLEARED' | 'BYPASSED' | 'ACTIVE' | 'REACHABLE' | 'LOCKED' => {
         if (node.type === 'HOME') return 'HOME';
         if (node.status === 'HACKED') return 'CLEARED';
         if (node.status === 'BYPASSED') return 'BYPASSED';
         // A node is ACTIVE if it appears in the activeServerIds index
         if (activeServerIds.includes(node.id)) return 'ACTIVE';
+        // A node is REACHABLE if it has been revealed but not yet accessed
+        if (node.visibility === 'REVEALED') return 'REACHABLE';
         return 'LOCKED';
+    };
+
+    const handleAccessNode = () => {
+        if (!selectedNodeId) return;
+        Dispatch({ type: 'ACCESS_NODE', payload: { nodeId: selectedNodeId } });
+        setSelectedNodeId(null);
     };
 
     return (
         <>
             <CountermeasureToastLayer />
             <div className="w-full flex flex-col items-center pt-[clamp(0.5rem,2vh,1.5rem)] gap-[clamp(0.25rem,1vh,0.75rem)] pointer-events-none">
-                <TopologyToggleButton isOpen={isOpen} onClick={() => setIsOpen(!isOpen)} />
+                <TopologyToggleButton isOpen={isOpen} onClick={() => { setIsOpen(!isOpen); setSelectedNodeId(null); }} />
 
                 {!isOpen && (
                     <div className="w-full flex justify-center z-40">
@@ -399,6 +416,9 @@ export const NetworkMap = () => {
                         {networkGraph.map(node => {
                             const coord = nodeCoords[node.id];
                             if (!coord) return null;
+                            const nodeState = getNodeState(node);
+                            const isReachable = nodeState === 'REACHABLE';
+                            const isSelected = selectedNodeId === node.id;
                             return (
                                 <div
                                     key={node.id}
@@ -409,7 +429,26 @@ export const NetworkMap = () => {
                                         transform: 'translate(-50%, -50%)'
                                     }}
                                 >
-                                    <CircularNodeIcon server={node} state={getNodeState(node)} />
+                                    <CircularNodeIcon
+                                        server={node}
+                                        state={nodeState}
+                                        isSelected={isSelected}
+                                        onClick={isReachable ? () => setSelectedNodeId(prev => prev === node.id ? null : node.id) : undefined}
+                                    />
+                                    <AnimatePresence>
+                                        {isSelected && (
+                                            <motion.button
+                                                initial={{ opacity: 0, y: -4, scale: 0.9 }}
+                                                animate={{ opacity: 1, y: 0, scale: 1 }}
+                                                exit={{ opacity: 0, y: -4, scale: 0.9 }}
+                                                transition={{ duration: 0.15 }}
+                                                onClick={handleAccessNode}
+                                                className="absolute top-[calc(100%+1.5rem)] left-1/2 -translate-x-1/2 px-4 py-1.5 bg-amber-500/20 border border-amber-400 text-amber-300 font-mono font-bold text-[10px] tracking-widest uppercase rounded whitespace-nowrap hover:bg-amber-500/30 hover:text-amber-200 hover:border-amber-300 transition-colors shadow-[0_0_12px_rgba(251,191,36,0.25)] active:scale-95 pointer-events-auto"
+                                            >
+                                                ACCESS NODE
+                                            </motion.button>
+                                        )}
+                                    </AnimatePresence>
                                 </div>
                             );
                         })}
