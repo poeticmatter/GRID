@@ -11,7 +11,6 @@ export const initAudio = async () => {
   }
 
   await Tone.start();
-  console.log('Audio Context Started');
 
   synth = new Tone.PolySynth(Tone.Synth, {
     oscillator: { type: 'fmsquare', modulationType: 'sawtooth', modulationIndex: 3, harmonicity: 3.4 },

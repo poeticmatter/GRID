@@ -21,7 +21,6 @@ export class NodeRegistry {
     public getRandomPoolId(): string {
         const poolKeys = Object.keys(this.pool);
         if (poolKeys.length === 0) {
-            console.warn('NodeRegistry pool is empty, returning fallback name');
             return 'FallbackPool';
         }
         const index = Math.floor(Math.random() * poolKeys.length);
@@ -31,8 +30,6 @@ export class NodeRegistry {
     public selectNode(poolId: string, targetDifficulty?: number): NetworkNode {
         const pool = this.pool[poolId];
         if (!pool || pool.length === 0) {
-            // Fallback for missing pool
-            console.warn(`Pool ${String(poolId)} is missing or empty. Using default node.`);
             return this.createNetworkNode({
                 type: 'SERVER',
                 name: 'Fallback Node',
@@ -102,7 +99,6 @@ export class NodeRegistry {
         let candidates = allDefs.filter(d => d.type === nodeType);
 
         if (candidates.length === 0) {
-            console.warn(`No definitions found for type ${nodeType}. Falling back to selectNode.`);
             const poolId = this.getRandomPoolId();
             return this.selectNode(poolId, targetDifficulty);
         }

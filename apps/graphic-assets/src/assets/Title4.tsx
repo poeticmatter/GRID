@@ -7,8 +7,6 @@ import { forwardRef } from 'react';
  */
 const Title4 = forwardRef<SVGSVGElement>((_, ref) => {
     const css = `
-        @import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
-
         .t4-text {
             font-family: 'VT323', 'Courier New', monospace;
             font-size: 100px;

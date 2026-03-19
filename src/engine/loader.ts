@@ -23,10 +23,7 @@ export async function loadGameAssets() {
         // Registry Initialization
         cardRegistry.initialize(validatedCards);
         nodeRegistry.initialize(validatedNodes);
-
-        console.log('Successfully loaded and validated game assets');
     } catch (error) {
-        console.error('Asset Ingestion Error:', error);
-        throw error; // Re-throw to be handled by the app initialization
+        throw error;
     }
 }

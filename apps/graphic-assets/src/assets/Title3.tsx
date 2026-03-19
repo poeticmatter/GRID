@@ -8,8 +8,6 @@ import { forwardRef } from 'react';
  */
 const Title3 = forwardRef<SVGSVGElement>((_, ref) => {
     const css = `
-        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
-
         .t3-text {
             font-family: 'Share Tech Mono', 'Courier New', monospace;
             font-size: 100px;

@@ -93,7 +93,6 @@ export function applyCountermeasure(
         }
 
         default:
-            console.warn(`Unknown countermeasure type: ${cm.type}`);
             break;
     }
 }
