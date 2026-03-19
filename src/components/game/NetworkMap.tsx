@@ -251,6 +251,26 @@ const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: Netw
                 </div>
             )}
 
+            {/* Reachable Server Layer Preview (Small Indicators) */}
+            {isReachable && (
+                <div className="absolute -top-3 flex gap-1 flex-wrap justify-center w-full pointer-events-none z-[60]">
+                    {Object.entries(server.layers || {}).map(([colorStr, requirements]) => {
+                        const color = colorStr as CellColor;
+                        if (!requirements || requirements.length === 0) return null;
+                        return (
+                            <div
+                                key={color}
+                                className={clsx(
+                                    "w-2.5 h-2.5 rounded-sm border shadow-sm",
+                                    LAYER_THEME[color].bg,
+                                    LAYER_THEME[color].border
+                                )}
+                            />
+                        );
+                    })}
+                </div>
+            )}
+
             {isActive && (
                 <motion.div
                     className={`absolute -inset-2 border-2 border-phosphor pointer-events-none ${shapeClass}`}
