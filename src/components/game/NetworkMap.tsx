@@ -9,7 +9,7 @@ import { useUIStore } from '../../store/useUIStore';
 import { Lock, Database, Globe, ChevronDown, ChevronUp, Server as ServerIcon, HelpCircle } from 'lucide-react';
 import { SymbolIcon } from './CellSymbols';
 import { clsx } from 'clsx';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import { CityBackground } from './CityBackground';
 
 
@@ -144,6 +144,48 @@ const ServerCard = ({ server }: { server: NetworkNode }) => {
     );
 };
 
+const ReachableServerCard = ({ server }: { server: NetworkNode }) => {
+    return (
+        <motion.div
+            layoutId={`server-${server.id}`}
+            initial={{ opacity: 0, x: 50 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
+            className="w-[clamp(140px,25vw,192px)] bg-grid-bg border border-green-500/40 rounded p-[clamp(0.375rem,1vh,0.5rem)] flex flex-col gap-1 shadow-lg pointer-events-auto min-h-0 z-[110]"
+        >
+            <div className="flex justify-between items-center border-b border-white/10 pb-1">
+                <span className="text-[clamp(0.6rem,1.2vh,0.75rem)] font-mono font-bold text-phosphor truncate w-32">{server.name}</span>
+                <span className="text-[clamp(0.5rem,1vh,0.625rem)] bg-grid-surface px-1 rounded text-phosphor/50 leading-none">{server.type.substring(0, 3)}</span>
+            </div>
+
+            {/* Layer color indicators — one per color, no capacities shown */}
+            <div className="flex flex-row my-[clamp(0.25rem,1.5vh,0.5rem)] gap-[clamp(0.25rem,1vh,0.5rem)]">
+                {Object.keys(server.layers || {}).map((colorStr) => {
+                    const color = colorStr as CellColor;
+                    const requirements = server.layers[color];
+                    if (!requirements || requirements.length === 0) return null;
+                    return (
+                        <div
+                            key={color}
+                            className={clsx(
+                                "w-[clamp(1rem,2.5vh,1.25rem)] h-[clamp(1rem,2.5vh,1.25rem)] rounded border",
+                                LAYER_THEME[color].bg, LAYER_THEME[color].border
+                            )}
+                        />
+                    );
+                })}
+            </div>
+
+            <button
+                onClick={() => Dispatch({ type: 'ACCESS_NODE', payload: { nodeId: server.id } })}
+                className="mt-auto w-full py-1 bg-amber-500/10 border border-amber-500/40 text-amber-300/80 font-mono font-bold text-[clamp(0.5rem,1vh,0.625rem)] tracking-widest uppercase rounded hover:bg-amber-500/20 hover:border-amber-400 hover:text-amber-200 transition-colors active:scale-95"
+            >
+                ACCESS NODE
+            </button>
+        </motion.div>
+    );
+};
+
 const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: NetworkNode, state: 'ACTIVE' | 'CLEARED' | 'LOCKED' | 'HOME' | 'REACHABLE', onClick?: () => void, isSelected?: boolean }) => {
     const isCleared = state === 'CLEARED';
     const isLocked = state === 'LOCKED';
@@ -158,7 +200,7 @@ const CircularNodeIcon = ({ server, state, onClick, isSelected }: { server: Netw
     if (isActive) bgClass = "bg-grid-surface border-phosphor text-phosphor drop-shadow-[0_0_8px_rgba(57,255,122,0.8)] z-50";
     if (isReachable) bgClass = isSelected
         ? "bg-amber-950/80 border-amber-400 text-amber-300 drop-shadow-[0_0_8px_rgba(251,191,36,0.8)] z-50 cursor-pointer"
-        : "bg-zinc-900/70 border-amber-500/60 text-amber-400/80 cursor-pointer hover:border-amber-400 hover:drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] transition-all";
+        : "bg-zinc-900/70 border-amber-500/60 text-amber-400/80 cursor-pointer hover:border-amber-400 hover:drop-shadow-[0_0_6px_rgba(251,191,36,0.6)] transition-colors z-50";
 
     const isTerminal = server.type === 'SERVER' || server.type === 'MAINFRAME';
     const shapeClass = isTerminal ? 'rounded-lg' : 'rounded-full';
@@ -280,6 +322,13 @@ export const NetworkMap = () => {
         return activeServerIds.map(id => nodes[id]).filter(Boolean) as NetworkNode[];
     }, [nodes, activeServerIds]);
 
+    // Derived: revealed nodes that are not yet active and not the HOME node
+    const reachableServers = useMemo(() => {
+        return Object.values(nodes).filter(
+            node => node.visibility === 'REVEALED' && !activeServerIds.includes(node.id) && node.type !== 'HOME'
+        ) as NetworkNode[];
+    }, [nodes, activeServerIds]);
+
     const nodeCoords = useMemo(() => {
         if (!networkGraph || networkGraph.length === 0) return {};
 
@@ -320,7 +369,7 @@ export const NetworkMap = () => {
     };
 
     return (
-        <>
+        <LayoutGroup>
             <CountermeasureToastLayer />
             <div className="w-full flex flex-col items-center pt-[clamp(0.5rem,2vh,1.5rem)] gap-[clamp(0.25rem,1vh,0.75rem)] pointer-events-none">
                 <TopologyToggleButton isOpen={isOpen} onClick={() => { setIsOpen(!isOpen); setSelectedNodeId(null); }} />
@@ -335,8 +384,13 @@ export const NetworkMap = () => {
                                     .map((server) => (
                                         <ServerCard key={server.id} server={server} />
                                     ))}
+                                {[...reachableServers]
+                                    .sort((a, b) => a.gridX - b.gridX)
+                                    .map((server) => (
+                                        <ReachableServerCard key={server.id} server={server} />
+                                    ))}
                             </AnimatePresence>
-                            {activeServers.filter(s => s.type !== 'HOME').length === 0 && (
+                            {activeServers.filter(s => s.type !== 'HOME').length === 0 && reachableServers.length === 0 && (
                                 <div className="text-white/30 text-sm font-mono animate-pulse">
                                     SCANNING FOR TARGETS...
                                 </div>
@@ -478,6 +532,6 @@ export const NetworkMap = () => {
                     </motion.div>
                 )}
             </AnimatePresence>
-        </>
+        </LayoutGroup>
     );
 };
