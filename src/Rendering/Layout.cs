@@ -4,19 +4,25 @@ namespace CardPathways.Rendering;
 
 public static class Layout
 {
-    public const int WindowWidth = 1280;
-    public const int WindowHeight = 720;
+    public const int WindowWidth = 1920;
+    public const int WindowHeight = 1080;
 
     public const int MapStartX = 50;
     public const int MapStartY = 50;
 
-    public const int SubCellSize = 12;
+    public const int SubCellSize = 20;
     public const int CellSize = SubCellSize * 9;
-    public const int CellPadding = 5;
+    public const int CellPadding = 0;
 
-    public const int HandStartX = 800;
+    public const int MapCols = 5;
+    public const int HandStartX = MapStartX + MapCols * CellSize + 50;
     public const int HandStartY = 50;
-    public const int HandCardSpacing = 140;
+    public const int HandCardSpacing = 200;
+
+    public const int QuitButtonX = WindowWidth - 110;
+    public const int QuitButtonY = 20;
+    public const int QuitButtonWidth = 90;
+    public const int QuitButtonHeight = 34;
 
     public static readonly Color BackgroundColor = new Color(20, 20, 30, 255);
     public static readonly Color GridColor = new Color(40, 40, 50, 255);

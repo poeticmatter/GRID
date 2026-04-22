@@ -15,10 +15,11 @@ var tiles = DataLoader.LoadTiles(tilesPath);
 var gameController = new GameController(cards, tiles);
 var renderer = new Renderer(gameController);
 
+Raylib.SetConfigFlags(ConfigFlags.FullscreenMode);
 Raylib.InitWindow(Layout.WindowWidth, Layout.WindowHeight, "Card Pathways");
 Raylib.SetTargetFPS(60);
 
-while (!Raylib.WindowShouldClose())
+while (!Raylib.WindowShouldClose() && !renderer.WantsQuit)
 {
     renderer.Update();
 }

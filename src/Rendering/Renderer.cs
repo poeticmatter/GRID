@@ -17,6 +17,8 @@ public class Renderer
     private string? _statusMessage;
     private double _statusMessageExpiry;
 
+    public bool WantsQuit { get; private set; }
+
     public Renderer(GameController gameController)
     {
         _gameController = gameController;
@@ -31,6 +33,22 @@ public class Renderer
 
     private void HandleInput()
     {
+        if (Raylib.IsKeyPressed(KeyboardKey.Escape))
+        {
+            WantsQuit = true;
+            return;
+        }
+
+        if (Raylib.IsMouseButtonPressed(MouseButton.Left))
+        {
+            var quitRect = new Rectangle(Layout.QuitButtonX, Layout.QuitButtonY, Layout.QuitButtonWidth, Layout.QuitButtonHeight);
+            if (Raylib.CheckCollisionPointRec(Raylib.GetMousePosition(), quitRect))
+            {
+                WantsQuit = true;
+                return;
+            }
+        }
+
         if (_state.Status != GameStatus.Playing)
         {
             if (Raylib.IsKeyPressed(KeyboardKey.R))
@@ -156,10 +174,7 @@ public class Renderer
                     DrawInactiveCell(coord, startX, startY);
 
                 if (_validTargets != null && _state.Status == GameStatus.Playing && _validTargets.Contains(coord))
-                {
-                    Raylib.DrawRectangleLines(startX, startY, Layout.CellSize, Layout.CellSize, Color.Yellow);
                     Raylib.DrawRectangle(startX, startY, Layout.CellSize, Layout.CellSize, Layout.ColorHighlight);
-                }
             }
         }
     }
@@ -176,14 +191,11 @@ public class Renderer
                 int cellY = startY + r * Layout.SubCellSize;
 
                 Raylib.DrawRectangle(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, GetSubCellColor(composite[r, c]));
-                Raylib.DrawRectangleLines(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, Layout.GridColor);
 
                 if (_state.Reachable.Contains(new SubCoord(c, r)))
                     Raylib.DrawRectangle(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, Layout.ColorReachable);
             }
         }
-
-        Raylib.DrawRectangleLines(startX, startY, Layout.CellSize, Layout.CellSize, Color.White);
     }
 
     private void DrawInactiveCell(MapCoord coord, int startX, int startY)
@@ -200,11 +212,8 @@ public class Renderer
                 int cellY = startY + offset + r * Layout.SubCellSize;
 
                 Raylib.DrawRectangle(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, GetSubCellColor(tile.Grid[r, c]));
-                Raylib.DrawRectangleLines(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, Layout.GridColor);
             }
         }
-
-        Raylib.DrawRectangleLines(startX, startY, Layout.CellSize, Layout.CellSize, Color.DarkGray);
     }
 
     private void DrawHand()
@@ -225,12 +234,8 @@ public class Renderer
                     int cellY = startY + r * Layout.SubCellSize;
 
                     Raylib.DrawRectangle(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, GetSubCellColor(card.Grid[r, c]));
-                    Raylib.DrawRectangleLines(cellX, cellY, Layout.SubCellSize, Layout.SubCellSize, Layout.GridColor);
                 }
             }
-
-            var borderColor = (_selectedCard == card) ? Color.Yellow : Color.Gray;
-            Raylib.DrawRectangleLines(startX, startY, Layout.CellSize, Layout.CellSize, borderColor);
         }
     }
 
@@ -238,6 +243,9 @@ public class Renderer
     {
         Raylib.DrawText($"Deck: {_state.DeckCount}", Layout.HandStartX + 150, 20, 20, Color.White);
         Raylib.DrawText($"Discard: {_state.DiscardCount}", Layout.HandStartX + 250, 20, 20, Color.White);
+
+        Raylib.DrawRectangle(Layout.QuitButtonX, Layout.QuitButtonY, Layout.QuitButtonWidth, Layout.QuitButtonHeight, new Color(120, 40, 40, 255));
+        Raylib.DrawText("QUIT", Layout.QuitButtonX + 20, Layout.QuitButtonY + 8, 18, Color.White);
 
         if (_statusMessage != null && Raylib.GetTime() < _statusMessageExpiry)
             Raylib.DrawText(_statusMessage, Layout.MapStartX, Layout.WindowHeight - 30, 18, Color.Orange);
