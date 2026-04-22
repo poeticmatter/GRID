@@ -15,6 +15,6 @@ public class GameState
     public HashSet<SubCoord> Reachable { get; set; } = new();
     public GameStatus Status { get; set; } = GameStatus.Playing;
 
-    // Store active card def to know hand size & ID for discarding
+    // Always set by GameController.Initialize before any game code reads this.
     public CardDefinition ActiveCardDef { get; set; } = null!;
 }

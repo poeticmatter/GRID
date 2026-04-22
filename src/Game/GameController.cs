@@ -28,7 +28,8 @@ public class GameController
         State.Deck.AddRange(deckCards.OrderBy(x => random.Next()));
 
         // Separate tiles
-        var reshuffleTile = allTiles.First(t => t.Grid[1, 1] == SubCell.Shuffle || t.DefinitionId == 23); // id 23 has shuffle in center
+        var reshuffleTile = allTiles.FirstOrDefault(t => t.Grid[1, 1] == SubCell.Shuffle)
+            ?? throw new InvalidOperationException("No tile with a Shuffle sub-cell at center (1,1) found in tiles.json");
         var standardTiles = allTiles.Where(t => t.DefinitionId != reshuffleTile.DefinitionId).ToList();
 
         // There might be more standard tiles than needed, shuffle and take 24
@@ -122,10 +123,9 @@ public class GameController
         // 5. Apply reshuffle
         if (result.TriggeredReshuffle)
         {
-            var random = new Random();
             State.Deck.AddRange(State.Discard);
             State.Discard.Clear();
-            var shuffledDeck = State.Deck.OrderBy(x => random.Next()).ToList();
+            var shuffledDeck = State.Deck.OrderBy(x => Random.Shared.Next()).ToList();
             State.Deck.Clear();
             State.Deck.AddRange(shuffledDeck);
         }
@@ -137,7 +137,9 @@ public class GameController
         // 7. Check win
         if (State.CurrentCell.Col == 4 && State.CurrentCell.Row == 0)
         {
-            if (State.Reachable.Contains(new SubCoord(4, 0)) || State.Reachable.Contains(new SubCoord(8, 4)))
+            var topExit = GameLogic.GetExitPoint(Direction.Top);
+            var rightExit = GameLogic.GetExitPoint(Direction.Right);
+            if (State.Reachable.Contains(topExit) || State.Reachable.Contains(rightExit))
             {
                 State.Status = GameStatus.Won;
             }

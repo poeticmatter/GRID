@@ -34,17 +34,7 @@ public static class GameLogic
         };
     }
 
-    public static SubCoord GetExitPoint(Direction exitEdge)
-    {
-        return exitEdge switch
-        {
-            Direction.Left => new SubCoord(0, 4),
-            Direction.Right => new SubCoord(8, 4),
-            Direction.Top => new SubCoord(4, 0),
-            Direction.Bottom => new SubCoord(4, 8),
-            _ => throw new ArgumentException("Invalid direction")
-        };
-    }
+    public static SubCoord GetExitPoint(Direction exitEdge) => GetEntryPoint(exitEdge);
 
     // Returns reachable cells, keys encountered, doors encountered, shuffles encountered
     public static (HashSet<SubCoord> Reachable, List<SubCoord> Keys, List<SubCoord> Doors, List<SubCoord> Shuffles) ComputeReachability(SubCell[,] composite, Direction entryEdge)
@@ -199,15 +189,15 @@ public static class GameLogic
         // 1. Orthogonally adjacent
         if (Math.Abs(currentCell.Col - targetCell.Col) + Math.Abs(currentCell.Row - targetCell.Row) != 1) return false;
 
-        // 4. Map bounds
+        // 2. Map bounds
         if (targetCell.Col < 0 || targetCell.Col > 4 || targetCell.Row < 0 || targetCell.Row > 4) return false;
 
-        // 2. Current card's reachable set includes exit facing target
+        // 3. Current card's reachable set includes exit facing target
         var exitDirection = GetExitDirectionToTarget(currentCell, targetCell);
         var exitCoord = GetExitPoint(exitDirection);
         if (!currentReachable.Contains(exitCoord)) return false;
 
-        // 3. Candidate card has Passable at entry edge
+        // 4. Candidate card has Passable at entry edge
         var entryDirection = GetEntryDirectionFromMove(currentCell, targetCell);
         var entryCoord = GetEntryPoint(entryDirection);
         var entryCell = candidateCard.Grid[entryCoord.Row, entryCoord.Col];

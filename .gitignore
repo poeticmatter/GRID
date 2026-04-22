@@ -1,14 +1,2 @@
-# Build artifacts
 bin/
 obj/
-
-# User-specific files
-*.user
-*.userosscache
-*.sln.docstates
-
-# IDE / Editor files
-.idea/
-.vscode/
-*.swp
-*~

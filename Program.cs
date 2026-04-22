@@ -5,7 +5,6 @@ using CardPathways.Data;
 using CardPathways.Game;
 using CardPathways.Rendering;
 
-// Initialize DataLoader
 string basePath = AppDomain.CurrentDomain.BaseDirectory;
 string cardsPath = Path.Combine(basePath, "assets", "data", "cards.json");
 string tilesPath = Path.Combine(basePath, "assets", "data", "tiles.json");

@@ -23,7 +23,7 @@ public static class DataLoader
     public static List<CardDefinition> LoadCards(string filePath)
     {
         var json = File.ReadAllText(filePath);
-        var jsonCards = JsonSerializer.Deserialize<List<JsonCard>>(json) ?? throw new Exception("Failed to load cards.json");
+        var jsonCards = JsonSerializer.Deserialize<List<JsonCard>>(json) ?? throw new InvalidOperationException($"Failed to deserialize cards from '{filePath}': result was null");
 
         var cards = new List<CardDefinition>();
         foreach (var jc in jsonCards)
@@ -50,7 +50,7 @@ public static class DataLoader
     public static List<MapTile> LoadTiles(string filePath)
     {
         var json = File.ReadAllText(filePath);
-        var jsonTiles = JsonSerializer.Deserialize<List<JsonTile>>(json) ?? throw new Exception("Failed to load tiles.json");
+        var jsonTiles = JsonSerializer.Deserialize<List<JsonTile>>(json) ?? throw new InvalidOperationException($"Failed to deserialize tiles from '{filePath}': result was null");
 
         var tiles = new List<MapTile>();
         foreach (var jt in jsonTiles)
@@ -83,7 +83,7 @@ public static class DataLoader
             "door" => SubCell.Door,
             "key" => SubCell.Key,
             "shuffle" => SubCell.Shuffle,
-            _ => throw new Exception($"Unknown subcell type: {value}")
+            _ => throw new InvalidOperationException($"Unknown subcell type: '{value}'")
         };
     }
 }

@@ -45,7 +45,8 @@ public class Renderer
             }
 
             // Check map clicks
-            if (_selectedCard != null)
+            var selected = _selectedCard;
+            if (selected != null)
             {
                 for (int row = 0; row < 5; row++)
                 {
@@ -59,9 +60,9 @@ public class Renderer
 
                         if (Raylib.CheckCollisionPointRec(mousePos, cellRect))
                         {
-                            if (_selectedCard != null && _gameController.TryPlayCard(_selectedCard, targetCoord))
+                            if (_gameController.TryPlayCard(selected, targetCoord))
                             {
-                                _selectedCard = null; // deselect after successful play
+                                _selectedCard = null;
                             }
                         }
                     }
