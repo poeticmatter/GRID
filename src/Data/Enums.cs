@@ -28,3 +28,9 @@ public enum GameStatus
     Won,
     Lost
 }
+
+public enum CardRotation
+{
+    Clockwise,
+    CounterClockwise
+}

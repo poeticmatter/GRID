@@ -184,6 +184,29 @@ public static class GameLogic
         throw new ArgumentException("Cells are not orthogonal neighbors");
     }
 
+    // Standard 2D square-matrix rotation. Clockwise: result[col, N-1-row] = source[row, col].
+    // Counter-clockwise: result[N-1-col, row] = source[row, col].
+    // Both produce a fully new array and leave the source untouched.
+    public static SubCell[,] RotateGridClockwise(SubCell[,] source)
+    {
+        int n = source.GetLength(0);
+        var result = new SubCell[n, n];
+        for (int row = 0; row < n; row++)
+            for (int col = 0; col < n; col++)
+                result[col, n - 1 - row] = source[row, col];
+        return result;
+    }
+
+    public static SubCell[,] RotateGridCounterClockwise(SubCell[,] source)
+    {
+        int n = source.GetLength(0);
+        var result = new SubCell[n, n];
+        for (int row = 0; row < n; row++)
+            for (int col = 0; col < n; col++)
+                result[n - 1 - col, row] = source[row, col];
+        return result;
+    }
+
     public static bool IsValidMove(MapCoord currentCell, IReadOnlySet<SubCoord> currentReachable, CardDefinition candidateCard, MapCoord targetCell)
     {
         // 1. Orthogonally adjacent

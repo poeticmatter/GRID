@@ -67,6 +67,24 @@ public class Renderer
 
         var mousePos = Raylib.GetMousePosition();
 
+        if (_selectedCard != null)
+        {
+            CardRotation? rotation = null;
+            if (Raylib.IsKeyPressed(KeyboardKey.E)) rotation = CardRotation.Clockwise;
+            else if (Raylib.IsKeyPressed(KeyboardKey.Q)) rotation = CardRotation.CounterClockwise;
+
+            if (rotation.HasValue)
+            {
+                var rotated = _gameController.TryRotateSelectedCard(_selectedCard, rotation.Value);
+                if (rotated != null)
+                {
+                    _selectedCard = rotated;
+                    _validTargets = ComputeValidTargets(rotated);
+                }
+                return;
+            }
+        }
+
         if (Raylib.IsMouseButtonPressed(MouseButton.Left))
         {
             if (_selectedCard != null)

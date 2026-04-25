@@ -176,6 +176,25 @@ Each turn executes these steps exactly, in order:
 
 ---
 
+## Card Rotation
+
+At any point during play, the player may rotate a selected card 90° clockwise (E key) or counter-clockwise (Q key):
+
+1. A new `CardDefinition` is created with the same `Id`, `Role`, and `HandSize` as the original, but with its `Grid` replaced by the rotated 9×9 array.
+2. The original card reference is replaced with this new instance at the same index in `Hand`. The original `CardDefinition` template loaded from JSON is never modified.
+3. The valid-target cache is recomputed immediately after rotation, because the new entry/exit sub-cell positions determine which map cells are reachable.
+4. If a rotated card is later discarded and shuffled back into the deck, it retains its rotation — the deck and discard pile hold `CardDefinition` instances, not template references.
+
+Rotation is only available when a card is selected and the game is in `Playing` status.
+
+The mathematical transformation for the 9×9 grid (indexed `[row, col]`):
+- **Clockwise:** `result[col, N-1-row] = source[row, col]`
+- **Counter-clockwise:** `result[N-1-col, row] = source[row, col]`
+
+This maps edge midpoints correctly: e.g., a card's left exit at `(row=4, col=0)` rotates clockwise to the top exit at `(row=0, col=4)`.
+
+---
+
 ## Discard Action
 
 At any point during play, the player may discard a selected card from hand without playing it:
@@ -310,7 +329,6 @@ Data        (CardDefinition, MapTile, enums — no behavior)
 
 ## Out of Scope (MVP)
 
-- Card rotation
 - Multiple players
 - Scoring / move counter
 - Traversal-based rules
@@ -334,3 +352,4 @@ Data        (CardDefinition, MapTile, enums — no behavior)
 | 2026-04-22 | Add Discard action mechanic; add HandSize label on top-left sub-cell of cards; update rendering conventions | Aurore |
 | 2026-04-22 | Replace magic Id==0 with CardRole/TileRole enums; start card and start tile are now declared in JSON via role field | Aurore |
 | 2026-04-23 | Add `TileRole.Center`; center tile is now declared in JSON via `role: center` instead of being identified by Shuffle sub-cell position | Aurore |
+| 2026-04-25 | Implement card rotation (Q/E keys); remove from Out of Scope; add Card Rotation section; document `CardRotation` enum and grid transformation math | Aurore |

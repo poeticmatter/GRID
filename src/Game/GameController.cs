@@ -99,6 +99,29 @@ public class GameController
         }
     }
 
+    public CardDefinition? TryRotateSelectedCard(CardDefinition card, CardRotation rotation)
+    {
+        if (_state.Status != GameStatus.Playing) return null;
+
+        int index = _state.Hand.IndexOf(card);
+        if (index < 0) return null;
+
+        var rotatedGrid = rotation == CardRotation.Clockwise
+            ? GameLogic.RotateGridClockwise(card.Grid)
+            : GameLogic.RotateGridCounterClockwise(card.Grid);
+
+        var rotatedCard = new CardDefinition
+        {
+            Id = card.Id,
+            Role = card.Role,
+            HandSize = card.HandSize,
+            Grid = rotatedGrid
+        };
+
+        _state.Hand[index] = rotatedCard;
+        return rotatedCard;
+    }
+
     public bool TryDiscardCard(CardDefinition card)
     {
         if (_state.Status != GameStatus.Playing) return false;

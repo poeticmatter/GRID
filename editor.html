@@ -217,7 +217,10 @@
 
 <div class="panels">
   <div id="cardsPanel">
-    <div class="panel-title">Cards — 9×9</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+      <div class="panel-title" style="margin-bottom:0">Cards — 9×9</div>
+      <button class="btn" onclick="addCard()">+ Add card</button>
+    </div>
     <div class="items-grid" id="cardsGrid"></div>
   </div>
   <div id="tilesPanel">
@@ -694,6 +697,23 @@ function download(type) {
   a.download = isCard ? 'cards.json' : 'tiles.json';
   a.click();
   URL.revokeObjectURL(url);
+}
+
+// ── add card ──────────────────────────────────────────────────────────────────
+
+function addCard() {
+  const newId = cards.reduce((max, c) => Math.max(max, c.id), -1) + 1;
+
+  const grid = [];
+  for (let r = 0; r < 9; r++) {
+    const row = [];
+    for (let c = 0; c < 9; c++) row.push(isCardHole(r, c) ? 'H' : ' ');
+    grid.push(row);
+  }
+
+  const card = { id: newId, handSize: 3, _grid: grid };
+  cards.push(card);
+  document.getElementById('cardsGrid').appendChild(buildCardItem(card));
 }
 
 // ── init ──────────────────────────────────────────────────────────────────────
