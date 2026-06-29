@@ -17,4 +17,5 @@ public static class Palette
     public static readonly Color Background = new(0x11, 0x11, 0x11, 0xFF);
     public static readonly Color UIElement = new(0x33, 0x33, 0x33, 0xFF);
     public static readonly Color Text = new(0xEE, 0xEE, 0xEE, 0xFF);
+    public static readonly Color Corrupt = new(0x55, 0x55, 0x55, 0xFF);
 }

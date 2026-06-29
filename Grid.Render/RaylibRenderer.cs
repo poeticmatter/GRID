@@ -22,12 +22,13 @@ public class RaylibRenderer : IRenderer
         Raylib.ClearBackground(Palette.Background);
     }
 
-    public void RenderMission(Mission mission)
+    public void RenderMission(Mission mission, UIState uiState)
     {
         DrawResourceBar(mission);
+        DrawSidePanels(mission);
         DrawServerConsole(mission);
         DrawGridConsole(mission);
-        DrawActionBar(mission);
+        DrawActionBar(mission, uiState);
 
         if (mission.State == MissionState.Prompt)
         {
@@ -39,6 +40,37 @@ public class RaylibRenderer : IRenderer
     {
         Raylib.DrawRectangle(0, 0, Layout.InternalWidth, Layout.ResourceBarHeight, Palette.UIElement);
         Raylib.DrawText($"Trace: {mission.Trace.Value}/{mission.Trace.Max}  Compute: {mission.Compute.Value}/{mission.Compute.Max}  Credits: {mission.Credits}", 4, 2, 10, Palette.Text);
+    }
+
+    private void DrawSidePanels(Mission mission)
+    {
+        // Left side: Hardware
+        Raylib.DrawText("HARDWARE:", 10, Layout.ResourceBarHeight + 10, 10, Palette.Text);
+        int y = Layout.ResourceBarHeight + 25;
+        if (mission.Hardware.Count == 0)
+        {
+            Raylib.DrawText("None", 10, y, 10, Palette.Corrupt);
+        }
+        else
+        {
+            foreach (var hw in mission.Hardware)
+            {
+                Raylib.DrawText($"- {hw.Name}", 10, y, 10, Palette.Text);
+                y += 12;
+            }
+        }
+
+        // Right side: Software
+        Raylib.DrawText("SOFTWARE:", 350, Layout.ResourceBarHeight + 10, 10, Palette.Text);
+        y = Layout.ResourceBarHeight + 25;
+        foreach (var slot in mission.SoftwareSlots)
+        {
+            string slotName = slot.Key.ToString();
+            string swName = slot.Value != null ? slot.Value.Name : "[Empty]";
+            Color color = slot.Value != null ? Palette.Text : Palette.Corrupt;
+            Raylib.DrawText($"{slotName}: {swName}", 350, y, 10, color);
+            y += 12;
+        }
     }
 
     private void DrawServerConsole(Mission mission)
@@ -53,17 +85,33 @@ public class RaylibRenderer : IRenderer
 
         int rowY = startY + Layout.ConsoleBorder + Layout.LayerConsolePad;
 
-        for (int i = 0; i < mission.Layers.Count; i++)
+        int visibleRows = Layout.LayerVisibleRows;
+        int currentIdx = mission.CurrentLayerIndex;
+        int totalLayers = mission.Layers.Count;
+
+        int startIndex = 0;
+        if (totalLayers > visibleRows)
         {
-            if (i >= Layout.LayerVisibleRows) break; // Simplified scrolling for now
+            startIndex = currentIdx - (visibleRows / 2);
+            if (startIndex < 0) startIndex = 0;
+            if (startIndex + visibleRows > totalLayers) startIndex = totalLayers - visibleRows;
+        }
+        int endIndex = Math.Min(startIndex + visibleRows, totalLayers);
+
+        for (int i = startIndex; i < endIndex; i++)
+        {
             var layer = mission.Layers[i];
 
-            string reqText = string.Join(", ", layer.Requirement.RequiredColors);
+            string reqColorsText = string.Join(", ", layer.Requirement.RequiredColors);
+            string reqText = reqColorsText;
             if (layer.Requirement.WildcardCount > 0)
-                reqText += $" (+{layer.Requirement.WildcardCount} wild)";
+            {
+                if (!string.IsNullOrEmpty(reqColorsText)) reqText += ", ";
+                reqText += string.Join(", ", Enumerable.Repeat("?", layer.Requirement.WildcardCount));
+            }
 
             string state = layer.IsBypassed ? "[Bypassed]" : (layer.IsProbed ? "[Probed]" : "[Unprobed]");
-            string text = $"Layer {i + 1}: {reqText} {state}";
+            string text = $"L{i + 1}: [{reqText}] {state}";
 
             if (i == mission.CurrentLayerIndex && mission.State != MissionState.Idle)
             {
@@ -117,21 +165,45 @@ public class RaylibRenderer : IRenderer
                     _ => Palette.Text
                 };
 
+                if (cell.IsCorrupt)
+                {
+                    bgColor = Palette.Corrupt;
+                    symbolColor = Palette.Background;
+                }
+
                 Raylib.DrawRectangle(cellX, cellY, Layout.CellSize, Layout.CellSize, bgColor);
                 Raylib.DrawRectangleLines(cellX, cellY, Layout.CellSize, Layout.CellSize, Palette.Text); // Border
 
-                // Draw Symbol (Simplified as text for now, should be shapes)
-                string symbolChar = cell.Symbol switch
-                {
-                    CellSymbol.Circle => "O",
-                    CellSymbol.Square => "[]",
-                    CellSymbol.Triangle => "^",
-                    CellSymbol.Diamond => "<>",
-                    _ => "?"
-                };
+                // Draw Symbol as actual shapes
+                int centerX = cellX + Layout.CellSize / 2;
+                int centerY = cellY + Layout.CellSize / 2;
+                int padding = 4;
+                int size = Layout.CellSize - (padding * 2);
 
-                int textW = Raylib.MeasureText(symbolChar, 10);
-                Raylib.DrawText(symbolChar, cellX + (Layout.CellSize - textW) / 2, cellY + 5, 10, symbolColor);
+                if (cell.Symbol == CellSymbol.Circle)
+                {
+                    Raylib.DrawCircle(centerX, centerY, size / 2.0f, symbolColor);
+                }
+                else if (cell.Symbol == CellSymbol.Square)
+                {
+                    Raylib.DrawRectangle(cellX + padding, cellY + padding, size, size, symbolColor);
+                }
+                else if (cell.Symbol == CellSymbol.Triangle)
+                {
+                    System.Numerics.Vector2 v1 = new(centerX, cellY + padding);
+                    System.Numerics.Vector2 v2 = new(cellX + padding, cellY + Layout.CellSize - padding);
+                    System.Numerics.Vector2 v3 = new(cellX + Layout.CellSize - padding, cellY + Layout.CellSize - padding);
+                    Raylib.DrawTriangle(v1, v2, v3, symbolColor);
+                }
+                else if (cell.Symbol == CellSymbol.Diamond)
+                {
+                    System.Numerics.Vector2 top = new(centerX, cellY + padding);
+                    System.Numerics.Vector2 bottom = new(centerX, cellY + Layout.CellSize - padding);
+                    System.Numerics.Vector2 left = new(cellX + padding, centerY);
+                    System.Numerics.Vector2 right = new(cellX + Layout.CellSize - padding, centerY);
+                    Raylib.DrawTriangle(top, left, right, symbolColor);
+                    Raylib.DrawTriangle(bottom, right, left, symbolColor);
+                }
 
                 // Highlight if selected
                 if (mission.SelectedCells.Contains((x, y)))
@@ -142,27 +214,45 @@ public class RaylibRenderer : IRenderer
         }
     }
 
-    private void DrawActionBar(Mission mission)
+    private void DrawActionBar(Mission mission, UIState uiState)
     {
         Raylib.DrawRectangle(0, Layout.InternalHeight - Layout.ActionBarHeight, Layout.InternalWidth, Layout.ActionBarHeight, Palette.UIElement);
-        string text = $"[E]xecute (Cost: {Compute.CalculateCost(mission.SelectedCells.Count)}) | [H]ard Reset (-3 trace) | [S]oft Reset (-2 trace)";
+        string text = "";
+
+        if (uiState.ResetState == ResetMenuState.None)
+        {
+            text = $"[E]xecute (Cost: {Compute.CalculateCost(mission.SelectedCells.Count)}) | [R]eset Menu";
+        }
+        else if (uiState.ResetState == ResetMenuState.ChoosingResetType)
+        {
+            text = "Reset: [H]ard (-3 Trace) | [S]oft (-2 Trace) | [C]ancel";
+        }
+        else if (uiState.ResetState == ResetMenuState.ChoosingSoftResetOption)
+        {
+            text = "Soft Reset Option: [F] Refill Grid | [C] Refresh Compute | [B]ack";
+        }
+
         Raylib.DrawText(text, 4, Layout.InternalHeight - Layout.ActionBarHeight + 4, 10, Palette.Text);
     }
 
     private void DrawPrompt(Mission mission)
     {
-        int w = 250, h = 100;
+        int w = 310, h = 120;
         int x = (Layout.InternalWidth - w) / 2;
         int y = (Layout.InternalHeight - h) / 2;
 
         Raylib.DrawRectangle(x, y, w, h, Palette.Background);
         Raylib.DrawRectangleLines(x, y, w, h, Palette.Text);
 
-        Raylib.DrawText("PROMPT", x + 10, y + 10, 10, Palette.Text);
-        Raylib.DrawText("Blocked by Layer", x + 10, y + 25, 10, Palette.Text);
-        Raylib.DrawText("[B]rute Force (2 Compute)", x + 10, y + 45, 10, Palette.Text);
-        Raylib.DrawText("[P]asscode", x + 10, y + 60, 10, Palette.Text);
-        Raylib.DrawText("[C]onsequence (Halt)", x + 10, y + 75, 10, Palette.Text);
+        var layer = mission.Layers[mission.CurrentLayerIndex];
+
+        Raylib.DrawText("BLOCKED BY LAYER DEFENSES", x + 10, y + 10, 10, Palette.Pink);
+        Raylib.DrawText($"Countermeasure: {layer.Countermeasure.Name} ({layer.Countermeasure.Description})", x + 10, y + 25, 9, Palette.Text);
+        Raylib.DrawText($"Consequence: {layer.Consequence.Name} ({layer.Consequence.Description})", x + 10, y + 38, 9, Palette.Text);
+
+        Raylib.DrawText("[B]rute-Force (-2 Compute, 50% success, triggers countermeasure)", x + 10, y + 55, 8, Palette.Text);
+        Raylib.DrawText($"[P]asscode (Legitimate access, no countermeasure - {mission.Passcodes} left)", x + 10, y + 70, 8, Palette.Text);
+        Raylib.DrawText("[C]onsequence (Accept consequence / Halt)", x + 10, y + 85, 8, Palette.Text);
     }
 
     public void EndFrame()

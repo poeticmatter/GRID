@@ -13,9 +13,10 @@ public static class Program
         // Setup Dependency Injection (manual)
         IRandom rng = new SeededRandom(Guid.NewGuid().GetHashCode());
         var mission = new Mission(rng);
+        var uiState = new UIState();
 
         IRenderer renderer = new RaylibRenderer();
-        var inputHandler = new InputHandler(mission);
+        var inputHandler = new InputHandler(mission, uiState);
 
         renderer.Initialize();
 
@@ -26,7 +27,7 @@ public static class Program
 
             // Render
             renderer.BeginFrame();
-            renderer.RenderMission(mission);
+            renderer.RenderMission(mission, uiState);
             renderer.EndFrame();
         }
 

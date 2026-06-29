@@ -7,29 +7,63 @@ namespace Grid.Input;
 public class InputHandler
 {
     private readonly Mission _mission;
+    private readonly UIState _uiState;
 
-    public InputHandler(Mission mission)
+    public InputHandler(Mission mission, UIState uiState)
     {
         _mission = mission;
+        _uiState = uiState;
     }
 
     public void ProcessInput()
     {
         if (_mission.State == MissionState.Idle || _mission.State == MissionState.Halted)
         {
-            HandleGridInput();
+            if (_uiState.ResetState == ResetMenuState.None)
+            {
+                HandleGridInput();
 
-            if (Raylib.IsKeyPressed(KeyboardKey.E))
-            {
-                _mission.Execute();
+                if (Raylib.IsKeyPressed(KeyboardKey.E))
+                {
+                    _mission.Execute();
+                }
+                if (Raylib.IsKeyPressed(KeyboardKey.R))
+                {
+                    _uiState.ResetState = ResetMenuState.ChoosingResetType;
+                }
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.H))
+            else if (_uiState.ResetState == ResetMenuState.ChoosingResetType)
             {
-                _mission.HardReset();
+                if (Raylib.IsKeyPressed(KeyboardKey.H))
+                {
+                    _mission.HardReset();
+                    _uiState.ResetState = ResetMenuState.None;
+                }
+                else if (Raylib.IsKeyPressed(KeyboardKey.S))
+                {
+                    _uiState.ResetState = ResetMenuState.ChoosingSoftResetOption;
+                }
+                else if (Raylib.IsKeyPressed(KeyboardKey.C))
+                {
+                    _uiState.ResetState = ResetMenuState.None;
+                }
             }
-            if (Raylib.IsKeyPressed(KeyboardKey.S))
+            else if (_uiState.ResetState == ResetMenuState.ChoosingSoftResetOption)
             {
-                _mission.SoftReset(refillGrid: true); // Default to refill grid for now
+                if (Raylib.IsKeyPressed(KeyboardKey.F))
+                {
+                    _mission.SoftReset(refillGrid: true);
+                    _uiState.ResetState = ResetMenuState.None;
+                }
+                else if (Raylib.IsKeyPressed(KeyboardKey.C))
+                {
+                    _mission.SoftReset(refillGrid: false);
+                    _uiState.ResetState = ResetMenuState.None;
+                }
+                else if (Raylib.IsKeyPressed(KeyboardKey.B))
+                {
+                    _uiState.ResetState = ResetMenuState.ChoosingResetType;
+                }
             }
         }
         else if (_mission.State == MissionState.Prompt)

@@ -380,4 +380,164 @@ public class MissionTests
         Assert.Equal(5, trace.Value);
         Assert.True(trace.IsMaxedOut);
     }
+
+    // ── Gaps Resolution Tests ──────────────────────────────────────────────────
+
+    [Fact]
+    public void SelectCell_CorruptCell_IsRejected()
+    {
+        var mission = new Mission(new FixedRandom(0));
+        
+        // Let's add a corrupt cell to the pool and refill the grid.
+        mission.Pool.AddCorruptCell();
+        // Since FixedRandom always returns 0, the shuffle is deterministic and
+        // the corrupt cell (which was added last) might be placed at a specific spot.
+        // Let's force refill so the pool contains the corrupt cell.
+        mission.Grid.Refill(mission.Pool, new FixedRandom(0));
+
+        // Find the corrupt cell in the grid
+        int corruptX = -1, corruptY = -1;
+        for (int y = 0; y < 4; y++)
+        {
+            for (int x = 0; x < 4; x++)
+            {
+                var cell = mission.Grid.GetCell(x, y);
+                if (cell != null && cell.IsCorrupt)
+                {
+                    corruptX = x;
+                    corruptY = y;
+                    break;
+                }
+            }
+        }
+
+        Assert.True(corruptX >= 0, "Corrupt cell should be placed in the grid.");
+
+        // Attempt to select the corrupt cell
+        mission.SelectCell(corruptX, corruptY);
+
+        // Verify it was NOT added to selected cells
+        Assert.DoesNotContain((corruptX, corruptY), mission.SelectedCells);
+    }
+
+    [Fact]
+    public void Countermeasures_TriggerOnBypass()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new TraceCountermeasure(2), new HaltConsequence())
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+        
+        // Select adjacent Cyan cell
+        // FixedRandom(0) grid: (0,0) is Cyan
+        mission.SelectCell(0, 0);
+        
+        int traceBefore = mission.Trace.Value;
+        mission.Execute();
+
+        // 1 trace from execution cost + 2 trace from countermeasure = 3 trace
+        Assert.Equal(traceBefore + GameConstants.ExecutionTraceCost + 2, mission.Trace.Value);
+    }
+
+    [Fact]
+    public void Countermeasures_TriggerOnBruteForce()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new ComputeDrainCountermeasure(3), new HaltConsequence())
+        };
+        var mission = new Mission(new FixedRandom(0), layers); // rng returns 0 -> brute force success
+
+        // Selected cell is at (0,1) which is Pink (fails color requirement, triggers Prompt)
+        mission.SelectCell(0, 1);
+        mission.Execute();
+        Assert.Equal(MissionState.Prompt, mission.State);
+
+        int computeBefore = mission.Compute.Value; // should be 9
+        mission.BruteForce(); // costs 2 compute + drains 3 compute = 5 total spent/drained
+
+        Assert.Equal(computeBefore - GameConstants.BruteForceCost - 3, mission.Compute.Value);
+    }
+
+    [Fact]
+    public void Countermeasures_DoNotTriggerOnPasscode()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new TraceCountermeasure(3), new HaltConsequence())
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+        mission.AddPasscode();
+
+        // Select Pink cell to force Prompt
+        mission.SelectCell(0, 1);
+        mission.Execute();
+        Assert.Equal(MissionState.Prompt, mission.State);
+
+        int traceBefore = mission.Trace.Value; // should be 1 from execution
+        mission.UsePasscode(); // bypasses without countermeasure
+
+        // Trace should remain 1 (no spike from countermeasure)
+        Assert.Equal(traceBefore, mission.Trace.Value);
+    }
+
+    [Fact]
+    public void Consequences_TraceConsequence_TriggersOnDecline()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new EmptyCountermeasure(), new TraceConsequence(4))
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+
+        // Select Pink cell to force Prompt
+        mission.SelectCell(0, 1);
+        mission.Execute();
+        Assert.Equal(MissionState.Prompt, mission.State);
+
+        int traceBefore = mission.Trace.Value; // should be 1
+        mission.TakeConsequence();
+
+        // Trace should increase by 4, state should become Halted, and layer index reset to 0
+        Assert.Equal(traceBefore + 4, mission.Trace.Value);
+        Assert.Equal(MissionState.Halted, mission.State);
+    }
+
+    [Fact]
+    public void Consequences_CorruptionConsequence_AddsCorruptCellToPool()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new EmptyCountermeasure(), new CorruptionConsequence())
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+
+        mission.SelectCell(0, 1);
+        mission.Execute();
+        
+        int poolSizeBefore = mission.Pool.GetCells().Count;
+        mission.TakeConsequence();
+
+        Assert.Equal(poolSizeBefore + 1, mission.Pool.GetCells().Count);
+        Assert.True(mission.Pool.GetCells().Last().IsCorrupt);
+    }
+
+    [Fact]
+    public void Consequences_CreditLossConsequence_DeductsCredits()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new EmptyCountermeasure(), new CreditLossConsequence(30))
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+        mission.AddCredits(100);
+
+        mission.SelectCell(0, 1);
+        mission.Execute();
+        
+        mission.TakeConsequence();
+
+        Assert.Equal(70, mission.Credits);
+    }
 }

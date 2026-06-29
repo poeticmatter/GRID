@@ -19,10 +19,14 @@ public class Layer
     public LayerRequirement Requirement { get; }
     public bool IsBypassed { get; internal set; }
     public bool IsProbed { get; internal set; }
+    public ICountermeasure Countermeasure { get; }
+    public IConsequence Consequence { get; }
 
-    public Layer(LayerRequirement requirement)
+    public Layer(LayerRequirement requirement, ICountermeasure? countermeasure = null, IConsequence? consequence = null)
     {
         Requirement = requirement;
+        Countermeasure = countermeasure ?? new EmptyCountermeasure();
+        Consequence = consequence ?? new HaltConsequence();
     }
 }
 
@@ -44,27 +48,47 @@ public class Mission
     private readonly HashSet<(int x, int y)> _selectedCells = new();
     public IReadOnlySet<(int x, int y)> SelectedCells => _selectedCells;
 
+    private readonly Dictionary<CellSymbol, ISoftware?> _softwareSlots = new()
+    {
+        { CellSymbol.Circle, null },
+        { CellSymbol.Square, null },
+        { CellSymbol.Triangle, null },
+        { CellSymbol.Diamond, null }
+    };
+    public IReadOnlyDictionary<CellSymbol, ISoftware?> SoftwareSlots => _softwareSlots;
+
+    private readonly List<IHardware> _hardware = new();
+    public IReadOnlyList<IHardware> Hardware => _hardware.AsReadOnly();
+
     // Preserved for the duration of an execution so BruteForce/UsePasscode can resume Flow
     // with the original program's colors.
     private List<CellColor> _currentProgramColors = new();
 
     private readonly IRandom _rng;
 
-    public Mission(IRandom rng)
+    public Mission(IRandom rng, IEnumerable<Layer>? layers = null)
     {
         _rng = rng;
         Trace = new Trace();
         Compute = new Compute();
         Pool = new Pool();
         Grid = new GridData();
-        _layers = new List<Layer>();
         State = MissionState.Idle;
 
         Grid.Refill(Pool, _rng);
 
-        // TODO: replace with externally-supplied layer configuration
-        _layers.Add(new Layer(new LayerRequirement(1, CellColor.Cyan, CellColor.Cyan)));
-        _layers.Add(new Layer(new LayerRequirement(0, CellColor.Pink)));
+        if (layers != null)
+        {
+            _layers = new List<Layer>(layers);
+        }
+        else
+        {
+            _layers = new List<Layer>
+            {
+                new Layer(new LayerRequirement(1, CellColor.Cyan, CellColor.Cyan)),
+                new Layer(new LayerRequirement(0, CellColor.Pink))
+            };
+        }
     }
 
     public void AddPasscode(int count = 1)
@@ -80,7 +104,8 @@ public class Mission
     public void SelectCell(int x, int y)
     {
         if (State != MissionState.Idle && State != MissionState.Halted) return;
-        if (Grid.GetCell(x, y) == null) return;
+        var cell = Grid.GetCell(x, y);
+        if (cell == null || cell.IsCorrupt) return;
 
         var pos = (x, y);
         if (_selectedCells.Contains(pos))
@@ -144,13 +169,15 @@ public class Mission
     {
         while (CurrentLayerIndex < _layers.Count)
         {
+            if (State == MissionState.Lost) return;
+
             var layer = _layers[CurrentLayerIndex];
             layer.IsProbed = true;
 
             if (MatchingEngine.CanBypass(programColors, layer.Requirement))
             {
                 layer.IsBypassed = true;
-                // TODO: trigger countermeasure here
+                layer.Countermeasure.Trigger(this);
                 CurrentLayerIndex++;
             }
             else
@@ -160,7 +187,10 @@ public class Mission
             }
         }
 
-        State = MissionState.Won;
+        if (State != MissionState.Lost)
+        {
+            State = MissionState.Won;
+        }
     }
 
     public void BruteForce()
@@ -173,7 +203,9 @@ public class Mission
         bool success = _rng.Next(100) < GameConstants.BruteForceSuccessPercent;
         if (success)
         {
-            _layers[CurrentLayerIndex].IsBypassed = true;
+            var layer = _layers[CurrentLayerIndex];
+            layer.IsBypassed = true;
+            layer.Countermeasure.Trigger(this);
             CurrentLayerIndex++;
             State = MissionState.ExecutionFlowing;
             Flow(_currentProgramColors);
@@ -196,9 +228,8 @@ public class Mission
     public void TakeConsequence()
     {
         if (State != MissionState.Prompt) return;
-        // TODO: apply layer-specific consequence; halt is the common default
-        State = MissionState.Halted;
-        CurrentLayerIndex = 0;
+        var layer = _layers[CurrentLayerIndex];
+        layer.Consequence.Trigger(this);
     }
 
     public void HardReset()
@@ -262,5 +293,47 @@ public class Mission
         }
 
         return visited.Count == cells.Count;
+    }
+
+    // These methods are called only by ICountermeasure/IConsequence implementations
+    // that live in Grid.Core. Internal access prevents the outer ring from bypassing
+    // the guarded command methods to mutate mission state directly.
+
+    internal void AddTrace(int amount)
+    {
+        Trace.Increase(amount);
+        if (Trace.IsMaxedOut)
+            State = MissionState.Lost;
+    }
+
+    internal void SpendCompute(int amount)
+    {
+        Compute.Drain(amount);
+    }
+
+    internal void HaltExecution()
+    {
+        State = MissionState.Halted;
+        CurrentLayerIndex = 0;
+    }
+
+    internal void AddCorruptCellToPool()
+    {
+        Pool.AddCorruptCell();
+    }
+
+    internal void LoseCredits(int amount)
+    {
+        Credits = Math.Max(0, Credits - amount);
+    }
+
+    public void InstallSoftware(ISoftware software)
+    {
+        _softwareSlots[software.TargetSlot] = software;
+    }
+
+    public void InstallHardware(IHardware hardware)
+    {
+        _hardware.Add(hardware);
     }
 }

@@ -38,6 +38,11 @@ public class Compute
         Value -= amount;
     }
 
+    public void Drain(int amount)
+    {
+        Value = Math.Max(0, Value - amount);
+    }
+
     public void Refresh()
     {
         Value = Max;
@@ -71,8 +76,7 @@ public class Pool
 
     public void AddCorruptCell()
     {
-        // TODO: decide corrupt cell representation (§3.3) before implementing
-        throw new NotImplementedException("Corrupt cell representation is TBD.");
+        _cells.Add(new Cell(CellColor.Cyan, CellSymbol.Circle, IsCorrupt: true));
     }
 }
 
