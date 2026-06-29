@@ -370,6 +370,70 @@ public class MissionTests
         Assert.Empty(mission.SelectedCells);
     }
 
+    // ── Probe ──────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Probe_RevealsNextUnprobedLayer()
+    {
+        // Default mission has two unprobed layers; ProbeRevealCount defaults to 1.
+        var mission = new Mission(new FixedRandom(0));
+
+        Assert.All(mission.Layers, layer => Assert.False(layer.IsProbed));
+
+        mission.Probe();
+
+        Assert.True(mission.Layers[0].IsProbed);
+        Assert.False(mission.Layers[1].IsProbed);
+    }
+
+    [Fact]
+    public void Probe_OutsideIdleOrHalted_DoesNothing()
+    {
+        var mission = new Mission(new FixedRandom(0));
+
+        mission.SelectCell(0, 1); // Pink → stops at layer 0
+        mission.Execute();
+        Assert.Equal(MissionState.Prompt, mission.State);
+
+        bool layer1ProbedBefore = mission.Layers[1].IsProbed;
+        mission.Probe(); // rejected while at a Prompt
+
+        Assert.Equal(layer1ProbedBefore, mission.Layers[1].IsProbed);
+    }
+
+    // ── Abandon ────────────────────────────────────────────────────────────────
+
+    [Fact]
+    public void Abandon_FromHalted_SetsAbandonedState()
+    {
+        var mission = new Mission(new FixedRandom(0));
+
+        mission.SelectCell(0, 1);
+        mission.Execute();
+        mission.TakeConsequence(); // Halted
+
+        mission.Abandon();
+
+        Assert.Equal(MissionState.Abandoned, mission.State);
+    }
+
+    [Fact]
+    public void Abandon_AfterWin_IsRejected()
+    {
+        var mission = new Mission(new FixedRandom(0));
+
+        mission.SelectCell(0, 0); // Cyan
+        mission.SelectCell(1, 0); // Cyan
+        mission.SelectCell(2, 0); // Cyan
+        mission.SelectCell(3, 0); // Pink
+        mission.Execute();
+        Assert.Equal(MissionState.Won, mission.State);
+
+        mission.Abandon();
+
+        Assert.Equal(MissionState.Won, mission.State); // terminal state is preserved
+    }
+
     // ── Trace ──────────────────────────────────────────────────────────────────
 
     [Fact]

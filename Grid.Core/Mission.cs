@@ -11,7 +11,8 @@ public enum MissionState
     Prompt,
     Halted,
     Won,
-    Lost
+    Lost,
+    Abandoned
 }
 
 public class Layer
@@ -313,6 +314,44 @@ public class Mission
         }
 
         State = MissionState.Idle;
+    }
+
+    /// <summary>
+    /// Reveals the next unprobed layers ahead so the player can plan before attempting
+    /// them (spec §9.6). Available between executions. Cost and reveal count are [TBD]
+    /// and live in <see cref="GameConstants"/>.
+    /// </summary>
+    public void Probe()
+    {
+        if (State != MissionState.Idle && State != MissionState.Halted) return;
+
+        Trace.Increase(GameConstants.ProbeTraceCost);
+        if (Trace.IsMaxedOut)
+        {
+            State = MissionState.Lost;
+            return;
+        }
+
+        int revealed = 0;
+        foreach (var layer in _layers)
+        {
+            if (revealed >= GameConstants.ProbeRevealCount) break;
+            if (!layer.IsProbed)
+            {
+                layer.IsProbed = true;
+                revealed++;
+            }
+        }
+    }
+
+    /// <summary>
+    /// Leaves the server entirely (spec §9.5). The return-to-map transition and any
+    /// abandon penalty are outer-ring/meta concerns and are [TBD].
+    /// </summary>
+    public void Abandon()
+    {
+        if (State != MissionState.Idle && State != MissionState.Halted && State != MissionState.Prompt) return;
+        State = MissionState.Abandoned;
     }
 
     private static bool AreAllContiguous(HashSet<(int x, int y)> cells)

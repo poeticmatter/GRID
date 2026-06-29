@@ -31,6 +31,14 @@ public class InputHandler
                 {
                     _uiState.ResetState = ResetMenuState.ChoosingResetType;
                 }
+                if (Raylib.IsKeyPressed(KeyboardKey.P))
+                {
+                    _mission.Probe();
+                }
+                if (Raylib.IsKeyPressed(KeyboardKey.X))
+                {
+                    _mission.Abandon();
+                }
                 if (Raylib.IsKeyPressed(KeyboardKey.B))
                 {
                     foreach (var hw in _mission.Hardware)
@@ -105,23 +113,13 @@ public class InputHandler
             float internalX = (mousePos.X - offsetX) / scale;
             float internalY = (mousePos.Y - offsetY) / scale;
 
-            // Hit test against grid console
-            int gridContentSize = (Layout.GridCols * Layout.CellSize) + ((Layout.GridCols - 1) * Layout.CellGap);
-            int totalSize = gridContentSize + (2 * Layout.GridConsolePad) + (2 * Layout.ConsoleBorder);
-            int serverHeight = (Layout.LayerVisibleRows * Layout.LayerRowHeight) + ((Layout.LayerVisibleRows - 1) * Layout.LayerRowGap) + (2 * Layout.LayerConsolePad) + (2 * Layout.ConsoleBorder);
-
-            int startY = Layout.ResourceBarHeight + 10 + serverHeight + Layout.ConsoleSeparatorGap;
-            int startX = (Layout.InternalWidth - totalSize) / 2;
-
-            int contentStartX = startX + Layout.ConsoleBorder + Layout.GridConsolePad;
-            int contentStartY = startY + Layout.ConsoleBorder + Layout.GridConsolePad;
-
+            // Hit-test against the grid console using the shared geometry so the
+            // clickable region always matches what RaylibRenderer draws.
             for (int y = 0; y < Layout.GridRows; y++)
             {
                 for (int x = 0; x < Layout.GridCols; x++)
                 {
-                    int cellX = contentStartX + x * (Layout.CellSize + Layout.CellGap);
-                    int cellY = contentStartY + y * (Layout.CellSize + Layout.CellGap);
+                    var (cellX, cellY) = Layout.CellOrigin(x, y);
 
                     if (internalX >= cellX && internalX <= cellX + Layout.CellSize &&
                         internalY >= cellY && internalY <= cellY + Layout.CellSize)

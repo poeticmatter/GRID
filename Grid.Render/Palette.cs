@@ -18,4 +18,7 @@ public static class Palette
     public static readonly Color UIElement = new(0x33, 0x33, 0x33, 0xFF);
     public static readonly Color Text = new(0xEE, 0xEE, 0xEE, 0xFF);
     public static readonly Color Corrupt = new(0x55, 0x55, 0x55, 0xFF);
+
+    // Additive white wash drawn over a selected cell (UIUX §4.4 "glow + lift").
+    public static readonly Color SelectionOverlay = new(0xFF, 0xFF, 0xFF, 0x64);
 }
