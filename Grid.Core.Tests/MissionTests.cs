@@ -540,4 +540,76 @@ public class MissionTests
 
         Assert.Equal(70, mission.Credits);
     }
+
+    [Fact]
+    public void Software_TraceShield_ReducesTraceSpike()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new TraceCountermeasure(3), new HaltConsequence())
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+        
+        var software = new TraceShieldSoftware();
+        mission.InstallSoftware(software);
+
+        // FixedRandom(0) grid: (3,3) is Cyan/Circle, which has symbol Circle (Circle slot for Trace Shield)
+        mission.SelectCell(3, 3);
+
+        int traceBefore = mission.Trace.Value;
+        mission.Execute();
+
+        // 1 (execution) + 3 (countermeasure) - 1 (shield) = 3 trace
+        Assert.Equal(traceBefore + GameConstants.ExecutionTraceCost + 3 - 1, mission.Trace.Value);
+    }
+
+    [Fact]
+    public void Hardware_BackupBattery_IncreasesComputeOnceBuilt()
+    {
+        var mission = new Mission(new FixedRandom(0));
+        var battery = new BackupBatteryHardware(mission);
+        
+        mission.InstallHardware(battery);
+        
+        Assert.False(battery.IsBuilt);
+        int maxComputeBefore = mission.Compute.Max;
+
+        battery.Build();
+
+        Assert.True(battery.IsBuilt);
+        Assert.Equal(maxComputeBefore + 5, mission.Compute.Max);
+        Assert.Equal(maxComputeBefore + 5, mission.Compute.Value);
+    }
+
+    private class EndFlowCounterSoftware : SoftwareBase
+    {
+        public override string Name => "End Flow Counter";
+        public override string Description => "";
+        public override CellSymbol TargetSlot => CellSymbol.Circle;
+        public int EndFlowCallCount { get; private set; }
+
+        public override void OnEndFlow(Mission mission, int symbolCount, bool won)
+        {
+            EndFlowCallCount++;
+        }
+    }
+
+    [Fact]
+    public void Software_OnEndFlow_FiresExactlyOnceWhenHaltedWithTraceSpike()
+    {
+        var layers = new[]
+        {
+            new Layer(new LayerRequirement(0, CellColor.Cyan), new EmptyCountermeasure(), new TraceConsequence(5))
+        };
+        var mission = new Mission(new FixedRandom(0), layers);
+        var software = new EndFlowCounterSoftware();
+        mission.InstallSoftware(software);
+
+        mission.SelectCell(3, 3);
+        mission.Execute();
+
+        mission.TakeConsequence();
+
+        Assert.Equal(1, software.EndFlowCallCount);
+    }
 }

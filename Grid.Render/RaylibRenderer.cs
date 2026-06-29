@@ -55,7 +55,9 @@ public class RaylibRenderer : IRenderer
         {
             foreach (var hw in mission.Hardware)
             {
-                Raylib.DrawText($"- {hw.Name}", 10, y, 10, Palette.Text);
+                string status = hw.IsBuilt ? "" : " (Schematic)";
+                Color color = hw.IsBuilt ? Palette.Text : Palette.Corrupt;
+                Raylib.DrawText($"- {hw.Name}{status}", 10, y, 10, color);
                 y += 12;
             }
         }
@@ -67,7 +69,20 @@ public class RaylibRenderer : IRenderer
         {
             string slotName = slot.Key.ToString();
             string swName = slot.Value != null ? slot.Value.Name : "[Empty]";
-            Color color = slot.Value != null ? Palette.Text : Palette.Corrupt;
+            
+            bool isHighlighted = slot.Value != null && (mission.State == MissionState.Idle || mission.State == MissionState.Halted) && mission.SelectedCells.Any(pos => mission.Grid.GetCell(pos.x, pos.y)?.Symbol == slot.Key);
+            
+            Color color;
+            if (isHighlighted)
+            {
+                color = Palette.Cyan;
+                swName += " [ACTIVE]";
+            }
+            else
+            {
+                color = slot.Value != null ? Palette.Text : Palette.Corrupt;
+            }
+            
             Raylib.DrawText($"{slotName}: {swName}", 350, y, 10, color);
             y += 12;
         }
@@ -221,7 +236,7 @@ public class RaylibRenderer : IRenderer
 
         if (uiState.ResetState == ResetMenuState.None)
         {
-            text = $"[E]xecute (Cost: {Compute.CalculateCost(mission.SelectedCells.Count)}) | [R]eset Menu";
+            text = $"[E]xecute (Cost: {Compute.CalculateCost(mission.SelectedCells.Count)}) | [R]eset Menu | [B]uild Hardware";
         }
         else if (uiState.ResetState == ResetMenuState.ChoosingResetType)
         {

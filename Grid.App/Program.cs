@@ -13,6 +13,8 @@ public static class Program
         // Setup Dependency Injection (manual)
         IRandom rng = new SeededRandom(Guid.NewGuid().GetHashCode());
         var mission = new Mission(rng);
+        mission.InstallSoftware(new TraceShieldSoftware());
+        mission.InstallHardware(new BackupBatteryHardware(mission));
         var uiState = new UIState();
 
         IRenderer renderer = new RaylibRenderer();

@@ -31,6 +31,13 @@ public class InputHandler
                 {
                     _uiState.ResetState = ResetMenuState.ChoosingResetType;
                 }
+                if (Raylib.IsKeyPressed(KeyboardKey.B))
+                {
+                    foreach (var hw in _mission.Hardware)
+                    {
+                        hw.Build();
+                    }
+                }
             }
             else if (_uiState.ResetState == ResetMenuState.ChoosingResetType)
             {

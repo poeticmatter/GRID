@@ -18,6 +18,11 @@ public class Trace
         Value = Math.Min(Value + amount, Max);
     }
 
+    public void Decrease(int amount)
+    {
+        Value = Math.Max(0, Value - amount);
+    }
+
     public bool IsMaxedOut => Value >= Max;
 }
 
@@ -41,6 +46,12 @@ public class Compute
     public void Drain(int amount)
     {
         Value = Math.Max(0, Value - amount);
+    }
+
+    public void IncreaseMax(int amount)
+    {
+        Max += amount;
+        Value += amount;
     }
 
     public void Refresh()

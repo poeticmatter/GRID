@@ -48,21 +48,21 @@ public class Mission
     private readonly HashSet<(int x, int y)> _selectedCells = new();
     public IReadOnlySet<(int x, int y)> SelectedCells => _selectedCells;
 
-    private readonly Dictionary<CellSymbol, ISoftware?> _softwareSlots = new()
+    private readonly Dictionary<CellSymbol, SoftwareBase?> _softwareSlots = new()
     {
         { CellSymbol.Circle, null },
         { CellSymbol.Square, null },
         { CellSymbol.Triangle, null },
         { CellSymbol.Diamond, null }
     };
-    public IReadOnlyDictionary<CellSymbol, ISoftware?> SoftwareSlots => _softwareSlots;
+    public IReadOnlyDictionary<CellSymbol, SoftwareBase?> SoftwareSlots => _softwareSlots;
 
     private readonly List<IHardware> _hardware = new();
     public IReadOnlyList<IHardware> Hardware => _hardware.AsReadOnly();
 
-    // Preserved for the duration of an execution so BruteForce/UsePasscode can resume Flow
-    // with the original program's colors.
     private List<CellColor> _currentProgramColors = new();
+    private readonly Dictionary<CellSymbol, int> _currentProgramSymbols = new();
+    private bool _endFlowFired;
 
     private readonly IRandom _rng;
 
@@ -74,6 +74,11 @@ public class Mission
         Pool = new Pool();
         Grid = new GridData();
         State = MissionState.Idle;
+
+        foreach (CellSymbol symbol in Enum.GetValues<CellSymbol>())
+        {
+            _currentProgramSymbols[symbol] = 0;
+        }
 
         Grid.Refill(Pool, _rng);
 
@@ -138,21 +143,29 @@ public class Mission
         Compute.Spend(cost);
 
         _currentProgramColors = new List<CellColor>();
+        foreach (CellSymbol symbol in Enum.GetValues<CellSymbol>())
+        {
+            _currentProgramSymbols[symbol] = 0;
+        }
+
         foreach (var (x, y) in _selectedCells)
         {
             var cell = Grid.GetCell(x, y);
             if (cell != null)
             {
                 _currentProgramColors.Add(cell.Color);
+                _currentProgramSymbols[cell.Symbol]++;
                 Grid.RemoveCell(x, y);
             }
         }
 
         _selectedCells.Clear();
+        _endFlowFired = false;
         Trace.Increase(GameConstants.ExecutionTraceCost);
         if (Trace.IsMaxedOut)
         {
             State = MissionState.Lost;
+            TriggerEndFlow(won: false);
             return;
         }
 
@@ -161,6 +174,9 @@ public class Mission
 
         State = MissionState.ExecutionFlowing;
         CurrentLayerIndex = 0;
+
+        // Trigger OnLaunch hook
+        FireSoftwareHook((sw, count) => sw.OnLaunch(this, count));
 
         Flow(_currentProgramColors);
     }
@@ -178,11 +194,22 @@ public class Mission
             {
                 layer.IsBypassed = true;
                 layer.Countermeasure.Trigger(this);
+
+                // Early return if countermeasure maxed trace
+                if (State == MissionState.Lost) return;
+
+                // Trigger OnPostLayer hook for bypass (attack = true)
+                FireSoftwareHook((sw, count) => sw.OnPostLayer(this, count, bypassedByAttack: true));
+
                 CurrentLayerIndex++;
             }
             else
             {
                 State = MissionState.Prompt;
+
+                // Trigger OnPrompt hook
+                FireSoftwareHook((sw, count) => sw.OnPrompt(this, count));
+
                 return;
             }
         }
@@ -190,6 +217,9 @@ public class Mission
         if (State != MissionState.Lost)
         {
             State = MissionState.Won;
+
+            // Trigger OnEndFlow hook
+            TriggerEndFlow(won: true);
         }
     }
 
@@ -206,6 +236,13 @@ public class Mission
             var layer = _layers[CurrentLayerIndex];
             layer.IsBypassed = true;
             layer.Countermeasure.Trigger(this);
+
+            // Early return if countermeasure maxed trace
+            if (State == MissionState.Lost) return;
+
+            // Trigger OnPostLayer hook for brute-force (attack = true)
+            FireSoftwareHook((sw, count) => sw.OnPostLayer(this, count, bypassedByAttack: true));
+
             CurrentLayerIndex++;
             State = MissionState.ExecutionFlowing;
             Flow(_currentProgramColors);
@@ -219,7 +256,12 @@ public class Mission
         if (Passcodes <= 0) return;
 
         Passcodes--;
-        _layers[CurrentLayerIndex].IsBypassed = true;
+        var layer = _layers[CurrentLayerIndex];
+        layer.IsBypassed = true;
+
+        // Trigger OnPostLayer hook for passcode (attack = false)
+        FireSoftwareHook((sw, count) => sw.OnPostLayer(this, count, bypassedByAttack: false));
+
         CurrentLayerIndex++;
         State = MissionState.ExecutionFlowing;
         Flow(_currentProgramColors);
@@ -299,11 +341,31 @@ public class Mission
     // that live in Grid.Core. Internal access prevents the outer ring from bypassing
     // the guarded command methods to mutate mission state directly.
 
+    private void FireSoftwareHook(Action<SoftwareBase, int> hook)
+    {
+        foreach (var (symbol, software) in _softwareSlots)
+        {
+            if (software != null && _currentProgramSymbols[symbol] > 0)
+                hook(software, _currentProgramSymbols[symbol]);
+        }
+    }
+
+    private void TriggerEndFlow(bool won)
+    {
+        if (_endFlowFired) return;
+        _endFlowFired = true;
+
+        FireSoftwareHook((sw, count) => sw.OnEndFlow(this, count, won));
+    }
+
     internal void AddTrace(int amount)
     {
         Trace.Increase(amount);
         if (Trace.IsMaxedOut)
+        {
             State = MissionState.Lost;
+            TriggerEndFlow(won: false);
+        }
     }
 
     internal void SpendCompute(int amount)
@@ -315,6 +377,17 @@ public class Mission
     {
         State = MissionState.Halted;
         CurrentLayerIndex = 0;
+        TriggerEndFlow(won: false);
+    }
+
+    internal void ReduceTrace(int amount)
+    {
+        Trace.Decrease(amount);
+    }
+
+    internal void IncreaseMaxCompute(int amount)
+    {
+        Compute.IncreaseMax(amount);
     }
 
     internal void AddCorruptCellToPool()
@@ -327,7 +400,7 @@ public class Mission
         Credits = Math.Max(0, Credits - amount);
     }
 
-    public void InstallSoftware(ISoftware software)
+    public void InstallSoftware(SoftwareBase software)
     {
         _softwareSlots[software.TargetSlot] = software;
     }
