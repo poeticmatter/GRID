@@ -17,8 +17,8 @@ public enum MissionState
 public class Layer
 {
     public LayerRequirement Requirement { get; }
-    public bool IsBypassed { get; set; } // Temporary state within an execution
-    public bool IsProbed { get; set; }
+    public bool IsBypassed { get; internal set; }
+    public bool IsProbed { get; internal set; }
 
     public Layer(LayerRequirement requirement)
     {
@@ -40,7 +40,13 @@ public class Mission
     private readonly List<Layer> _layers;
 
     public int CurrentLayerIndex { get; private set; }
-    public HashSet<(int x, int y)> SelectedCells { get; } = new();
+
+    private readonly HashSet<(int x, int y)> _selectedCells = new();
+    public IReadOnlySet<(int x, int y)> SelectedCells => _selectedCells;
+
+    // Preserved for the duration of an execution so BruteForce/UsePasscode can resume Flow
+    // with the original program's colors.
+    private List<CellColor> _currentProgramColors = new();
 
     private readonly IRandom _rng;
 
@@ -54,77 +60,84 @@ public class Mission
         _layers = new List<Layer>();
         State = MissionState.Idle;
 
-        // TBD exact initialization from outside
         Grid.Refill(Pool, _rng);
 
-        // Dummy server setup
-        _layers.Add(new Layer(new LayerRequirement(1, CellColor.Cyan, CellColor.Cyan))); // cyan, cyan, any
-        _layers.Add(new Layer(new LayerRequirement(0, CellColor.Pink))); // pink
+        // TODO: replace with externally-supplied layer configuration
+        _layers.Add(new Layer(new LayerRequirement(1, CellColor.Cyan, CellColor.Cyan)));
+        _layers.Add(new Layer(new LayerRequirement(0, CellColor.Pink)));
+    }
+
+    public void AddPasscode(int count = 1)
+    {
+        Passcodes += count;
+    }
+
+    public void AddCredits(int amount)
+    {
+        Credits += amount;
     }
 
     public void SelectCell(int x, int y)
     {
         if (State != MissionState.Idle && State != MissionState.Halted) return;
-
-        // Must be contiguous, implemented loosely here for brevity (should check orthogonal adjacency)
         if (Grid.GetCell(x, y) == null) return;
 
         var pos = (x, y);
-        if (SelectedCells.Contains(pos))
+        if (_selectedCells.Contains(pos))
         {
-            SelectedCells.Remove(pos);
+            _selectedCells.Remove(pos);
+            // If removing the cell splits the remaining selection into disconnected
+            // islands, clear entirely rather than leave an invalid program.
+            if (!AreAllContiguous(_selectedCells))
+                _selectedCells.Clear();
         }
         else
         {
-            // Simple contiguity check: must be adjacent to at least one already selected cell if any exist
-            if (SelectedCells.Count > 0)
+            if (_selectedCells.Count > 0)
             {
-                bool isAdjacent = SelectedCells.Any(c => Math.Abs(c.x - x) + Math.Abs(c.y - y) == 1);
-                if (!isAdjacent) return; // Reject if not contiguous
+                bool isAdjacent = _selectedCells.Any(c => Math.Abs(c.x - x) + Math.Abs(c.y - y) == 1);
+                if (!isAdjacent) return;
             }
-            SelectedCells.Add(pos);
+            _selectedCells.Add(pos);
         }
     }
 
     public void Execute()
     {
         if (State != MissionState.Idle && State != MissionState.Halted) return;
-        if (SelectedCells.Count == 0) return;
+        if (_selectedCells.Count == 0) return;
 
-        int cost = Compute.CalculateCost(SelectedCells.Count);
+        int cost = Compute.CalculateCost(_selectedCells.Count);
         if (Compute.Value < cost) return;
 
         Compute.Spend(cost);
 
-        var programColors = new List<CellColor>();
-        foreach (var (x, y) in SelectedCells)
+        _currentProgramColors = new List<CellColor>();
+        foreach (var (x, y) in _selectedCells)
         {
             var cell = Grid.GetCell(x, y);
             if (cell != null)
             {
-                programColors.Add(cell.Color);
+                _currentProgramColors.Add(cell.Color);
                 Grid.RemoveCell(x, y);
             }
         }
 
-        SelectedCells.Clear();
-        Trace.Increase(1);
+        _selectedCells.Clear();
+        Trace.Increase(GameConstants.ExecutionTraceCost);
         if (Trace.IsMaxedOut)
         {
             State = MissionState.Lost;
             return;
         }
 
-        // Reset bypassed states for new execution
         foreach (var layer in _layers)
-        {
             layer.IsBypassed = false;
-        }
 
         State = MissionState.ExecutionFlowing;
         CurrentLayerIndex = 0;
 
-        Flow(programColors);
+        Flow(_currentProgramColors);
     }
 
     private void Flow(List<CellColor> programColors)
@@ -132,68 +145,58 @@ public class Mission
         while (CurrentLayerIndex < _layers.Count)
         {
             var layer = _layers[CurrentLayerIndex];
-            layer.IsProbed = true; // Intel is gained by reaching it
+            layer.IsProbed = true;
 
             if (MatchingEngine.CanBypass(programColors, layer.Requirement))
             {
                 layer.IsBypassed = true;
-                // Countermeasure would trigger here
+                // TODO: trigger countermeasure here
                 CurrentLayerIndex++;
             }
             else
             {
                 State = MissionState.Prompt;
-                return; // Wait for player decision
+                return;
             }
         }
 
-        // Past final layer
         State = MissionState.Won;
     }
 
     public void BruteForce()
     {
         if (State != MissionState.Prompt) return;
+        if (Compute.Value < GameConstants.BruteForceCost) return;
 
-        const int BruteForceCost = 2;
-        if (Compute.Value < BruteForceCost) return;
+        Compute.Spend(GameConstants.BruteForceCost);
 
-        Compute.Spend(BruteForceCost);
-
-        // 50% chance to brute force for now (TBD scaling)
-        bool success = _rng.Next(100) < 50;
-
+        bool success = _rng.Next(100) < GameConstants.BruteForceSuccessPercent;
         if (success)
         {
             _layers[CurrentLayerIndex].IsBypassed = true;
             CurrentLayerIndex++;
             State = MissionState.ExecutionFlowing;
-
-            // Re-flow with empty program as we've already bypassed the problematic layer,
-            // but in reality we should keep the original program colors to test subsequent layers.
-            // Simplified for now: just trigger next prompt.
-            Flow(new List<CellColor>());
+            Flow(_currentProgramColors);
         }
-        // If fails, stays in Prompt state
+        // On failure, remain at Prompt so the player can try again or take consequence.
     }
 
     public void UsePasscode()
     {
-         if (State != MissionState.Prompt) return;
-         if (Passcodes <= 0) return;
+        if (State != MissionState.Prompt) return;
+        if (Passcodes <= 0) return;
 
-         Passcodes--;
-         _layers[CurrentLayerIndex].IsBypassed = true;
-         CurrentLayerIndex++;
-         State = MissionState.ExecutionFlowing;
-         Flow(new List<CellColor>()); // Simplified
+        Passcodes--;
+        _layers[CurrentLayerIndex].IsBypassed = true;
+        CurrentLayerIndex++;
+        State = MissionState.ExecutionFlowing;
+        Flow(_currentProgramColors);
     }
 
     public void TakeConsequence()
     {
         if (State != MissionState.Prompt) return;
-
-        // Apply consequence (halt for now)
+        // TODO: apply layer-specific consequence; halt is the common default
         State = MissionState.Halted;
         CurrentLayerIndex = 0;
     }
@@ -202,17 +205,16 @@ public class Mission
     {
         if (State != MissionState.Idle && State != MissionState.Halted) return;
 
-        const int TraceCost = 3;
-        Trace.Increase(TraceCost);
+        Trace.Increase(GameConstants.HardResetTraceCost);
         if (Trace.IsMaxedOut)
         {
-             State = MissionState.Lost;
-             return;
+            State = MissionState.Lost;
+            return;
         }
 
         Grid.Refill(Pool, _rng);
         Compute.Refresh();
-        SelectedCells.Clear();
+        _selectedCells.Clear();
         State = MissionState.Idle;
     }
 
@@ -220,24 +222,45 @@ public class Mission
     {
         if (State != MissionState.Idle && State != MissionState.Halted) return;
 
-        const int TraceCost = 2;
-        Trace.Increase(TraceCost);
+        Trace.Increase(GameConstants.SoftResetTraceCost);
         if (Trace.IsMaxedOut)
         {
-             State = MissionState.Lost;
-             return;
+            State = MissionState.Lost;
+            return;
         }
 
         if (refillGrid)
         {
-             Grid.Refill(Pool, _rng);
-             SelectedCells.Clear();
+            Grid.Refill(Pool, _rng);
+            _selectedCells.Clear();
         }
         else
         {
-             Compute.Refresh();
+            Compute.Refresh();
         }
 
         State = MissionState.Idle;
+    }
+
+    private static bool AreAllContiguous(HashSet<(int x, int y)> cells)
+    {
+        if (cells.Count <= 1) return true;
+
+        var start = cells.First();
+        var visited = new HashSet<(int x, int y)> { start };
+        var queue = new Queue<(int x, int y)>();
+        queue.Enqueue(start);
+
+        while (queue.Count > 0)
+        {
+            var (cx, cy) = queue.Dequeue();
+            foreach (var neighbor in new[] { (cx - 1, cy), (cx + 1, cy), (cx, cy - 1), (cx, cy + 1) })
+            {
+                if (cells.Contains(neighbor) && visited.Add(neighbor))
+                    queue.Enqueue(neighbor);
+            }
+        }
+
+        return visited.Count == cells.Count;
     }
 }

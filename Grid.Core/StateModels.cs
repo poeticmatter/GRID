@@ -71,7 +71,8 @@ public class Pool
 
     public void AddCorruptCell()
     {
-        // TBD exact representation of corrupt cell, using an extension to Cell enum or similar later.
+        // TODO: decide corrupt cell representation (§3.3) before implementing
+        throw new NotImplementedException("Corrupt cell representation is TBD.");
     }
 }
 

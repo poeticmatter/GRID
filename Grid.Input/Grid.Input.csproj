@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Grid.Core\Grid.Core.csproj" />
     <ProjectReference Include="..\Grid.Render\Grid.Render.csproj" />
   </ItemGroup>
 
