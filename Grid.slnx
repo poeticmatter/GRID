@@ -1,0 +1,8 @@
+<Solution>
+  <Project Path="Grid.App/Grid.App.csproj" />
+  <Project Path="Grid.Core.Tests/Grid.Core.Tests.csproj" />
+  <Project Path="Grid.Core/Grid.Core.csproj" />
+  <Project Path="Grid.Input/Grid.Input.csproj" />
+  <Project Path="Grid.Persistence/Grid.Persistence.csproj" />
+  <Project Path="Grid.Render/Grid.Render.csproj" />
+</Solution>
