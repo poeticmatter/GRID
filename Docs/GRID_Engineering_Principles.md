@@ -12,6 +12,7 @@
 - **Tests:** xUnit. The core ships with tests from the first commit.
 - **Build:** `dotnet build` / `dotnet run` / `dotnet test`. No engine, no editor, no content pipeline.
 - **No networking.** Solo game. Do not add a transport, socket, or realtime library. Persistence is local files; any future backend is `HttpClient` behind an interface.
+- **Internal resolution:** 480×270. All game drawing targets a `RenderTexture2D` at 480×270, scaled to the OS window with **nearest-neighbor filtering** (no linear interpolation). Integer scale targets: ×2 = 540p, ×3 = 810p, ×4 = 1080p. Non-integer window sizes letterbox or pillarbox. No component hard-codes screen-space pixel values — all coordinates are in internal (480×270) space.
 
 ---
 
@@ -45,7 +46,7 @@ Grid.Persistence  // save/load. References: Core. Local files only.
 ## 3. Rendering & input cross the boundary as data, not calls
 
 - The UI/app layer produces **intent** (a frame's worth of "what to draw" — cells, layer cards, the prompt, resource bars) and hands it to an `IRenderer`. The Raylib backend is the one implementation; a headless/fake implementation exists for tests. The app never calls `Raylib.*` directly.
-- Input enters as **semantic intents** (`SelectCell(x,y)`, `Execute`, `BruteForce`, `UsePasscode`, `Reset(kind)`, `Probe`, `Abandon`), never as raw mouse coordinates threaded into rules. Hit-testing (pixel → cell) happens in the input/UI layer and is translated to an intent before the core sees it.
+- Input enters as **semantic intents** (`SelectCell(x,y)`, `Execute`, `BruteForce`, `UsePasscode`, `Reset(kind)`, `Probe`, `Abandon`), never as raw mouse coordinates threaded into rules. Hit-testing (pixel → cell) happens in the input/UI layer and is translated to an intent before the core sees it. Mouse/input coordinates from the OS must be **inverse-scaled from window space to internal (480×270) space** before any hit-testing occurs — the core never sees window-space coordinates.
 - The core exposes **queries** (read state) and **commands** (apply an intent, get a result). It does not push pixels and is never handed a `Rectangle`.
 
 This seam keeps rules separable from presentation and lets UI-driving logic be tested without a window. Keep it lean — one Raylib backend plus a headless fake for tests. Do not build a second real backend or abstract beyond what testing earns.
@@ -66,7 +67,58 @@ This seam keeps rules separable from presentation and lets UI-driving logic be t
 
 - **Matching logic is pure and isolated.** "Does this color multiset contain this requirement (named colors + wildcards)?" is a small, total, heavily-tested function. It does not know what a layer looks like on screen or that compute exists.
 - **Resource accounting is one place.** Trace, compute, credits each have a single owner that enforces min/max and emits the loss condition. The UI reads these; it never computes them. Trace-max → run-lost is decided in the core, surfaced to the UI as an event/state.
-- **Costs are data, not magic numbers.** Compute cost curve (`1+2+3+4…`), reset costs (hard −3, soft −2), brute-force cost (−2/attempt), execution cost (−1 trace) live in a config/constants module, not inlined across call sites. The spec marks several values `[TBD]`; that is exactly why they must be data you can tune in one place.
+- **Costs are data, not magic numbers.** Compute cost curve (`1+2+3+4…`), reset costs (hard −3, soft −2), brute-force cost (−2/attempt), execution cost (−1 trace) live in a config/constants module, not inlined across call sites. The spec marks several values `[TBD]`; that is exactly why they must be data you can tune in one place. The same rule applies to **all visual and layout constants** — no magic hex values, no magic pixel numbers inline in draw calls.
+
+All locked palette and layout values belong in named constant modules in `Grid.Render`:
+
+```csharp
+// Grid.Render/Palette.cs
+public static class Palette
+{
+    public static readonly Color Cyan          = new(0x00, 0xC8, 0xFF, 0xFF);
+    public static readonly Color Pink          = new(0xFF, 0x2D, 0x78, 0xFF);
+    public static readonly Color Amber         = new(0xFF, 0xB3, 0x00, 0xFF);
+    public static readonly Color Violet        = new(0x9B, 0x30, 0xFF, 0xFF);
+
+    public static readonly Color SymbolOnCyan   = new(0x0A, 0x0A, 0x0A, 0xFF); // Black
+    public static readonly Color SymbolOnPink   = new(0x0A, 0x0A, 0x0A, 0xFF); // Black
+    public static readonly Color SymbolOnAmber  = new(0x0A, 0x0A, 0x0A, 0xFF); // Black
+    public static readonly Color SymbolOnViolet = new(0xF0, 0xF0, 0xF0, 0xFF); // White
+}
+
+// Grid.Render/Layout.cs
+public static class Layout
+{
+    public const int InternalWidth  = 480;
+    public const int InternalHeight = 270;
+
+    public const int ResourceBarHeight = 14;
+    public const int ActionBarHeight   = 18;
+    // MiddleZoneHeight = InternalHeight - ResourceBarHeight - ActionBarHeight = 238
+
+    public const int CellSize         = 20;
+    public const int CellGap          = 2;
+    public const int GridCols         = 4;
+    public const int GridRows         = 4;
+    // GridContentSize = (GridCols * CellSize) + ((GridCols - 1) * CellGap) = 86
+    public const int GridConsolePad   = 8;
+    public const int ConsoleBorder    = 2;
+    // GridConsoleSize = GridContentSize + (2 * GridConsolePad) + (2 * ConsoleBorder) = 106
+
+    public const int LayerRowHeight   = 14;
+    public const int LayerRowGap      = 2;
+    public const int LayerVisibleRows = 5;
+    // LayerContentHeight = (LayerVisibleRows * LayerRowHeight) + ((LayerVisibleRows - 1) * LayerRowGap) = 78
+    public const int LayerConsolePad  = 6;
+    // LayerConsoleHeight = LayerContentHeight + (2 * LayerConsolePad) + (2 * ConsoleBorder) = 98
+    // LayerConsoleWidth = TBD — lock when layer card content is designed
+
+    public const int ConsoleSeparatorGap = 6;
+    // TotalStackedHeight = LayerConsoleHeight + ConsoleSeparatorGap + GridConsoleSize = 210
+    // MiddleZoneHeadroom = MiddleZoneHeight - TotalStackedHeight = 28
+}
+```
+
 - **`[TBD]` and `[Open design space]` are extension points, not blockers.** Where the spec is open (countermeasure effects, consequence effects, software effects, hardware), design the seam now: a small interface or effect type, a default/empty implementation, and a TODO. Do not invent mechanics the spec doesn't state, and do not hard-code today's single behavior in a way that blocks tomorrow's variants (temporary layers, conditional layers, multi-symbol cells).
 
 ---
@@ -89,6 +141,7 @@ This seam keeps rules separable from presentation and lets UI-driving logic be t
 - A method that touches both rules and rendering.
 - A `using Raylib_cs;` in `Grid.Core`.
 - A literal `2`, `3`, `−1` for a cost outside the config module.
+- A literal hex color or pixel dimension outside `Palette` / `Layout`.
 - `new Random()` / `DateTime.Now` in the core.
 - A class over ~300 lines or a method over ~40 — likely doing too much.
 - Duplicated matching/cost logic in two places — extract.

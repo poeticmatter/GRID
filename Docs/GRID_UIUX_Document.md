@@ -1,26 +1,14 @@
 # GRID — UI/UX Document
 
-**Scope:** This document covers the user-facing experience of a single mission: screen layout, on-screen arrangement, and user flows. It assumes the mechanics defined in *GRID — Mission Design Specification*. The map/node screen is sketched only where it bookends a mission. Concrete color and symbol art direction is proposed here because the mechanics spec deferred it to UI/UX.
+**Scope:** This document covers the user-facing experience of a single mission: screen layout, on-screen arrangement, pixel dimensions, and user flows. It assumes the mechanics defined in *GRID — Mission Design Specification*. The map/node screen is sketched only where it bookends a mission. Concrete color and symbol art direction is specified here.
 
 ---
 
-## 1. Platform Strategy (mobile + desktop)
+## 1. Platform Strategy
 
-The honest answer to "will mobile make it too limited?": **no, if the mission screen is designed mobile-first around the grid, and desktop is treated as the same layout given room to breathe.** GRID's core interaction is tapping a small number of cells in a 4×4 (or 4×5) grid and pressing execute — this is a fundamentally touch-friendly, low-input-density loop, closer to a card-battler than to a twitch game. Slay the Spire, Balatro, and Luck be a Landlord all ship the same core on phone and desktop successfully; GRID's loop is in that family.
+Desktop only. Internal resolution 480×270, rendered to a `RenderTexture2D` and scaled to the window with nearest-neighbor filtering. Integer scale targets: ×2 = 540p, ×3 = 810p, ×4 = 1080p, ×5 = 1350p.
 
-The constraint mobile imposes is **information density**, not input. The risk areas are: many layers stacked vertically, software/hardware lists, the reward screen, and probe/intel readouts. The strategy below keeps the *action surface* (grid + execute) identical across platforms and makes only the *information surfaces* responsive.
-
-**Recommended approach: one layout, two densities.**
-
-| Aspect | Mobile (portrait, ~390pt wide) | Desktop (landscape) |
-|--------|-------------------------------|---------------------|
-| Grid | Center of screen, large tap targets (min 44pt). | Same grid, centered, with side panels for persistent info. |
-| Server / layers | Vertical stack **above** the grid, scrollable; only the **active + next** layer fully detailed, others collapsed. | Layers shown as a fuller vertical "stack" with more detail visible at once; no scrolling needed for typical depth. |
-| Software / hardware | Collapsed into a tappable tray/drawer; badges show what's active during an execution. | Persistent left rail (hardware) and right rail (software) always visible. |
-| Resource readout (trace, compute, credits) | Fixed top bar, compact. | Top bar, with room for labels and secondary detail. |
-| Prompt (stuck layer) | Modal sheet sliding up from bottom; thumb-reachable buttons. | Centered modal; same options, mouse or keyboard. |
-
-**Decision to confirm:** lock to **portrait** on mobile (recommended — the layer stack reads naturally as a vertical column the program "descends" through), or support landscape. Landscape on mobile would fight the vertical-stack metaphor. **[Confirm portrait-only on mobile.]**
+No mobile target. No web export. No wasm constraints on core.
 
 ---
 
@@ -41,78 +29,172 @@ The whole mission screen is organized around a single readable idea: **the progr
                     ▼ program flows downward ▼
 
         ┌──────────────── THE GRID (data) ───────────────┐
-        │   [▲g] [■b] [●r] [◆y]                           │
-        │   [●b] [■b] [▲p] [●g]    ← tap to select        │
-        │   [◆r] [▲b] [■y] [●p]                           │
-        │   [■g] [◆b] [●b] [▲r]                           │
+        │   [▲C] [■P] [●A] [◆V]                          │
+        │   [●C] [■P] [▲V] [●A]    ← tap to select       │
+        │   [◆A] [▲C] [■V] [●P]                          │
+        │   [■C] [◆P] [●A] [▲V]                          │
         └────────────────────────────────────────────────┘
 
-   [ SOFTWARE tray ]   [ ⚡ EXECUTE ]   [ RESET ▸ ]   [ HARDWARE tray ]
+   [ HARDWARE ]   [ ⚡ EXECUTE ]   [ RESET ▸ ]   [ SOFTWARE ]
 ```
 
 - **Top:** resources (always visible).
 - **Middle-upper:** the server as a vertical layer stack the program moves *down* through.
 - **Middle-lower:** the grid, the player's primary interaction zone.
-- **Bottom:** the action bar — execute, reset, and the software/hardware trays (rails on desktop).
+- **Bottom:** the action bar.
 
-Reading top-to-bottom mirrors the fiction: you assemble data at the bottom, fire it up/into the server, and it works **down** the stack toward server access.
-
----
-
-## 3. Visual Language: Colors & Symbols
-
-The mechanics spec defers the concrete identities; here is a proposed starting set chosen for **maximum mutual distinguishability** and **colorblind safety** (color is never the only channel — every cell also carries a symbol, which doubles as redundancy).
-
-**5 colors** (proposed): a cool blue, a warm amber, a magenta/pink, a green, and a violet. Avoid red+green as the only differentiator anywhere; rely on the paired symbol for accessibility. **[Final palette TBD with art.]**
-
-**5 symbols** (proposed): distinct silhouettes readable at small size — e.g., circle, square, triangle, diamond, hex. Symbols must be legible at ~32pt on mobile. **[Final glyphs TBD with art.]**
-
-**Cell rendering:** each cell shows symbol (foreground) on a color field (background), with a high-contrast border. Selected cells get a clear active state (glow + lift). Corrupt cells get an unmistakable "broken/static" treatment so the player reads them instantly as dead weight.
-
-**Layer requirement rendering:** a layer shows its required colors as a row of color chips; a **wildcard** ("any") renders as a distinct neutral chip (e.g., a "?" slot) so "blue, blue, any" visibly reads as three chips, two colored and one wild.
+Reading top-to-bottom mirrors the fiction: you assemble data at the bottom, fire it into the server, and it works **down** the stack toward server access.
 
 ---
 
-## 4. Mission Screen — Component Inventory
+## 3. Screen Layout — Pixel Dimensions
 
-1. **Resource bar (top, persistent)**
+All values are at internal resolution (480×270). Final rendered size = internal × integer scale factor.
+
+### 3.1 Vertical zones
+
+| Zone              | Height | Y origin |
+|-------------------|--------|----------|
+| Resource bar      | 14px   | 0        |
+| Middle zone       | 238px  | 14       |
+| Action bar        | 18px   | 252      |
+
+### 3.2 Grid console
+
+| Element              | Value                                     |
+|----------------------|-------------------------------------------|
+| Cell size            | 20×20px                                   |
+| Cell gap             | 2px                                       |
+| Grid content area    | 86×86px  (4×20 + 3×2)                     |
+| Console padding      | 8px each side                             |
+| Console border       | 2px                                       |
+| Grid console total   | 106×106px                                 |
+| Horizontal position  | Centered in middle zone                   |
+
+### 3.3 Layer console
+
+| Element              | Value                                                         |
+|----------------------|---------------------------------------------------------------|
+| Layer row height     | 14px                                                          |
+| Layer row gap        | 2px                                                           |
+| Visible rows         | 5                                                             |
+| Layer content height | 78px  (5×14 + 4×2)                                           |
+| Console padding      | 6px each side                                                 |
+| Console border       | 2px                                                           |
+| Console total height | 98px                                                          |
+| Console width        | **[TBD — wider than 106px; lock when layer card content is designed]** |
+| Horizontal position  | Centered in middle zone                                       |
+
+### 3.4 Vertical stacking (middle zone)
+
+| Element          | Height |
+|------------------|--------|
+| Layer console    | 98px   |
+| Gap              | 6px    |
+| Grid console     | 106px  |
+| **Total**        | **210px** |
+| Available        | 238px  |
+| Headroom         | 28px   |
+
+The 28px of headroom is distributed as top and bottom margin around the two consoles. If console content grows (e.g., layer console width forces layout changes), this is the first budget to draw from.
+
+### 3.5 Side panels
+
+Left and right of the centered consoles: hardware, software, and secondary information. Sizes **[TBD — deferred until content is designed].**
+
+---
+
+## 4. Visual Language: Colors & Symbols
+
+Color is never the only identification channel — every cell also carries a symbol, which provides full redundancy for colorblind players. Symbol render color is fixed per cell color to maximize contrast without introducing additional information channels.
+
+### 4.1 Colors
+
+| ID | Name   | Hex       | Symbol render color | Notes                        |
+|----|--------|-----------|---------------------|------------------------------|
+| C1 | Cyan   | `#00C8FF` | Black `#0A0A0A`     | Cool; high contrast on dark backgrounds |
+| C2 | Pink   | `#FF2D78` | Black `#0A0A0A`     | Warm; readable at small size |
+| C3 | Amber  | `#FFB300` | Black `#0A0A0A`     | Warm; distinct from pink in hue and value |
+| C4 | Violet | `#9B30FF` | White `#F0F0F0`     | Cool; distinct from cyan in hue and darkness |
+
+Cyan and Violet are both cool-toned but differ enough in hue and lightness to be distinguishable under most colorblindness types. Pink and Amber are both warm but differ in hue. The symbol render color doubles as a contrast guarantee — the player can always read the symbol regardless of the cell color.
+
+### 4.2 Symbols
+
+| ID | Name     | Shape description                     |
+|----|----------|---------------------------------------|
+| S1 | Circle   | Filled circle                         |
+| S2 | Square   | Filled square, axis-aligned           |
+| S3 | Triangle | Filled equilateral triangle, point up |
+| S4 | Diamond  | Filled square rotated 45°             |
+
+Symbols are chosen for maximum silhouette distinction at 20×20px. No two symbols share a dominant axis or outline shape.
+
+### 4.3 Cell palette (all 16 base cells)
+
+Every row is a color; every column is a symbol. All 16 cells are always present in a fresh pool; the base grid always contains all 16.
+
+|                     | Circle (S1) | Square (S2) | Triangle (S3) | Diamond (S4) |
+|---------------------|-------------|-------------|---------------|--------------|
+| **Cyan (C1)**       | C1·S1       | C1·S2       | C1·S3         | C1·S4        |
+| **Pink (C2)**       | C2·S1       | C2·S2       | C2·S3         | C2·S4        |
+| **Amber (C3)**      | C3·S1       | C3·S2       | C3·S3         | C3·S4        |
+| **Violet (C4)**     | C4·S1       | C4·S2       | C4·S3         | C4·S4        |
+
+### 4.4 Special cell rendering
+
+| Cell type    | Visual treatment                                                        |
+|--------------|-------------------------------------------------------------------------|
+| Base cell    | Color background, symbol in fixed render color, 1px contrast border     |
+| Selected     | Glow + lift (additive overlay); compute cost updates live               |
+| Corrupt      | Desaturated / static-noise treatment; unmistakably dead weight          |
+| Wild         | **[TBD — design pending]**                                              |
+
+---
+
+## 5. Mission Screen — Component Inventory
+
+1. **Resource bar (top, persistent, 480×14px)**
    - **Trace meter:** segmented bar; the dominant, always-visible threat. Animates on increase; warns near max.
-   - **Compute:** current value with a bolt icon; shows spend preview when cells are selected.
+   - **Compute:** current value; shows spend preview when cells are selected.
    - **Credits:** current value.
 
-2. **Server / layer stack (upper)**
-   - Each layer card shows: requirement chips, state (unprobed / probed / bypassed-this-execution), and discoverable tags for countermeasure/consequence once known.
-   - **Unprobed layers** are obscured (depth unknown). **Probed** layers reveal their requirement. **Bypassed** layers (within the current execution) show a passed state but visibly **refresh** between executions (per mechanics §9.5).
+2. **Server / layer console (upper, 98px tall)**
+   - Each layer row (14px) shows: requirement color chips, state (unprobed / probed / bypassed-this-execution), and discoverable tags for countermeasure/consequence once known.
+   - **Unprobed layers** are obscured. **Probed** layers reveal their requirement. **Bypassed** layers show a passed state but visibly **refresh** between executions.
    - A persistent **"program position" indicator** shows how far the current execution has reached.
+   - A **wildcard** slot renders as a distinct neutral chip (e.g., "?" slot) — "cyan, cyan, any" visibly reads as three chips.
+   - Layers beyond the 5 visible rows are collapsed; they expand upward as the program descends.
 
-3. **The grid (lower, primary interaction)**
-   - 4×4 (or 4×5) of cells. Tap to add/remove from the current selection.
-   - **Selection feedback:** highlighted cells, a live readout of the program's **color multiset** and **symbol multiset**, and the **compute cost** of executing at the current size.
-   - **Contiguity feedback:** if a tapped cell isn't contiguous with the current selection, it's rejected with a clear visual cue. *(Contiguity rule itself is [TBD] in the spec.)*
+3. **The grid console (lower, 106×106px)**
+   - 4×4 of 20×20px cells with 2px gaps. Tap/click to add or remove from current selection.
+   - **Selection feedback:** highlighted cells, live readout of the program's **color multiset**, **symbol multiset**, and **compute cost**.
+   - **Contiguity feedback:** a cell that would break contiguity is rejected with a clear visual cue.
+   - **Software preview:** software slots light up during selection when the program contains the matching symbol.
 
-4. **Action bar (bottom)**
-   - **Execute** (primary button): disabled until a valid program is selected; shows compute cost.
-   - **Reset** control: opens a small chooser — **Hard (−3 trace)** or **Soft (−2 trace)**; soft then asks **refill grid** or **refresh compute**.
-   - **Software tray:** shows the 5 symbol slots; during selection, slots whose symbol is present in the program **light up** to preview what will activate.
-   - **Hardware tray:** passive/triggered items; informational, with triggered items flagged.
-   - **Probe** control: reveals layer(s) ahead. **[Cost/placement TBD.]**
-   - **Abandon mission** control: tucked away (low-frequency, requires confirm).
+4. **Action bar (bottom, 480×18px)**
+   - **Execute** (primary): disabled until a valid program is selected; shows compute cost.
+   - **Reset** control: opens a chooser — **Hard (−3 trace)** or **Soft (−2 trace)**; soft then asks **refill grid** or **refresh compute**.
+   - **Software tray:** 4 symbol slots; active-state badges during execution.
+   - **Hardware tray:** passive/triggered items; informational, triggered items flagged.
+   - **Probe** control: reveals layers ahead. **[Cost/placement TBD.]**
+   - **Abandon mission:** tucked away, requires confirm.
 
 5. **Prompt (modal, appears at a stuck layer)**
    - States the layer's requirement and what the program is missing.
-   - Offers: **Brute-force (−2 compute, chance)**, **Use passcode**, **Use software** (if applicable), **Take consequence** (which halts).
-   - Brute-force shows running compute spent and lets the player **try again (−2)** or **stop** after each failure.
-   - Clearly distinguishes that **passcode = no countermeasure**, **brute-force = triggers countermeasure**.
+   - Offers: **Brute-force (−2 compute, chance)**, **Use passcode**, **Use software** (if applicable), **Take consequence** (halts).
+   - Brute-force shows running compute spent; lets the player **try again (−2)** or **stop** after each failure.
+   - Clearly distinguishes **passcode = no countermeasure** vs. **brute-force = triggers countermeasure**.
 
 ---
 
-## 5. Core User Flow — One Execution
+## 6. Core User Flow — One Execution
 
 ```
 SELECT cells ──▶ (live preview: colors, symbols, compute cost, software lighting up)
    │
    ▼
-EXECUTE ──▶ compute spent, cells consumed
+EXECUTE ──▶ compute spent, cells removed from grid
    │
    ▼
 Program enters top layer ──▶ attempts BYPASS
@@ -141,7 +223,7 @@ After a halt, the player chooses among: **select a new program**, **reset**, **p
 
 ---
 
-## 6. Mission-Level Flow (bookends)
+## 7. Mission-Level Flow (bookends)
 
 ```
 [ MAP NODE selected ]  (out of scope here)
@@ -166,45 +248,43 @@ MISSION ──▶ loop of executions / prompts / resets / probes
 
 ---
 
-## 7. Reward Screen
+## 8. Reward Screen
 
 - Presents the **reward bundle** as a small set of cards (credits, software, schematic, special data cell, run-progress).
 - Schematics are flagged as **"must be built"** so the player understands they aren't immediately active.
-- Special data cells (wild / multi-symbol) get distinct rendering consistent with their grid appearance.
+- Special data cells get distinct rendering consistent with their grid appearance.
 - One clear **continue** action returns to the map. **[Whether any reward involves a choice/draft is TBD.]**
 
 ---
 
-## 8. Feedback, Juice & Readability Priorities
+## 9. Feedback, Juice & Readability Priorities
 
 Ordered by importance to comprehension:
 
 1. **Trace** must always be felt — it is the run's life. Persistent, animated on change, alarmed near max.
 2. **Compute preview on selection** — the player must see the cost *before* committing.
 3. **What will activate** — software slots lighting up during selection teaches the symbol system without a tutorial.
-4. **Bypass vs. brute-force vs. passcode distinction** — countermeasure-triggering vs. not must be visually obvious at the prompt, because it's the key strategic decision.
-5. **Layer refresh on halt** — the player must clearly see that bypassed layers came back, or the re-attempt loop will feel buggy rather than intended.
+4. **Bypass vs. brute-force vs. passcode distinction** — countermeasure-triggering vs. not must be visually obvious at the prompt.
+5. **Layer refresh on halt** — the player must clearly see that bypassed layers came back.
 6. **Corrupt cells** — instantly readable as dead weight.
 
 ---
 
-## 9. Mobile-Specific Risk Mitigations
+## 10. Rendering Approach
 
-- **Layer stack depth:** collapse all but the active and next layer; the rest become compact chips. Tap to expand any probed layer.
-- **Software/hardware:** drawers with active-state badges rather than always-on rails.
-- **Prompt as bottom sheet:** keeps decision buttons in the thumb zone.
-- **Selection on small grids:** generous hit targets, drag-to-select as an option in addition to tapping. **[Confirm whether drag-select is desired given the contiguity rule.]**
-- **No hover:** every hover-only affordance on desktop (e.g., layer detail, software tooltip) must have a tap-to-inspect equivalent on mobile.
+- All UI is drawn procedurally via Raylib primitives — no art asset dependency to start.
+- Glow is implemented as layered semi-transparent additive draws initially. Shader-based bloom is a future upgrade path, not a day-one requirement.
+- Console frames are drawn procedurally to match the terminal aesthetic; may be replaced with AI-generated PNG textures in a later art pass without changing the layout contract.
 
 ---
 
-## 10. Open UI/UX Questions
+## 11. Open UI/UX Questions
 
-1. Mobile orientation: confirm **portrait-only** (recommended).
-2. Final color palette and symbol glyph set (with art; must stay colorblind-safe).
-3. Probe placement and cost surface in the UI.
-4. Drag-to-select vs. tap-only on the grid (depends on contiguity rule).
+1. Layer console width — lock when layer card content is designed.
+2. Side panel layout — hardware left, software right; sizes TBD when content is designed.
+3. Final color palette confirmation with art pass (hex values in §4.1 are locked pending art review).
+4. Probe placement and cost surface in the UI.
 5. Whether the reward screen ever presents a **draft/choice** vs. a fixed bundle.
-6. How much intel persists **visually** across executions within a mission vs. across missions (history/notebook view?).
+6. How much intel persists **visually** across executions within a mission vs. across missions.
 7. Abandon-mission confirmation flow and any penalty display.
-8. Tutorial/onboarding approach — relying on "software lights up" and live previews to teach, vs. explicit tutorial missions.
+8. Tutorial/onboarding approach.
